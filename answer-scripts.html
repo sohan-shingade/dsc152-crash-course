@@ -55,7 +55,7 @@
 <div class="container">
 
 <h1><span>Answer Scripts</span></h1>
-<p class="sub">12 question types from all 6 quizzes &bull; Exact full-marks wording &bull; Fill in the blanks for your context</p>
+<p class="sub">14 question types from all 6 quizzes &bull; Exact full-marks wording &bull; Fill in the blanks for your context</p>
 
 <!-- ===== SCRIPT 1 ===== -->
 <div class="script">
@@ -387,6 +387,95 @@
     <ul class="examples">
       <li><span class="tag q3">Q3</span> <code>lm(log(visits) ~ bookings + day_of_week, data = traffic_df)</code></li>
       <li><span class="tag pq3">PQ3</span> <code>mod &lt;- Arima(admit, order=c(2, 0, 0), xreg=1:50)</code><br><code>coeftest(mod)</code></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 13 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">13</span>
+    <span class="script-title">Centering & scaling covariates</span>
+    <span class="script-freq">Appeared 2x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>What centering does:</strong></p>
+    <div class="template">
+      $x_{\text{centered}} = x - \bar{x}$<br><br>
+      "<strong>Centering</strong> makes the intercept correspond to a <strong class="fill">[subject]</strong> with <strong>average</strong> predictor values, rather than a <strong class="fill">[subject]</strong> with zero <strong class="fill">[predictor]</strong> (which may not be meaningful)."
+    </div>
+
+    <p><strong>What scaling does:</strong></p>
+    <div class="template">
+      $x_{\text{scaled}} = \dfrac{x - \bar{x}}{2s_x}$<br><br>
+      "<strong>Scaling</strong> makes coefficients interpretable in <strong>standard-deviation units</strong>: a one-unit increase in the scaled predictor means a <strong class="fill">[one-standard-deviation / 2-SD]</strong> increase in the original predictor."
+    </div>
+
+    <p><strong>Why scale by $2s$ (not $s$)?</strong> So that a 1-unit change in the scaled continuous predictor is comparable in magnitude to a 0→1 change in a binary predictor.</p>
+
+    <p><strong>What does NOT change:</strong></p>
+    <div class="template">
+      &bull; Centering or scaling does <strong>NOT change the p-value</strong> for whether a coefficient equals 0.<br>
+      &bull; Centering and scaling does <strong>NOT change $R^2$</strong>.<br>
+      &bull; Centering and scaling is <strong>NOT a substitute</strong> for checking model conditions (LINE).
+    </div>
+
+    <p><strong>Interpreting the intercept (centered model):</strong></p>
+    <div class="template">
+      "$\hat{\gamma}_0$ is the estimated <strong class="fill">[outcome]</strong> for a <strong class="fill">[subject]</strong> with <strong>average <span class="fill">[predictor 1]</span></strong> and <strong>average <span class="fill">[predictor 2]</span></strong>."
+    </div>
+
+    <p><strong>Interpreting interaction with centered/scaled covariates:</strong></p>
+    <div class="template">
+      "$\hat{\gamma}_3$ is the estimated change in the slope on <strong class="fill">[predictor 1 scaled]</strong> for each <strong>1-point increase in <span class="fill">[predictor 2 centered]</span></strong> (equivalently, for each 1-point increase in <strong class="fill">[original predictor 2]</strong> above the mean)."
+    </div>
+
+    <p><strong>Comparing relative importance:</strong></p>
+    <div class="template">
+      "With both predictors centered and scaled, $|\hat{\gamma}_1| \gg |\hat{\gamma}_2|$ suggests that <strong class="fill">[predictor 1]</strong> has a substantially larger association with <strong class="fill">[outcome]</strong> than <strong class="fill">[predictor 2]</strong> does, at average levels of the other covariate."
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag pq3">PQ3</span> "When gre = mean(gre) and gpa = mean(gpa), we have gre_s = 0 and gpa_c = 0, so stipend_hat = γ0. Thus γ0 is the estimated stipend for an applicant with average GRE score and average GPA."</li>
+      <li><span class="tag q3">Q3</span> "Centering makes the intercept correspond to a student with average predictor values, rather than a student with zero practice hours and zero portfolio score. Scaling also makes coefficients interpretable in standard-deviation units."</li>
+      <li><span class="tag q3">Q3</span> "Neither centering a covariate nor scaling it will change the p-value for whether its coefficient is equal to 0."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 14 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">14</span>
+    <span class="script-title">Model selection → inference fallacy (Lab 9)</span>
+    <span class="script-freq">Appeared 2x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag q3">Q3</span> + Lab 9</p>
+
+    <p><strong>"Is this workflow valid for inference?"</strong></p>
+    <div class="template">
+      "This is an <strong>incorrect workflow</strong> because the p-value for <strong class="fill">[predictor]</strong> from the smaller model is <strong>influenced by model-selection</strong> based on the same data. The decision of whether to include <strong class="fill">[other predictor]</strong> in the model should <strong>not</strong> be based on this workflow, but rather on whether there is <strong>scientific justification</strong> for it as a confounding variable."
+    </div>
+
+    <p><strong>"Should you remove this non-significant variable?"</strong></p>
+    <div class="template">
+      "<strong>No.</strong> Non-significant p-values do not justify removing pre-specified covariates. Removing them based on the data is model selection, which invalidates subsequent inference. For <strong>categorical variables</strong> (e.g., day of week): you must keep <strong>all levels or remove all</strong> &mdash; you cannot remove individual levels."
+    </div>
+
+    <p><strong>"Is this a valid justification for log-transforming?"</strong></p>
+    <div class="template">
+      <strong>Valid:</strong> "Previous studies showed improved model fit on the log scale" (a priori justification).<br>
+      <strong>Invalid:</strong> "Looking at our data shows the log scale gives a better fit" (this IS model selection).<br>
+      <strong>Invalid:</strong> "Log scale makes coefficients easier to interpret" (convenience ≠ statistical justification).
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag q3">Q3</span> "This is an incorrect workflow because the p-value for practice_hours from the smaller model is influenced by model-selection step based on the same data."</li>
+      <li><span class="tag q3">Q3</span> "The decision of whether to include practice_hours in the model should not be based on this workflow, but rather on whether there is scientific justification for it as a confounding variable."</li>
+      <li><span class="tag q3">Q3</span> "As a sensitivity analysis, these residual plots would suggest that future studies should consider using model_logy for statistical inference. Scientific rationale should also guide model choice."</li>
     </ul>
   </div>
 </div>

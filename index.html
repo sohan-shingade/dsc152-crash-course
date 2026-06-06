@@ -228,7 +228,7 @@ function render() {
     const numCls = m.pct >= 85 ? 'done-n' : m.pct > 0 ? 'active-n' : 'todo-n';
     const barCls = m.pct >= 85 ? 'g' : m.pct >= 40 ? 'y' : m.pct > 0 ? 'r' : 'z';
 
-    html += `<div class="mod ${status}" onclick="openModule(${m.id})">
+    html += `<div class="mod ${status}" onclick="openModule(${m.id})" style="position:relative">
       <div class="mod-num ${numCls}">${m.id}</div>
       <div class="mod-info">
         <div class="mod-title">${m.title}</div>
@@ -236,6 +236,7 @@ function render() {
       </div>
       <div class="mod-bar"><div class="mod-bar-track"><div class="mod-bar-fill ${barCls}" style="width:${m.pct}%"></div></div></div>
       <div class="mod-pct">${m.pct}%</div>
+      <button onclick="event.stopPropagation();markDone(${m.id})" style="background:${m.pct>=85?'#333':'#28c840'};color:${m.pct>=85?'#888':'#000'};border:none;padding:0.2rem 0.5rem;border-radius:3px;font-size:0.6rem;font-weight:700;cursor:pointer;flex-shrink:0">${m.pct>=85?'Undo':'Done'}</button>
     </div>`;
   });
 
@@ -277,16 +278,17 @@ function resetAll() {
   render();
 }
 
-function openModule(id) {
-  if (markMode) {
-    const m = MODULES.find(x => x.id === id);
-    if (m) {
-      m.pct = m.pct >= 85 ? 0 : 100;
-      savePct();
-      render();
-    }
-    return;
+function markDone(id) {
+  const m = MODULES.find(x => x.id === id);
+  if (m) {
+    m.pct = m.pct >= 85 ? 0 : 100;
+    savePct();
+    render();
   }
+}
+
+function openModule(id) {
+  if (markMode) { markDone(id); return; }
   window.location.href = 'module-' + String(id).padStart(2, '0') + '.html';
 }
 

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Answer Scripts — DSC 152</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7;padding:2rem 1rem 4rem}
+  .container{max-width:800px;margin:0 auto}
+  h1{font-size:1.6rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
+  h1 span{color:#e94560}
+  .sub{text-align:center;color:#888;font-size:0.8rem;margin-bottom:2rem}
+  .script{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1.5rem;overflow:hidden}
+  .script-head{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem;border-bottom:1px solid #1a1a3e}
+  .script-head:hover{background:#161630}
+  .script-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;padding:3px 8px;border-radius:4px;min-width:24px;text-align:center}
+  .script-num.hyp{background:#e94560;color:#fff}
+  .script-num.reg{background:#0f3460;color:#a8d8ff}
+  .script-num.log{background:#6c3483;color:#d2b4de}
+  .script-num.ts{background:#28c840;color:#000}
+  .script-title{font-size:0.9rem;font-weight:700;flex:1}
+  .script-freq{font-size:0.65rem;color:#888;background:#1a1a3e;padding:2px 8px;border-radius:10px}
+  .script-body{display:none;padding:1rem 1.2rem;font-size:0.85rem}
+  .script-body.open{display:block}
+  .template{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.83rem;line-height:1.8}
+  .template strong{color:#ffbd2e}
+  .template .fill{color:#4a9eff;font-style:italic}
+  .warn{color:#e94560;font-weight:700;font-size:0.78rem}
+  .good{color:#28c840;font-weight:700;font-size:0.78rem}
+  .examples{margin:0.5rem 0;font-size:0.8rem;color:#aaa}
+  .examples li{margin-bottom:0.3rem}
+  .tag{display:inline-block;font-size:0.6rem;padding:1px 6px;border-radius:3px;margin-right:4px;font-weight:700}
+  .tag.pq1{background:#5c2a2a;color:#e94560}.tag.q1{background:#2a5c2a;color:#28c840}
+  .tag.pq2{background:#2a2a5c;color:#4a9eff}.tag.q2{background:#5c5c2a;color:#ffbd2e}
+  .tag.pq3{background:#5c2a5c;color:#d2b4de}.tag.q3{background:#2a5c5c;color:#4ae0e0}
+  code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.78rem;font-family:'JetBrains Mono',monospace}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100;margin:-2rem -1rem 2rem}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .current{color:#ffbd2e;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a>
+  <span class="current">Answer Scripts — Wording Cheat Sheet</span>
+</div>
+
+<div class="container">
+
+<h1><span>Answer Scripts</span></h1>
+<p class="sub">12 question types from all 6 quizzes &bull; Exact full-marks wording &bull; Fill in the blanks for your context</p>
+
+<!-- ===== SCRIPT 1 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">1</span>
+    <span class="script-title">Interpret the slope coefficient</span>
+    <span class="script-freq">Appeared 6x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq1">PQ1</span><span class="tag q1">Q1</span><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p style="margin-top:0.5rem"><strong>Simple regression (one predictor):</strong></p>
+    <div class="template">
+      "For every <strong>1-[unit]</strong> increase in <strong class="fill">[predictor]</strong>, the expected <strong class="fill">[outcome]</strong> <strong>increases/decreases</strong> by about <strong class="fill">[|coefficient|]</strong> <strong class="fill">[units]</strong>, on average."
+    </div>
+
+    <p><strong>Multiple regression ("holding constant"):</strong></p>
+    <div class="template">
+      "For every <strong>1-[unit]</strong> increase in <strong class="fill">[predictor]</strong>, the expected <strong class="fill">[outcome]</strong> <strong>increases/decreases</strong> by about <strong class="fill">[|coefficient|]</strong> <strong class="fill">[units]</strong>, <strong>holding <span class="fill">[other variables]</span> constant</strong>."
+    </div>
+
+    <p class="warn">NEVER say "causes" for observational data. Say "is associated with."</p>
+    <p class="good">Key phrases grader looks for: "on average", "holding __ constant", "associated with"</p>
+
+    <ul class="examples">
+      <li><span class="tag q2">Q2</span> "For every 1 percentage point increase in adherence rate, the expected time to recovery decreases by about 0.1892 weeks, on average."</li>
+      <li><span class="tag pq2">PQ2</span> "Every &#36;1 increase in rent is associated with an average difference in starting salary of &#36;28.50."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 2 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">2</span>
+    <span class="script-title">Interpret the p-value / state conclusion</span>
+    <span class="script-freq">Appeared 5x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq1">PQ1</span><span class="tag q1">Q1</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p style="margin-top:0.5rem"><strong>What the p-value IS:</strong></p>
+    <div class="template">
+      "The p-value is the probability of observing a test statistic <strong>at least as extreme</strong> as the one observed, <strong>assuming $H_0$ is true</strong>."
+    </div>
+
+    <p><strong>Stating the conclusion (reject):</strong></p>
+    <div class="template">
+      "Since <strong class="fill">[p-value]</strong> $&lt;$ <strong class="fill">[α]</strong>, we <strong>reject $H_0$</strong>. There is statistically significant evidence that <strong class="fill">[claim in context]</strong>, <strong class="fill">[after adjusting for ___]</strong>."
+    </div>
+
+    <p><strong>Stating the conclusion (fail to reject):</strong></p>
+    <div class="template">
+      "Since <strong class="fill">[p-value]</strong> $&gt;$ <strong class="fill">[α]</strong>, we <strong>fail to reject $H_0$</strong>. There is not statistically significant evidence of <strong class="fill">[claim]</strong>."
+    </div>
+
+    <p class="warn">NEVER say "accept H0" or "the probability H0 is true is [p-value]."</p>
+
+    <ul class="examples">
+      <li><span class="tag q2">Q2</span> "$H_0: \beta_1 = 0$. Since 0.003 < 0.05, we reject $H_0$. There is statistically significant evidence that adherence rate is associated with recovery time, after adjusting for undernourishment."</li>
+      <li><span class="tag pq3">PQ3</span> "The p-value is 0.0786. We fail to reject $H_0$ and conclude there is not statistically significant evidence of a decline in admissions rate while including an AR(2) term."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 3 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">3</span>
+    <span class="script-title">Interpret a categorical coefficient</span>
+    <span class="script-freq">Appeared 4x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      "Compared to <strong class="fill">[reference category]</strong>, <strong class="fill">[this level]</strong> is associated with a <strong class="fill">[|coefficient|]</strong>-[unit] <strong>higher/lower</strong> predicted <strong class="fill">[outcome]</strong>, <strong>holding <span class="fill">[other predictors]</span> constant</strong>."
+    </div>
+
+    <p><strong>How R picks the reference:</strong> alphabetically first level. "no" before "yes", "negative" before "positive", "rural" before "suburban".</p>
+
+    <ul class="examples">
+      <li><span class="tag pq2">PQ2</span> "The reference category is rural. Suburban jobs are associated with an &#36;8,200 lower average starting salary than rural jobs, among companies with the same number of employees."</li>
+      <li><span class="tag q2">Q2</span> "Patients tend to recover 0.8 weeks faster per 10% increase in adherence, among patients with the same undernourishment status."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 4 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">4</span>
+    <span class="script-title">Interpret an interaction coefficient</span>
+    <span class="script-freq">Appeared 4x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      "The <strong class="fill">[effect of X1 on Y]</strong> is <strong class="fill">[|interaction coeff|]</strong> [units] <strong>larger/smaller</strong> for <strong class="fill">[group B]</strong> compared to <strong class="fill">[group A / reference]</strong>."
+    </div>
+
+    <p><strong>Subgroup equation (MEMORIZE THIS PATTERN):</strong></p>
+    <div class="template">
+      Full model: $\hat{y} = \beta_0 + \beta_1 x + \beta_2 G + \beta_3 (x \cdot G)$<br>
+      When $G = 0$: $\hat{y} = \beta_0 + \beta_1 x$<br>
+      When $G = 1$: $\hat{y} = (\beta_0 + \beta_2) + (\beta_1 + \beta_3) x$<br><br>
+      <strong>Plug in, combine like terms, simplify.</strong>
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag pq2">PQ2</span> "The salary advantage of being in a high-rent city is &#36;9,800 larger for remote jobs than for in-person jobs."</li>
+      <li><span class="tag q3">Q3</span> "For coached students, each additional practice hour is associated with an additional 0.10 thousand dollars in predicted stipend compared to uncoached students."</li>
+      <li><span class="tag pq3">PQ3</span> "For CS applicants, each additional point on the GRE is associated with an average stipend that is &#36;90 higher compared with the corresponding increase for Statistics applicants."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 5 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">5</span>
+    <span class="script-title">"Can we conclude causation?"</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq1">PQ1</span><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span></p>
+
+    <p><strong>For observational data (answer: NO):</strong></p>
+    <div class="template">
+      "This statement is <strong>incorrect</strong>. This is an <strong>observational dataset</strong> &mdash; we did not randomly assign <strong class="fill">[subjects]</strong> to <strong class="fill">[groups/conditions]</strong>. A significant p-value indicates a statistically significant <strong>association</strong>, not causation. Confounders such as <strong class="fill">[specific variable]</strong> or other variables that we don't even have data on may be driving both <strong class="fill">[X]</strong> and <strong class="fill">[Y]</strong>."
+    </div>
+
+    <p><strong>For experiments with random assignment (answer: YES):</strong></p>
+    <div class="template">
+      "<strong>Yes</strong>, because subjects were <strong>randomly assigned</strong> to treatment groups. Random assignment distributes potential confounders equally across groups, so any significant difference can be attributed to <strong class="fill">[the treatment]</strong> itself."
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 6 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">6</span>
+    <span class="script-title">Confounder definition</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      "<strong class="fill">[Variable]</strong> must be associated with <strong>both</strong> the primary predictor (<strong class="fill">[X]</strong>) <strong>and</strong> the outcome (<strong class="fill">[Y]</strong>). That is, <strong class="fill">[variable]</strong> must relate to both <strong class="fill">[X behavior]</strong> and to <strong class="fill">[Y behavior]</strong>."
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 7 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">7</span>
+    <span class="script-title">Partial F-test (anova) — when and how</span>
+    <span class="script-freq">Appeared 5x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>When to use:</strong> Testing whether a GROUP of coefficients are all zero simultaneously (categorical variable with 3+ levels, or main effect + interaction).</p>
+
+    <div class="template">
+      <code>null_model &lt;- lm(y ~ [predictors WITHOUT the variable], data = df)</code><br>
+      <code>full_model &lt;- lm(y ~ [predictors WITH the variable], data = df)</code><br>
+      <code>anova(null_model, full_model)</code><br><br>
+      $H_0$: $\beta_{\text{var1}} = \beta_{\text{var2}} = \ldots = 0$ (all coefficients for the tested variable are zero simultaneously)
+    </div>
+
+    <p><strong>Interpreting the result:</strong></p>
+    <div class="template">
+      "Reject $H_0$; there is statistically significant evidence that <strong>at least one <span class="fill">[group]</span> differs</strong> in mean <strong class="fill">[outcome]</strong>, adjusting for <strong class="fill">[other predictors]</strong>."
+    </div>
+
+    <p class="warn">Individual p-values from summary() are NOT the same as the partial F-test when testing multiple coefficients jointly. The individual p-value for coachingyes only tests the coaching effect at practice_hours = 0.</p>
+
+    <ul class="examples">
+      <li><span class="tag q3">Q3</span> <code>reduced_model &lt;- lm(stipend ~ practice_hours, data = career_df)</code><br><code>anova(reduced_model, model1)</code></li>
+      <li><span class="tag pq3">PQ3</span> "$H_0: \beta_4 = \beta_5 = 0$. The null model is <code>lm(stipend ~ gre + field, data=grad)</code>."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 8 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">8</span>
+    <span class="script-title">Log-transformation interpretations</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>Log-linear:</strong> <code>lm(log(y) ~ x)</code></p>
+    <div class="template">
+      "A 1-unit increase in <strong class="fill">[x]</strong> is associated with approximately a <strong class="fill">[β &times; 100]</strong>% change in <strong class="fill">[y]</strong>."
+    </div>
+
+    <p><strong>Double-log:</strong> <code>lm(log(y) ~ log(x))</code></p>
+    <div class="template">
+      "A <strong>1% increase</strong> in <strong class="fill">[x]</strong> is associated with approximately a <strong class="fill">[β]</strong>% change in <strong class="fill">[y]</strong>."
+    </div>
+
+    <p><strong>Linear-log:</strong> <code>lm(y ~ log(x))</code></p>
+    <div class="template">
+      "A <strong>1% increase</strong> in <strong class="fill">[x]</strong> is associated with a <strong class="fill">[β/100]</strong>-unit change in <strong class="fill">[y]</strong>."
+    </div>
+
+    <p class="warn">The model is STILL linear regression even with log(x) — "we simply transformed the predictor before fitting."</p>
+
+    <ul class="examples">
+      <li><span class="tag pq3">PQ3</span> "A 1% increase in GRE score is associated with an approximately 2.84% increase in predicted stipend, holding all else equal."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 9 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num log">9</span>
+    <span class="script-title">Logistic regression coefficient (log-odds + OR)</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>Log-odds interpretation:</strong></p>
+    <div class="template">
+      "Each 1-unit increase in <strong class="fill">[x]</strong> is associated with a <strong class="fill">[β]</strong> increase in the <strong>log-odds</strong> of <strong class="fill">[outcome]</strong>, holding <strong class="fill">[other vars]</strong> constant."
+    </div>
+
+    <p><strong>Odds ratio interpretation:</strong></p>
+    <div class="template">
+      "The odds ratio is $e^{\beta}$ $\approx$ <strong class="fill">[value]</strong>. Each 1-unit increase in <strong class="fill">[x]</strong> <strong>multiplies</strong> the odds of <strong class="fill">[outcome]</strong> by approximately <strong class="fill">[e^β]</strong>, holding <strong class="fill">[other vars]</strong> constant."
+    </div>
+
+    <p><strong>CI for odds ratio:</strong></p>
+    <div class="template">
+      "Exponentiate both endpoints: $(e^{\text{lower}}, e^{\text{upper}})$. We are 95% confident that a 1-unit increase in <strong class="fill">[x]</strong> multiplies the odds of <strong class="fill">[outcome]</strong> by a factor between <strong class="fill">[e^lower]</strong> and <strong class="fill">[e^upper]</strong>."
+    </div>
+
+    <p><strong>Multi-unit change:</strong> For a $k$-unit increase, log-odds changes by $k\beta$, so odds multiply by $e^{k\beta}$.</p>
+
+    <ul class="examples">
+      <li><span class="tag pq3">PQ3</span> "$e^{0.08} \approx 1.08$. Each additional point on GRE is associated with a multiplicative increase of approximately 1.08 in the estimated odds of admission (roughly 8%), holding GPA constant."</li>
+      <li><span class="tag q3">Q3</span> "The odds ratio for coaching is $e^{1.10}$. Holding portfolio score fixed, coached students have $e^{1.10}$ times the odds of receiving an offer compared to uncoached students."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 10 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num log">10</span>
+    <span class="script-title">Predicted probability (logistic)</span>
+    <span class="script-freq">Appeared 2x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      <strong>Step 1:</strong> log-odds $= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \ldots$ (plug in values)<br>
+      <strong>Step 2:</strong> odds $= e^{\text{log-odds}}$<br>
+      <strong>Step 3:</strong> $\hat{p} = \dfrac{e^{\text{log-odds}}}{1 + e^{\text{log-odds}}}$
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag pq3">PQ3</span> "Log-odds = $-14.82 + 0.08(160) + 0.77(3.5)$. $\hat{p} = \frac{e^{\text{log-odds}}}{1 + e^{\text{log-odds}}}$"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 11 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num log">11</span>
+    <span class="script-title">Odds ratio from a 2&times;2 table</span>
+    <span class="script-freq">Appeared 2x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      $RR = \dfrac{\text{risk}_{\text{exposed}}}{\text{risk}_{\text{unexposed}}} = \dfrac{a/(a+b)}{c/(c+d)}$<br><br>
+      $OR = \dfrac{\text{odds}_{\text{exposed}}}{\text{odds}_{\text{unexposed}}} = \dfrac{a/b}{c/d} = \dfrac{ad}{bc}$<br><br>
+      <strong>Interpretation:</strong> "The odds of <strong class="fill">[outcome]</strong> are <strong class="fill">[OR]</strong> times as large for <strong class="fill">[exposed]</strong> as for <strong class="fill">[unexposed]</strong>."
+    </div>
+
+    <p><strong>OR &approx; RR when:</strong> "The outcome is rare (low prevalence)."</p>
+    <p><strong>Case-control:</strong> "RR is invalid (groups are fixed by design). OR is still valid."</p>
+
+    <ul class="examples">
+      <li><span class="tag q3">Q3</span> "$OR = \frac{72 \cdot 120}{48 \cdot 60} = 3.0$. The odds of receiving an offer are estimated to be 3 times as large for coached students as for uncoached students."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 12 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num ts">12</span>
+    <span class="script-title">"Why is lm() inappropriate for time series?"</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      "If time is ignored, residuals may still contain a systematic <strong class="fill">[weekly/temporal]</strong> pattern. Errors from nearby <strong class="fill">[days/time points]</strong> may not behave like independent random noise, so ordinary linear-regression standard errors, p-values, and confidence intervals may be <strong>misleading</strong>."
+    </div>
+
+    <p><strong>The fix:</strong></p>
+    <div class="template">
+      <code>model &lt;- Arima(y, order = c(p, 0, 0), xreg = x)</code><br>
+      <code>coeftest(model)</code>
+    </div>
+
+    <p><strong>Power simulation trap:</strong></p>
+    <div class="template">
+      "lm() appears to have higher power (higher rejection rate), but this is actually <strong>inflated Type I Error</strong> from ignoring autocorrelation, not genuine power. Arima() has the correct Type I Error rate."
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag q3">Q3</span> <code>lm(log(visits) ~ bookings + day_of_week, data = traffic_df)</code></li>
+      <li><span class="tag pq3">PQ3</span> <code>mod &lt;- Arima(admit, order=c(2, 0, 0), xreg=1:50)</code><br><code>coeftest(mod)</code></li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<script>
+// Open first script by default
+document.querySelector('.script-body').classList.add('open');
+</script>
+</body>
+</html>

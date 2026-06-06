@@ -193,6 +193,10 @@ function render() {
       if (m.id === 'final') {
         html += `<div class="unit"><div class="unit-header"><span class="unit-badge uf">FINAL</span><span class="unit-title">Final Exam Prep</span></div>`;
         html += `<div class="module-list">`;
+        html += `<div class="mod" onclick="window.location.href='answer-scripts.html'" style="border-color:#ffbd2e">
+          <div class="mod-num" style="background:#ffbd2e;color:#000">WD</div>
+          <div class="mod-info"><div class="mod-title">Answer Scripts — Wording Cheat Sheet</div><div class="mod-desc">12 question types, exact full-marks templates from all 6 quizzes</div></div>
+        </div>`;
         html += `<div class="mod active" onclick="window.location.href='lab9-review.html'" style="border-color:#e94560">
           <div class="mod-num active-n" style="background:#e94560">L9</div>
           <div class="mod-info"><div class="mod-title">Lab 9 Review (APPEARS ON FINAL)</div><div class="mod-desc">Model selection vs inference, Lucas 2013, correct workflow, diagnostic checks, log traps</div></div>

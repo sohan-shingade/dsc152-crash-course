@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 9 Review — Model Selection vs Inference (Casino Study)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <span class="current">Lab 9 Review</span>
+  <a href="final-simulator.html" class="next-btn">Final Simulator &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Lab 9 Review Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Core Concepts from Lab 9</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">The Big Picture &mdash; Model Selection vs Inference</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>Lab 9 uses the <strong>Lucas 2013 paper</strong> as a case study of what NOT to do. The paper studied whether casino poker rooms drive traffic to slot machines and table games &mdash; a "loss leader" argument.</p>
+
+    <div class="callout warning">
+      <strong>THE central shortcoming:</strong> Lucas performed <strong>variable selection</strong> (backward/forward selection guided by p-values) and then used the resulting model for <strong>inference</strong> (hypothesis tests on coefficients). This is circular &mdash; you cannot use p-values to build a model and then trust the p-values from that model.
+    </div>
+
+    <p>This is the <strong>model selection &rarr; inference problem</strong> from Lecture 13, and it's the single most important concept the professor is testing.</p>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>What Lucas did (WRONG)</h4>
+        <ol style="font-size:0.8rem;padding-left:1rem">
+          <li>Looked at the data</li>
+          <li>Used p-values to add/remove variables</li>
+          <li>Added AR terms based on correlograms</li>
+          <li>Added outlier dummies based on residuals</li>
+          <li>Used the "final model" for inference</li>
+        </ol>
+      </div>
+      <div class="compare-side right">
+        <h4>What should have been done (RIGHT)</h4>
+        <ol style="font-size:0.8rem;padding-left:1rem">
+          <li>Pre-specify model from scientific reasoning</li>
+          <li>Make summary tables and plots</li>
+          <li>Run the primary analysis</li>
+          <li>Check diagnostics (LINE conditions)</li>
+          <li>Perform sensitivity analyses</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Exam phrasing:</strong> "The author's workflow inappropriately mixes model selection with statistical inference." Memorize this sentence &mdash; it's the correct answer for Q1.2 and the foundation for many exam questions.
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">The Correct Workflow &mdash; Pre-Specified Model</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>The correct model for inference must be determined <strong>before</strong> looking at results. Here's the pre-specified model the lab says we should use:</p>
+
+    <div class="eq-box">
+      $$\text{COIN\_pf} = \beta_0 + \beta_1 \cdot \text{RAKE} + \beta_2 \cdot \text{TUE} + \beta_3 \cdot \text{WED} + \beta_4 \cdot \text{THU} + \beta_5 \cdot \text{FRI} + \beta_6 \cdot \text{SAT} + \beta_7 \cdot \text{SUN}$$
+    </div>
+
+    <p>Key features of this model:</p>
+    <ul style="font-size:0.85rem;padding-left:1.2rem;margin-bottom:0.5rem">
+      <li>Variables on <strong>raw dollar scale</strong> (not log-transformed)</li>
+      <li>Day of week included as a confounder (weekends are busier for everything)</li>
+      <li>Monday as the baseline level</li>
+      <li><strong>NO variable selection</strong> &mdash; model is locked in before analysis</li>
+      <li>NO AR/MA terms, NO outlier dummy variables</li>
+    </ul>
+
+    <div class="callout insight">
+      <strong>Why does this differ from Lucas 2013?</strong><br>
+      (1) Lucas's final models were obtained via variable selection &mdash; objectively incorrect before inference.<br>
+      (2) It would be hard to justify why each of the six models (3 resorts &times; 2 outcomes) should differ structurally if the scientific question is the same.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Categorical variables: all-or-nothing rule</h4>
+    <p>Day of week is <strong>categorical with 7 levels</strong>. In any variable selection, you must keep ALL levels or remove ALL. You cannot remove individual days (like dropping Thursday alone because its p-value is not significant).</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">pre_specified_model.R</span></div>
+      <pre><code class="language-r"># Set Monday as reference level
+casino$dow <- relevel(as.factor(casino$dow), ref = "Monday")
+
+# Pre-specified model for Resort 1 slot profit
+model1 <- lm(R1_COIN_pf ~ R1_RAKE + dow, data = casino)
+summary(model1)</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">Understanding the Data &mdash; COIN, DROP, RAKE</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>The dataset has 217 days (Feb&ndash;Sept 2009) across 3 Las Vegas casino resorts. Know what each variable actually measures:</p>
+
+    <table class="ref-table">
+      <tr><th>Variable</th><th>What it is</th><th>Profit?</th></tr>
+      <tr><td><code>COIN-IN (COIN)</code></td><td>Total money customers put into slot machines</td><td>NOT profit &mdash; casino keeps ~7.5%</td></tr>
+      <tr><td><code>DROP</code></td><td>Business volume on table games</td><td>NOT profit &mdash; casino keeps ~15%</td></tr>
+      <tr><td><code>RAKE</code></td><td>Money earned by the poker room</td><td>IS the actual profit</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Exam trap:</strong> Don't confuse COIN-IN with profit. COIN-IN is total wagered, not what the casino keeps. To get profit:<br>
+      &bull; Slot profit = <code>COIN * 0.075</code><br>
+      &bull; Table profit = <code>DROP * 0.15</code><br>
+      &bull; RAKE is already profit (no adjustment needed)
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">profit_adjustment.R</span></div>
+      <pre><code class="language-r"># Convert to profit-adjusted variables
+casino$R1_COIN_pf <- casino$R1_COIN * 0.075
+casino$R1_DROP_pf <- casino$R1_DROP * 0.15
+# RAKE stays as-is (already profit)
+
+# Summary stats on original dollar scale
+summary_usd <- matrix(NA, nrow = 9, ncol = 4)
+colnames(summary_usd) <- c("Mean", "Std. Dev", "Min.", "Max.")
+summary_usd["R1 COIN-IN", ] <- c(mean(casino$R1_COIN),
+    sd(casino$R1_COIN), min(casino$R1_COIN), max(casino$R1_COIN))</code></pre>
+    </div>
+
+    <p>The scientific question: does poker room activity (<code>RAKE</code>) predict/drive slot machine and table game activity (<code>COIN-IN</code> and <code>DROP</code>)?</p>
+
+    <div class="callout insight">
+      <strong>The "loss leader" argument:</strong> Poker rooms may not be highly profitable themselves, but they might bring in customers who also play slots and table games. This is what Lucas was trying to test.
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Diagnostic Checks &mdash; All 4 LINE Conditions</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>After running the primary analysis, you check the four conditions for valid linear regression inference. Here's the status for the casino model:</p>
+
+    <table class="ref-table">
+      <tr><th>Condition</th><th>How to Check</th><th>Result</th></tr>
+      <tr><td><strong>L</strong>inearity</td><td>Residuals vs fitted values</td><td style="color:#28c840">Likely NOT violated</td></tr>
+      <tr><td><strong>I</strong>ndependence</td><td>Residuals vs time (day_num)</td><td style="color:#ffbd2e">MAYBE violated (cyclical patterns)</td></tr>
+      <tr><td><strong>N</strong>ormality</td><td>QQ-plot + Shapiro-Wilk test</td><td style="color:#e94560">LIKELY VIOLATED</td></tr>
+      <tr><td><strong>E</strong>qual variance</td><td>Residuals vs each predictor</td><td style="color:#ffbd2e">MAYBE violated (slight fan shape)</td></tr>
+    </table>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">diagnostics.R</span></div>
+      <pre><code class="language-r"># Get residuals and fitted values
+casino$residuals <- residuals(model1)
+casino$fitted    <- fitted(model1)
+
+# L: Linearity -- residuals vs fitted
+ggplot(casino, aes(x = fitted, y = residuals)) + geom_point()
+
+# I: Independence -- residuals vs time
+ggplot(casino, aes(x = day_num, y = residuals)) + geom_point()
+
+# N: Normality -- QQ plot + formal test
+qqnorm(casino$residuals)
+qqline(casino$residuals)
+shapiro.test(casino$residuals)  # p < 0.05 => reject normality
+
+# E: Equal variance -- residuals vs predictor
+ggplot(casino, aes(x = R1_RAKE, y = residuals)) + geom_point()</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Mnemonic: LINE</strong> &mdash; Linearity, Independence, Normality, Equal variance. You check ALL four, even if you suspect only one is problematic. On the exam, be specific about which plot you'd use for each.
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Critical Exam Traps &mdash; 5 Things That Will Lose Points</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+
+    <h4 style="margin:0.5rem 0 0.3rem;font-size:0.85rem;color:#e94560">Trap 1: log(mean(x)) != mean(log(x))</h4>
+    <p>When building a summary table on the log scale, you must compute summary statistics <strong>after</strong> transforming, not before.</p>
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Wrong</h4>
+        <code>log(summary_usd)</code><br>
+        Takes log of already-computed means
+      </div>
+      <div class="compare-side right">
+        <h4>Right</h4>
+        <code>mean(log(casino$R1_COIN))</code><br>
+        Computes mean of log-transformed values
+      </div>
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#e94560">Trap 2: "Using my data to justify a transformation"</h4>
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Model selection (BAD)</h4>
+        "Looking at our data, the log scale gives a better linear fit, so we'll use log."
+      </div>
+      <div class="compare-side right">
+        <h4>A priori (OK)</h4>
+        "Previous studies showed improved model fit on the log scale."
+      </div>
+    </div>
+    <p>Using YOUR data to decide on a transformation IS model selection. Using prior studies is a priori justification.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#e94560">Trap 3: Double-log coefficient misinterpretation</h4>
+    <div class="callout warning">
+      In a double-log model $\log(Y) = \beta_0 + \beta_1 \log(X)$, the coefficient $\beta_1 = 0.5$ means: "a <strong>1% increase</strong> in $X$ is associated with a <strong>0.5% increase</strong> in $Y$." NOT a 50% increase!<br><br>
+      Similarly, $\beta_1 = 0.0646$ means a 1% increase in RAKE is associated with a 0.0646% increase in COIN &mdash; NOT 6.46%.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#e94560">Trap 4: Constants on the log scale</h4>
+    <p>If the model's constant/intercept is 13.8990 on the log scale, the actual dollar value is $e^{13.8990}$, not &#36;13.8990.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#e94560">Trap 5: "The data looks like an AR process, so add AR terms"</h4>
+    <p>Visual similarity does NOT justify including AR terms in an inference model. Using correlograms from your data to decide whether to add AR(1) terms IS model selection &mdash; just as invalid as using p-values to select variables.</p>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Lab 9 Question Types</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "What is wrong with this analysis?"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>You will see a workflow where a researcher does variable selection and then inference.</strong> You need to identify the flaw.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>A researcher starts with 15 predictors, uses backward selection to remove variables with $p > 0.05$, arrives at a model with 6 remaining predictors, and reports those 6 predictors as "statistically significant drivers of the outcome." What is wrong?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "You shouldn't use p-values to decide what to include."<br><br>
+        <span style="color:#e94560">Too vague. Doesn't explain WHY or use proper terminology.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "The workflow inappropriately mixes model selection with statistical inference. Variables were selected based on p-values from the data, and then the resulting model's p-values were used for inference. This is circular &mdash; you cannot use p-values to build a model and then trust the p-values from that model."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Full-marks template:</strong><br>
+      1. Name the problem: "inappropriately mixes model selection with statistical inference"<br>
+      2. Explain the circularity: "p-values were used to build the model, then the model's p-values were used for inference"<br>
+      3. State the consequence: "the p-values from the final model are invalid / cannot be trusted"
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Lucas 2013 used backward/forward selection to arrive at different final models for each resort, then reported which predictors were "significant." Write your critique in 2&ndash;3 sentences.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+        The Lucas 2013 workflow inappropriately mixes model selection with statistical inference. The author used backward/forward selection (guided by p-values and correlograms) to arrive at a "final model," and then reported the p-values from that model as evidence. This is circular &mdash; you cannot use p-values to select variables and then trust the p-values from the resulting model. The model for inference must be pre-specified before looking at the data.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: "Should you remove this non-significant variable?"</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p><strong>Expect a question where a colleague suggests removing a variable because its p-value is large.</strong></p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Your colleague looks at the regression output and says: "The Thursday coefficient has $p = 0.82$, which is not significant. Let's remove it from the model to simplify things." What do you tell them?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "We should keep it because it might matter."<br><br>
+        <span style="color:#e94560">Doesn't explain the model selection issue or the categorical variable rule.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "Non-significant p-values do not justify removing pre-specified covariates. Removing them based on the data is model selection, which invalidates subsequent inference. Furthermore, day of week is categorical with 7 levels &mdash; you should not remove individual days. Either keep all levels or remove all."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Two-part answer pattern:</strong><br>
+      1. <strong>General rule:</strong> "Removing non-significant variables from a pre-specified model IS model selection, which invalidates inference."<br>
+      2. <strong>Categorical trap:</strong> "Day of week is categorical &mdash; you keep ALL levels or remove ALL. Cannot remove Thursday alone."
+    </div>
+
+    <p><strong>Why you keep ALL day-of-week levels:</strong></p>
+    <div class="callout insight">
+      Day of week is a single categorical variable with 7 levels represented by 6 dummy variables (Monday = baseline). Removing just one dummy (Thursday) while keeping the rest is like removing one category from a variable &mdash; it doesn't make sense scientifically. You either control for day-of-week effects or you don't.
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: "Is this a valid justification for log-transforming?"</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p>The exam will give you several reasons for log-transforming and ask which are valid. The key distinction: <strong>a priori</strong> (before seeing data) vs <strong>data-driven</strong> (model selection).</p>
+
+    <table class="ref-table">
+      <tr><th>Justification</th><th>Valid?</th><th>Why</th></tr>
+      <tr><td>"Previous studies showed improved model fit on the log scale"</td><td style="color:#28c840">VALID</td><td>A priori justification from external evidence</td></tr>
+      <tr><td>"Looking at our data shows the log scale gives a better linear fit"</td><td style="color:#e94560">INVALID</td><td>Using YOUR data to decide = model selection</td></tr>
+      <tr><td>"Log scale makes coefficients interpretable as elasticities"</td><td style="color:#e94560">INVALID</td><td>Convenience of interpretation is not a statistical justification</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>The subtle distinction (Q1.3 vs Q4.2):</strong><br>
+      &bull; Q1.3 says the <em>primary reason</em> for transformation should be to improve fit, not interpretation &mdash; this is about the <em>goal</em> of transforming.<br>
+      &bull; Q4.2 says if you use <em>your own data</em> to determine that log improves fit, that's model selection &mdash; this is about the <em>evidence</em> for transforming.<br><br>
+      The resolution: you should transform to improve fit, but the evidence that fit improves should come from <strong>prior studies</strong>, not your current dataset.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A colleague says: "I plotted the residuals from the raw-scale model and saw non-constant variance. After log-transforming, the residuals look much better. So I'll use the log model for my inference." Is this appropriate?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        No, this is not appropriate. The colleague is using their own data to decide on the transformation &mdash; looking at residuals from the raw model to justify switching to a log model. This is model selection, which invalidates the subsequent inference. A valid justification would be citing previous studies that found the log scale to be more appropriate for this type of data.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Lab 9 Exam Readiness</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">5-Question Quiz &mdash; Exam-Critical</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>What is the main shortcoming of the Lucas 2013 paper? Explain in 1&ndash;2 sentences using correct terminology.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        The author's workflow inappropriately mixes model selection with statistical inference. Variables were selected using backward/forward selection guided by p-values and correlograms, and then the resulting model's p-values were used for inference &mdash; this is circular and invalidates the reported results.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>Write the pre-specified regression model for Resort 1 slot machine profit (in equation form), and write the R code to fit it. Use Monday as the reference day.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        <strong>Model:</strong> $\text{COIN\_pf} = \beta_0 + \beta_1 \cdot \text{RAKE} + \beta_2 \cdot \text{TUE} + \beta_3 \cdot \text{WED} + \beta_4 \cdot \text{THU} + \beta_5 \cdot \text{FRI} + \beta_6 \cdot \text{SAT} + \beta_7 \cdot \text{SUN}$<br><br>
+        <strong>R code:</strong><br>
+        <code>casino$dow <- relevel(as.factor(casino$dow), ref = "Monday")</code><br>
+        <code>model1 <- lm(R1_COIN_pf ~ R1_RAKE + dow, data = casino)</code>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>A colleague says: "The Thursday coefficient is not significant ($p = 0.82$), so let's remove it from the model." What's wrong with this suggestion? Give two reasons.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        <strong>Reason 1:</strong> Removing a non-significant variable from a pre-specified model IS model selection. It invalidates subsequent inference because you're using p-values from the data to decide what stays in the model.<br><br>
+        <strong>Reason 2:</strong> Day of week is a single categorical variable with 7 levels. You cannot remove individual levels &mdash; either keep all day-of-week indicators or remove all of them. Removing Thursday alone doesn't make scientific sense.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>Which of the following is a valid reason to log-transform your variables before inference?</p>
+      <p style="font-size:0.82rem;padding-left:0.5rem">
+        (a) Your data shows that the log scale gives a better linear fit<br>
+        (b) Previous studies on similar casino data used the log scale and found improved model fit<br>
+        (c) Log-transforming makes the coefficients easier to interpret as elasticities
+      </p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <strong>(b) is the only valid justification.</strong><br><br>
+        (a) is invalid because using YOUR data to determine the transformation is model selection.<br>
+        (b) is valid because citing previous studies is an a priori justification.<br>
+        (c) is invalid because ease of interpretation is not a statistical justification for transformation.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q5</div>
+      <p>The regression output shows a coefficient of 2.449 on <code>R1_RAKE</code> (raw dollar scale model). Interpret this in context. Also: is the intercept of &#36;132,669.654 the estimated profit on a Monday?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz5').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz5">
+        <strong>Coefficient interpretation:</strong> Every &#36;1 increase in poker room profit (RAKE) is associated with an expected &#36;2.449 increase in slot machine profit (COIN_pf), holding day of week constant.<br><br>
+        <strong>Intercept:</strong> No, &#36;132,669.654 is NOT the estimated profit on a Monday. It is the estimated slot profit when RAKE = &#36;0 AND it is Monday. These are different &mdash; on an actual Monday, RAKE is not zero.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Quiz Complete &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 10 -->
+<div class="step" id="s10">
+  <div class="step-header" onclick="toggleStep(10)">
+    <span class="step-num">10</span>
+    <span class="step-title">Bonus &mdash; AR(1) Simulation and When AR Terms Are Appropriate</span>
+    <span class="step-check" id="check10"></span>
+  </div>
+  <div class="step-body" id="body10">
+
+    <h4 style="margin:0.3rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Random walk simulation (phi_1 = 1)</h4>
+    <p>The AR(1) formula: $y_t = c + \phi_1 \cdot y_{t-1} + \varepsilon_t$. With $c = 0$ and $\phi_1 = 1$, this is a <strong>random walk</strong>.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">ar1_simulation.R</span></div>
+      <pre><code class="language-r">set.seed(1)
+y <- numeric(217)
+y[1] <- 14.2
+for (i in 2:217) {
+  y[i] <- y[i-1] + rnorm(1)  # c=0, phi_1=1, epsilon ~ N(0,1)
+}
+day <- 1:217
+AR_df <- data.frame(day = day, y = y)
+ggplot(data = AR_df, aes(x = day, y = y)) + geom_line()</code></pre>
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Why the simulation looks different from actual data</h4>
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Simulated AR(1) random walk</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Drifts far from starting value (14.2)</li>
+          <li>No mean-reversion &mdash; once it drifts, it stays drifted</li>
+          <li>Cycles are NOT explained by day of week</li>
+        </ul>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Actual log(COIN) data</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Stays within a relatively narrow range</li>
+          <li>Shows mean-reversion (comes back to average)</li>
+          <li>Cyclical patterns match <strong>weekday vs weekend</strong> effects</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>They do NOT look "remarkably similar."</strong> The simulated random walk drifts much further from 14.2 than the actual data. And even if they did look similar visually, that would NOT justify adding AR terms to an inference model.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">When IS it appropriate to include AR terms?</h4>
+    <table class="ref-table">
+      <tr><th>Scenario</th><th>Appropriate?</th><th>Why</th></tr>
+      <tr><td>Previous studies on similar data used AR(1) models</td><td style="color:#28c840">YES</td><td>A priori justification from external evidence</td></tr>
+      <tr><td>You looked at the correlogram of your residuals and saw autocorrelation</td><td style="color:#e94560">NO</td><td>Using your data to decide = model selection</td></tr>
+      <tr><td>Your time series "looks like" it has AR behavior</td><td style="color:#e94560">NO</td><td>Visual similarity is not a valid justification</td></tr>
+      <tr><td>The domain knowledge dictates temporal dependence (e.g., stock prices)</td><td style="color:#28c840">YES</td><td>Scientific rationale specified before analysis</td></tr>
+    </table>
+
+    <div class="callout memorize">
+      <strong>Key R functions for ARIMA models:</strong><br>
+      &bull; <code>Arima(y, xreg = X, order = c(1,0,0))</code> from the <code>forecast</code> package (note capital A)<br>
+      &bull; <code>order = c(1,0,0)</code> means AR(1), no differencing, no MA terms<br>
+      &bull; <code>coeftest(arima_model)</code> from the <code>lmtest</code> package to display coefficient table
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">arima_model.R</span></div>
+      <pre><code class="language-r"># If you DID have a priori justification for AR(1):
+library(forecast)
+library(lmtest)
+
+# Design matrix (Lucas 2013 "final model" -- for reference only)
+X <- cbind(
+  log(casino$R1_RAKE),
+  as.numeric(casino$dow == "Tuesday"),
+  as.numeric(casino$dow == "Wednesday"),
+  as.numeric(casino$dow == "Friday"),
+  as.numeric(casino$dow == "Saturday"),
+  as.numeric(casino$dow == "Sunday")
+)
+
+ar1_model <- Arima(log(casino$R1_COIN), xreg = X, order = c(1,0,0))
+coeftest(ar1_model)</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(10)">Lab 9 Review Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Lab 9 Review &rarr; Go to Final Simulator</button>
+
+</div>
+
+<script>
+const TOTAL=10;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('lab9_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('lab9_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='final-simulator.html'}
+loadState();
+</script>
+</body>
+</html>

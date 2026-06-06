@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 11 — Interaction Terms</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-10.html">Module 10</a><span class="sep">/</span>
+  <span class="current">Module 11</span>
+  <a href="module-12.html" class="next-btn">Module 12 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 11 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Interaction Terms</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">What interaction means &mdash; parallel vs non-parallel lines</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>An <strong>interaction</strong> means the effect of one predictor ($X_1$) on the outcome ($Y$) <strong>depends on the level of another predictor</strong> ($X_2$).</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">No Interaction</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Lines for each group are <strong>parallel</strong></li>
+          <li>The effect of $X_1$ is the same regardless of $X_2$</li>
+          <li>Groups differ only in intercept</li>
+        </ul>
+      </div>
+      <div class="compare-side" style="border-color:#5c2a2a">
+        <h4 style="color:#e94560">Interaction Present</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Lines for each group are <strong>NOT parallel</strong></li>
+          <li>The effect of $X_1$ <strong>differs</strong> depending on $X_2$</li>
+          <li>Groups differ in both intercept AND slope</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Key visual test:</strong> If you plot fitted lines for each group and they cross or diverge, there's an interaction. Parallel lines = no interaction.
+    </div>
+
+    <p>Think of it this way: without interaction, going to the gym improves your mental health by the same amount whether or not you also meditate. With interaction, the gym benefit is <em>different</em> depending on whether you meditate.</p>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">R syntax for interaction &mdash; the <code>*</code> and <code>:</code> operators</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>In R, the <code>*</code> operator in a formula adds both main effects AND the interaction:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">interaction_syntax.R</span></div>
+      <pre><code class="language-r"># These two are IDENTICAL:
+mod_int <- lm(y ~ x1 * x2, data = df)
+mod_int <- lm(y ~ x1 + x2 + x1:x2, data = df)</code></pre>
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Operator</th><th>What it adds</th><th>Example</th></tr>
+      <tr><td><code>*</code></td><td>Main effects + interaction</td><td><code>x1 * x2</code> = <code>x1 + x2 + x1:x2</code></td></tr>
+      <tr><td><code>:</code></td><td>Only the interaction term</td><td><code>x1:x2</code> = just the product term</td></tr>
+      <tr><td><code>+</code></td><td>Only main effects (no interaction)</td><td><code>x1 + x2</code> = additive model</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Common mistake:</strong> Writing <code>lm(y ~ x1:x2, data = df)</code> without the main effects. Always use <code>*</code> or explicitly include both main effects with <code>+</code> when you add <code>:</code>. Dropping main effects gives misleading results.
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">pq2_example.R</span></div>
+      <pre><code class="language-r"># Practice Quiz 2 Q4b:
+mod_int <- lm(sal ~ hi_rent * modality, data = ds_jobs_2)</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">Interpreting interaction coefficients &mdash; the ADDITIONAL effect</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>The interaction coefficient is <strong>not</strong> a standalone effect. It tells you how much the slope <strong>changes</strong> when you move from the reference group to the other group.</p>
+
+    <p>Consider a model with one numeric variable ($x_1$) and one binary variable ($x_2$ = TRUE/FALSE):</p>
+
+    <div class="eq-box">
+      $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_{2\text{TRUE}} + \hat{\beta}_3 (x_1 \cdot x_{2\text{TRUE}})$$
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Coefficient</th><th>Interpretation</th></tr>
+      <tr><td>$\hat{\beta}_1$</td><td>Slope of $x_1$ <strong>for the reference group</strong> ($x_2$ = FALSE)</td></tr>
+      <tr><td>$\hat{\beta}_2$</td><td>Difference in intercept between TRUE and FALSE groups <strong>when $x_1 = 0$</strong></td></tr>
+      <tr><td>$\hat{\beta}_3$</td><td>How much the slope of $x_1$ <strong>changes</strong> for the TRUE group vs the FALSE group</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <strong>Think of $\hat{\beta}_3$ as:</strong> "The slope of $x_1$ is $\hat{\beta}_3$ <strong>more</strong> for the TRUE group than for the FALSE group." So the TRUE group's slope is $\hat{\beta}_1 + \hat{\beta}_3$.
+    </div>
+
+    <div class="callout memorize">
+      <strong>PQ2 Q4 coefficients:</strong><br>
+      Intercept = 74,000 &ensp;|&ensp; hi_rentTRUE = 21,000 &ensp;|&ensp; modalityremote = 6,500 &ensp;|&ensp; hi_rentTRUE:modalityremote = 9,800<br><br>
+      The interaction (9,800) means: "The salary boost from being in a high-rent city is &#36;9,800 <strong>larger</strong> for remote jobs than for in-person jobs."
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Writing fitted equations for subgroups &mdash; plug in dummy values</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>To get the fitted equation for a specific subgroup, <strong>plug in the dummy variable values</strong> and simplify.</p>
+
+    <p><strong>General model:</strong></p>
+    <div class="eq-box">
+      $$\hat{y} = \beta_0 + \beta_1 x + \beta_2 \cdot \text{group} + \beta_3 \cdot x \cdot \text{group}$$
+    </div>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">group = 0 (reference)</h4>
+        <p style="font-size:0.82rem">$\hat{y} = \beta_0 + \beta_1 x + \beta_2(0) + \beta_3 x(0)$</p>
+        <p style="font-size:0.82rem"><strong>$\hat{y} = \beta_0 + \beta_1 x$</strong></p>
+      </div>
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">group = 1</h4>
+        <p style="font-size:0.82rem">$\hat{y} = \beta_0 + \beta_1 x + \beta_2(1) + \beta_3 x(1)$</p>
+        <p style="font-size:0.82rem"><strong>$\hat{y} = (\beta_0 + \beta_2) + (\beta_1 + \beta_3) x$</strong></p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <strong>PQ2 Q4b &mdash; Fitted equation for remote jobs:</strong><br>
+      Full model: $\widehat{\text{sal}} = 74000 + 21000 \cdot \text{hi\_rent} + 6500 \cdot \text{remote} + 9800 \cdot \text{hi\_rent} \cdot \text{remote}$<br><br>
+      Plug in remote = 1:<br>
+      $\widehat{\text{sal}} = (74000 + 6500) + (21000 + 9800) \cdot \text{hi\_rent}$<br>
+      $\widehat{\text{sal}} = 80500 + 30800 \cdot \text{hi\_rentTRUE}$
+    </div>
+
+    <div class="worked">
+New intercept: 74000 + 6500 = 80500
+New slope:     21000 + 9800 = 30800
+
+Remote jobs:  sal_hat = 80500 + 30800 * hi_rentTRUE
+In-person:    sal_hat = 74000 + 21000 * hi_rentTRUE
+    </div>
+
+    <div class="callout memorize">
+      <strong>Recipe:</strong> For the non-reference group, <strong>add</strong> the dummy coefficient to the intercept, and <strong>add</strong> the interaction coefficient to the slope.
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">When to use interaction &mdash; and why you need partial F-tests</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>Use an interaction when you suspect the relationship between $X$ and $Y$ <strong>differs across groups</strong>. Signs to look for:</p>
+    <ul style="font-size:0.85rem;padding-left:1.2rem;margin-bottom:0.5rem">
+      <li>Non-parallel lines in a scatterplot colored by group</li>
+      <li>Theory suggests groups respond differently</li>
+      <li>The interaction coefficient is significant</li>
+    </ul>
+
+    <div class="callout warning">
+      <strong>Why you can't just look at individual p-values (PQ2 Q4g):</strong><br>
+      The p-value for <code>modalityremote</code> (0.038) only tests the impact of modality <strong>in low-rent locations specifically</strong> (when hi_rent = FALSE, the reference level). We probably care about the impact of modality in ALL locations. That single p-value doesn't capture the full picture.
+    </div>
+
+    <p>Instead, use a <strong>partial F-test</strong> (via <code>anova()</code>) to test whether modality matters overall:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">partial_f_test.R</span></div>
+      <pre><code class="language-r"># PQ2 Q4h: Does modality matter AT ALL?
+null_mod2 <- lm(sal ~ hi_rent, data = ds_jobs_2)
+full_mod2 <- lm(sal ~ hi_rent * modality, data = ds_jobs_2)
+anova(null_mod2, full_mod2)</code></pre>
+    </div>
+
+    <div class="callout insight">
+      <strong>What the F-test tests:</strong> $H_0: \beta_{\text{remote}} = \beta_{\text{hi\_rent:remote}} = 0$ simultaneously. This asks: "Is modality irrelevant everywhere?" &mdash; which is the actual question we care about.
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Interaction Term Questions</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: Interpret each coefficient in the interaction model</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Setup (PQ2 Q4):</strong> <code>mod_int &lt;- lm(sal ~ hi_rent * modality, data = ds_jobs_2)</code></p>
+
+    <table class="ref-table">
+      <tr><th>Coefficient</th><th>Value</th></tr>
+      <tr><td>Intercept</td><td>74,000</td></tr>
+      <tr><td>hi_rentTRUE</td><td>21,000</td></tr>
+      <tr><td>modalityremote</td><td>6,500</td></tr>
+      <tr><td>hi_rentTRUE:modalityremote</td><td>9,800</td></tr>
+    </table>
+
+    <p><strong>Q4c &mdash; Interpret the intercept:</strong></p>
+    <div class="callout success">
+      "The predicted starting salary for an <strong>in-person</strong> job in a <strong>low-rent city</strong> (hi_rent = FALSE) is &#36;74,000."
+    </div>
+
+    <p><strong>Q4d &mdash; Interpret hi_rentTRUE:</strong></p>
+    <div class="callout success">
+      "Among <strong>in-person</strong> jobs, those located in high-rent cities are associated with a &#36;21,000 higher predicted starting salary than those in low-rent cities."
+    </div>
+
+    <p><strong>Q4e &mdash; Interpret modalityremote:</strong></p>
+    <div class="callout success">
+      "Among jobs in <strong>low-rent cities</strong>, remote positions are associated with a &#36;6,500 higher predicted starting salary than in-person positions."
+    </div>
+
+    <p><strong>Q4f &mdash; Interpret the interaction:</strong></p>
+    <div class="callout success">
+      "The salary advantage of being in a high-rent city is &#36;9,800 <strong>larger</strong> for remote jobs than for in-person jobs."
+    </div>
+
+    <div class="callout memorize">
+      <strong>Pattern for interaction interpretation:</strong><br>
+      Each main effect coefficient applies <strong>only when the other variable is at its reference level</strong>. The interaction tells you <strong>how much that effect changes</strong> for the non-reference group.
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: Write the fitted equation for a subgroup</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p><strong>PQ2 Q4b:</strong> Write the fitted equation for <strong>remote</strong> jobs only.</p>
+
+    <div class="worked">
+Full model:
+  sal_hat = 74000 + 21000*hi_rent + 6500*remote
+            + 9800*hi_rent*remote
+
+Plug in remote = 1:
+  sal_hat = 74000 + 21000*hi_rent + 6500(1)
+            + 9800*hi_rent(1)
+  sal_hat = (74000 + 6500) + (21000 + 9800)*hi_rent
+  sal_hat = 80500 + 30800 * hi_rentTRUE
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Using the same model, write the fitted equation for <strong>in-person</strong> jobs.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+        Plug in remote = 0:<br>
+        $\widehat{\text{sal}} = 74000 + 21000 \cdot \text{hi\_rentTRUE} + 6500(0) + 9800 \cdot \text{hi\_rent}(0)$<br>
+        $\widehat{\text{sal}} = 74000 + 21000 \cdot \text{hi\_rentTRUE}$<br><br>
+        The intercept stays at 74,000 and the slope stays at 21,000 &mdash; because in-person is the reference group.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: Why not just use the p-value? / Writing the correct F-test</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p><strong>PQ2 Q4g:</strong> The p-value for <code>modalityremote</code> is 0.038. Can we use this alone to decide if modality matters?</p>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "p = 0.038 < 0.05 so modality is significant."<br><br>
+        <span style="color:#e94560">Ignores that this p-value only tests modality at the reference level of hi_rent.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "The p-value of 0.038 is for the impact of modality <strong>only in low-rent locations</strong>, and we probably care about the impact of modality in <strong>all</strong> locations."
+      </div>
+    </div>
+
+    <p><strong>PQ2 Q4h &mdash; The correct approach:</strong> Use a partial F-test.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">f_test_modality.R</span></div>
+      <pre><code class="language-r"># Null model: modality doesn't matter at all
+null_mod2 <- lm(sal ~ hi_rent, data = ds_jobs_2)
+
+# Full model: modality matters (main effect + interaction)
+full_mod2 <- lm(sal ~ hi_rent * modality, data = ds_jobs_2)
+
+# F-test: H0: beta_remote = beta_hi_rent:remote = 0
+anova(null_mod2, full_mod2)</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Rule of thumb:</strong> When a variable appears in BOTH a main effect and an interaction, use <code>anova()</code> to test whether it matters overall. Don't rely on individual <code>summary()</code> p-values.
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Interaction Terms</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>A model is fit: <code>lm(gpa ~ hours_studied * tutor, data = students)</code> where <code>tutor</code> is "yes" or "no". The output shows: Intercept = 2.1, hours_studied = 0.15, tutoryes = 0.3, hours_studied:tutoryes = 0.08. Interpret the interaction coefficient (0.08) in context.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        The slope of hours_studied is <strong>0.08 higher</strong> for students with a tutor than for students without a tutor. In other words, each additional hour of study is associated with a 0.08 greater increase in GPA for tutored students compared to non-tutored students. The tutored group's slope is 0.15 + 0.08 = 0.23 per hour, while the non-tutored group's slope is 0.15 per hour.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>Using the same model from Q1, write the fitted equation for students who <strong>have</strong> a tutor (tutor = "yes").</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        Plug in tutoryes = 1:<br>
+        $\widehat{\text{gpa}} = (2.1 + 0.3) + (0.15 + 0.08) \cdot \text{hours\_studied}$<br>
+        $\widehat{\text{gpa}} = 2.4 + 0.23 \cdot \text{hours\_studied}$
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>In the salary model <code>lm(sal ~ hi_rent * modality)</code>, the coefficient for <code>hi_rentTRUE</code> is 21,000. A student says: "Being in a high-rent city is associated with &#36;21,000 higher salary for all jobs." What is wrong with this interpretation?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        The &#36;21,000 coefficient applies <strong>only to in-person jobs</strong> (the reference level of modality). Because there is an interaction term, the effect of hi_rent differs by modality. For remote jobs, the effect of being in a high-rent city is 21,000 + 9,800 = &#36;30,800. In an interaction model, each main effect coefficient only holds when the other variable is at its reference level.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>You fit <code>lm(sal ~ hi_rent * modality)</code> and the p-value for <code>modalityremote</code> in the <code>summary()</code> output is 0.12. A classmate says: "Modality is not significant, so we can drop it from the model." Explain why this reasoning is flawed and what they should do instead.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        The p-value of 0.12 only tests whether modality matters <strong>at the reference level of hi_rent</strong> (i.e., in low-rent cities only). Modality could still be important in high-rent cities via the interaction term. To properly test whether modality matters overall, use a <strong>partial F-test</strong>:<br><br>
+        <code>null_mod <- lm(sal ~ hi_rent, data = ds_jobs_2)</code><br>
+        <code>full_mod <- lm(sal ~ hi_rent * modality, data = ds_jobs_2)</code><br>
+        <code>anova(null_mod, full_mod)</code><br><br>
+        This tests $H_0: \beta_{\text{remote}} = \beta_{\text{hi\_rent:remote}} = 0$ simultaneously.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 11 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 11 &rarr; Go to Module 12</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod11_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod11_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[11]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-12.html'}
+loadState();
+</script>
+</body>
+</html>

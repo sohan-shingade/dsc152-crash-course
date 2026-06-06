@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 — Statistical vs Practical Significance</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  .scenario-box{background:#0f0f1a;border:2px solid #2a2a4a;border-radius:8px;padding:1rem;margin:0.6rem 0}
+  .scenario-box .label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:0.4rem}
+  .scenario-box .label.danger{color:#e94560}.scenario-box .label.caution{color:#ffbd2e}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-04.html">Module 4</a><span class="sep">/</span>
+  <span class="current">Module 5</span>
+  <a href="module-06.html" class="next-btn">Module 6 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 5 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Statistical vs Practical Significance</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">The core problem: significant &ne; important</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>Imagine a doctor tells you: "Lab results show your cholesterol is <em>statistically significantly</em> higher than normal." Scary, right?</p>
+    <p>Then they add: "It's 200.3 instead of 200.0."</p>
+    <p>Would you change your diet for a 0.3-point difference? Probably not. That's the whole point of this module.</p>
+
+    <div class="callout memorize">
+      <strong>The distinction:</strong><br>
+      <strong>Statistical significance</strong> = the p-value is small enough to reject $H_0$<br>
+      <strong>Practical (effect-size) significance</strong> = the actual difference is large enough to <em>matter</em> in the real world
+    </div>
+
+    <p>These are <strong>independent</strong>. You can have one without the other:</p>
+
+    <table class="ref-table">
+      <tr><th></th><th>Practically important</th><th>NOT practically important</th></tr>
+      <tr><td><strong>Statistically significant</strong></td><td style="color:#28c840">Best case: real and meaningful</td><td style="color:#e94560">TRAP: huge $n$ detects a useless difference</td></tr>
+      <tr><td><strong>NOT statistically significant</strong></td><td style="color:#ffbd2e">Possible: low power missed a real effect</td><td>Nothing here</td></tr>
+    </table>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">The bacon example (Lec 5)</h4>
+    <p>WHO study: eating processed meat increases colon cancer risk by 18%.</p>
+    <p>Sounds terrifying? The <strong>baseline risk</strong> is ~5%. An 18% increase means:</p>
+    <div class="worked">
+Baseline risk:   5.0%
+After processed meat: 5.0% &times; 1.18 = 5.9%
+Absolute increase: <strong>0.9 percentage points</strong>
+    </div>
+    <p>Compare: smoking increases lung cancer risk by <strong>1,500&ndash;3,000%</strong>. The meat finding is statistically significant (huge study, tiny p-value) but the practical impact is small.</p>
+
+    <div class="callout insight">
+      <strong>The p-value tells you WHETHER a difference exists. It does NOT tell you whether the difference is large enough to matter.</strong>
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">Why large $n$ causes the trap</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>Recall the t-statistic formula:</p>
+    <div class="eq-box">
+      $$t_s = \frac{\bar{x} - \mu_0}{s / \sqrt{n}}$$
+    </div>
+
+    <p>As $n$ gets huge, $s/\sqrt{n}$ gets <strong>tiny</strong>. So even a microscopic difference $\bar{x} - \mu_0$ produces a massive $t_s$, which gives a tiny p-value.</p>
+
+    <div class="scenario-box">
+      <div class="label danger">THE TRAP IN ACTION</div>
+      <p style="font-size:0.85rem">
+        $H_0: \mu = 20$, $n = 50{,}000$, $\bar{x} = 20.3$, $s = 15$<br><br>
+        $t_s = \frac{20.3 - 20}{15 / \sqrt{50000}} = \frac{0.3}{0.067} = 4.47$<br><br>
+        p-value $= 0.0001$ &rarr; <strong>Reject $H_0$!</strong><br><br>
+        But the actual difference is <strong>0.3 minutes</strong>. Nobody cares about 18 seconds.
+      </p>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Rule of thumb:</strong> When $n$ is very large, <strong>always check the confidence interval</strong> to see how big the effect actually is. A tight CI near the null value = statistically significant but practically meaningless.
+    </div>
+
+    <p>From the scenario above, 95% CI might be $(20.17, 20.43)$. The entire interval is within half a minute of 20. Operationally useless.</p>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">CIs tell you more than p-values</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>The p-value is binary: significant or not. The <strong>confidence interval</strong> shows you the <em>range of plausible values</em> for the true parameter.</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">Meaningful CI</h4>
+        $H_0: \mu = 20$<br>
+        95% CI: $(25.3, 34.7)$<br><br>
+        Excludes 20 &rarr; reject.<br>
+        True mean is 5&ndash;15 minutes higher. <strong>That matters.</strong>
+      </div>
+      <div class="compare-side" style="border-color:#5c2a2a">
+        <h4 style="color:#e94560">Useless CI</h4>
+        $H_0: \mu = 4.00$<br>
+        95% CI: (&#36;4.01, &#36;4.05)<br><br>
+        Excludes 4 &rarr; reject.<br>
+        True mean is 1&ndash;5 cents higher. <strong>Nobody cares.</strong>
+      </div>
+    </div>
+
+    <div class="callout insight">
+      Both CIs lead to rejecting $H_0$. But only one represents a difference worth acting on. <strong>The CI shows the effect size; the p-value doesn't.</strong>
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">The reverse: fail to reject &ne; no effect</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>Module 4 taught power. Here's where it connects:</p>
+
+    <div class="scenario-box">
+      <div class="label caution">SCENARIO FROM QUIZ 1 Q5b</div>
+      <p style="font-size:0.85rem">
+        Small pilot: $n = 12$ deliveries from Premium restaurants<br>
+        Sample mean tip: $\bar{x} = $ &#36;6.80 (vs $H_0: \mu = 4$)<br>
+        p-value: $0.11$ &rarr; <strong>Fail to reject at $\alpha = 0.05$</strong><br><br>
+        But &#36;6.80 is WAY above &#36;4.00! The sample mean is &#36;2.80 higher. That's a huge practical difference.
+      </p>
+    </div>
+
+    <p>So why didn't we reject? <strong>Low power.</strong> With only $n = 12$, we don't have enough data to detect the effect, even though it's probably real.</p>
+
+    <div class="callout warning">
+      <strong>"Fail to reject" does NOT mean "no difference exists."</strong> It means we don't have enough evidence. With small $n$, the test might just be too weak (low power) to detect a real difference.
+    </div>
+
+    <div class="callout memorize">
+      <strong>The two scenarios side by side:</strong><br><br>
+      <strong>Large $n$ + tiny effect + small p:</strong> "We reject $H_0$, but the difference may not be enough to act on." Check the CI.<br><br>
+      <strong>Small $n$ + large effect + big p:</strong> "We fail to reject $H_0$, but a larger sample size may be needed to determine whether there is a difference." Don't conclude there's no effect.
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Significance Questions</span>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Exam Q Type: "What concept does this illustrate?"</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p><strong>Real exam question (Practice Quiz 1 Q7b):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>The airport collects a large sample of $n = 50{,}000$ passengers and runs a t-test of $H_0: \mu = 20$ vs $H_A: \mu \neq 20$. Sample mean $\bar{x} = 20.3$, $s = 15$. The resulting p-value is 0.0001.</p>
+      <p>Despite the highly significant p-value, a manager argues that a 0.3-minute difference in average wait time is operationally meaningless for the airport. In 2&ndash;3 sentences, explain what concept this scenario illustrates and why the p-value alone can be misleading in large samples.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "The p-value is wrong because the difference is small."<br><br>
+        <span style="color:#e94560">The p-value isn't wrong &mdash; the test correctly detected a real (but tiny) difference. Missing the key term.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "This illustrates the distinction between <strong>statistical significance</strong> and <strong>practical (effect-size) significance</strong>. With a very large sample size, even a tiny true difference from the null value will produce a very small p-value, causing us to reject $H_0$. However, a 0.3-minute difference is negligible from an operational standpoint &mdash; it provides no meaningful guidance for improving passenger experience. The p-value tells us whether a difference exists, but not whether it is large enough to matter."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Wording keys for full marks:</strong><br>
+      1. Name the concept: <strong>"statistical significance vs practical (effect-size) significance"</strong><br>
+      2. Explain WHY: large $n$ makes tiny differences detectable<br>
+      3. Say the p-value tells you <strong>"whether"</strong> not <strong>"how much"</strong>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A hospital tests whether a new drug lowers blood pressure. With $n = 100{,}000$ patients, they find $\bar{x} = 119.8$ mmHg vs $H_0: \mu = 120$. p-value = 0.0003. The 95% CI is $(119.7, 119.9)$. Explain what concept this illustrates.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt5').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt5">
+        This illustrates the distinction between statistical significance and practical (effect-size) significance. With $n = 100{,}000$, even a 0.2 mmHg difference is detectable, producing a very small p-value. However, a 0.2 mmHg reduction is clinically negligible &mdash; the 95% CI of (119.7, 119.9) shows the true mean is at most 0.3 mmHg below 120, which would not change any treatment decisions. The p-value tells us a difference exists, but not whether it is large enough to matter.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "Select all that are true" &mdash; large $n$, tiny effect</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Real exam question (Quiz 1 Q5a):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>$n = 40{,}000$ deliveries. $H_0: \mu = 4$, $H_A: \mu \neq 4$.<br>
+      Sample mean tip = &#36;4.03, $s =$ &#36;1.60, p-value $= 0.0002$.<br>
+      95% CI = (&#36;4.01, &#36;4.05).</p>
+      <p>At $\alpha = 0.05$, select <strong>all</strong> that are true:</p>
+      <p style="padding-left:1rem">
+        &#9724; Since the p-value is extremely small, we reject $H_0$ at $\alpha = 0.05$<br>
+        &#9723; Since the sample mean is only &#36;0.03 away from the null hypothesis value, we actually do not reject $H_0$ at $\alpha = 0.05$ even though the p-value is small<br>
+        &#9724; Since the 95% confidence interval is very close to the null hypothesis value, the difference from &#36;4 may not be enough to act on even though we should reject $H_0$<br>
+        &#9723; Since the p-value is extremely small, this indicates that there is a meaningful difference from &#36;4 even though the estimated mean is not very different from &#36;4
+      </p>
+    </div>
+
+    <p><strong>Why each wrong answer is wrong:</strong></p>
+    <ul style="font-size:0.85rem;margin:0.4rem 0 0.4rem 1rem">
+      <li><strong>"We don't reject even though p is small"</strong> &mdash; WRONG. $p < \alpha$ means we ALWAYS reject. The decision rule is mechanical.</li>
+      <li><strong>"Meaningful difference"</strong> &mdash; WRONG. Small p-value does NOT mean meaningful. It means detectable. The CI shows it's only 1&ndash;5 cents.</li>
+    </ul>
+
+    <div class="callout warning">
+      <strong>TRAP:</strong> Students confuse "we should act on this" with "we should reject." They are DIFFERENT things.<br>
+      <strong>Always reject when $p < \alpha$.</strong> But then ask: is the effect large enough to care about?
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: "Fail to reject but large sample mean" &mdash; small $n$</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p><strong>Real exam question (Quiz 1 Q5b):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>A small pilot study of $n = 12$ deliveries from Premium restaurants finds a sample mean tip of &#36;6.80 with a p-value of 0.11 for the test $H_0: \mu = 4$ vs $H_A: \mu \neq 4$. Select <strong>all</strong> correct responses.</p>
+      <p style="padding-left:1rem">
+        &#9723; We reject $H_0$ at $\alpha = 0.05$ since the sample mean is so different from &#36;4<br>
+        &#9632; If the true mean tip is &#36;4 and the conditions of the test were met, then the probability of observing a tip that is at least &#36;6.80 or at most &#36;1.20 is 11%<br>
+        &#9723; We fail to reject $H_0$ at $\alpha = 0.05$ and should end the investigation here, concluding that there is no meaningful difference from &#36;4<br>
+        &#9632; The result indicates that a larger sample size may be needed to determine whether there is a difference from &#36;4.
+      </p>
+    </div>
+
+    <p><strong>Why each wrong answer is wrong:</strong></p>
+    <ul style="font-size:0.85rem;margin:0.4rem 0 0.4rem 1rem">
+      <li><strong>"Reject because sample mean is far"</strong> &mdash; WRONG. We compare p-value to $\alpha$, not the sample mean to the null. $0.11 > 0.05$ means fail to reject.</li>
+      <li><strong>"End the investigation"</strong> &mdash; WRONG. Fail to reject $\neq$ no difference. With $n = 12$, the test has low power. The &#36;2.80 difference might be real but undetectable at this sample size.</li>
+    </ul>
+
+    <div class="callout memorize">
+      <strong>Key wording (Quiz 1 Q5b answer key):</strong><br>
+      "The result indicates that <strong>a larger sample size may be needed</strong> to determine whether there is a difference from &#36;4."<br><br>
+      This is the correct response when you fail to reject with small $n$ but see a large sample mean difference.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A pilot study with $n = 8$ patients tests $H_0: \mu = 120$ (blood pressure). Sample mean = 135, p-value = 0.09. A colleague says "we failed to reject, so the drug doesn't work." What's wrong with this conclusion?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+        Failing to reject $H_0$ does not mean the drug has no effect. With only $n = 8$, the test has low power &mdash; it may simply be too weak to detect the 15-point difference. The sample mean of 135 is substantially above 120, suggesting a real effect might exist. A larger sample size may be needed to determine whether there is a true difference.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Statistical vs Practical Significance</span>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>In one sentence, explain the difference between statistical significance and practical significance. Then: which one does the p-value measure?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        <strong>Statistical significance</strong> means the p-value is below $\alpha$, indicating sufficient evidence to reject $H_0$. <strong>Practical significance</strong> means the detected difference is large enough to matter in the real world. The p-value measures statistical significance only &mdash; it tells you whether a difference exists, not whether it's large enough to be useful.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>A company tests $H_0: \mu = 50$ with $n = 200{,}000$. They get $\bar{x} = 50.01$, $p = 0.00004$, 95% CI $= (50.005, 50.015)$.</p>
+      <p>(a) What is the decision at $\alpha = 0.05$?<br>
+      (b) Should the company act on this finding? Why or why not?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        (a) Reject $H_0$ since $p = 0.00004 < 0.05$.<br>
+        (b) Probably not. The 95% CI is $(50.005, 50.015)$ &mdash; the true mean is at most 0.015 units above 50. This is a statistically significant but practically negligible difference. The huge sample size made this tiny effect detectable, but the effect is too small to have any real-world impact.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>A study with $n = 15$ tests $H_0: \mu = 30$ and gets $\bar{x} = 42$, $p = 0.08$. True or false: "Since we fail to reject at $\alpha = 0.05$, we can conclude the true mean is 30." Explain.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        <strong>False.</strong> Failing to reject $H_0$ does not mean $H_0$ is true. With $n = 15$, the test likely has low power, so it may simply be unable to detect the difference. The sample mean of 42 is 12 units above the null value, which suggests a potentially large real effect. A larger sample size may be needed to determine whether there is a true difference from 30.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>Match each scenario to the correct interpretation:</p>
+      <p style="font-size:0.82rem;padding-left:0.5rem">
+        <strong>A:</strong> $n = 500{,}000$, $\bar{x} = 100.002$, $H_0: \mu = 100$, $p = 0.0001$<br>
+        <strong>B:</strong> $n = 10$, $\bar{x} = 115$, $H_0: \mu = 100$, $p = 0.12$
+      </p>
+      <p style="font-size:0.82rem;padding-left:0.5rem">
+        (i) "Larger sample needed to determine if difference exists"<br>
+        (ii) "Reject, but difference may not be enough to act on"
+      </p>
+      <textarea class="fr-input" rows="1"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <strong>A &rarr; (ii)</strong>: Reject $H_0$ (tiny p), but $\bar{x}$ is only 0.002 above 100. Statistically significant, not practically significant.<br>
+        <strong>B &rarr; (i)</strong>: Fail to reject (p = 0.12 > 0.05), but $\bar{x} = 115$ is 15 units above null. Low power from $n = 10$. A larger sample may be needed.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Module 5 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 5 &rarr; Quiz 1 Checkpoint</button>
+
+</div>
+
+<script>
+const TOTAL=8;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod5_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod5_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[5]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='course.html'}
+loadState();
+</script>
+</body>
+</html>

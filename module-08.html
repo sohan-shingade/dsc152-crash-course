@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8 — Multiple Regression &amp; "Holding Constant"</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-07.html">Module 7</a><span class="sep">/</span>
+  <span class="current">Module 8</span>
+  <a href="module-09.html" class="next-btn">Module 9 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 8 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Multiple Regression &amp; "Holding Constant"</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">Why multiple regression &mdash; controlling for confounders</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>In Module 6 you learned that confounders can create fake relationships in observational data. In Module 7 you fit a simple regression with one predictor. But what if that one predictor is tangled up with other variables?</p>
+
+    <p><strong>Multiple regression</strong> lets you include multiple predictors so you can estimate the effect of one variable <em>while controlling for the others</em>.</p>
+
+    <div class="callout insight">
+      <strong>Classic example (from lecture):</strong> A naive comparison shows smokers have <em>higher</em> lung capacity (FEV) than non-smokers. That seems backwards! But older children are more likely to smoke AND have bigger lungs. Age is a confounder. Once you add age to the model, the smoking effect flips to negative &mdash; as expected.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#5c2a2a">
+        <h4 style="color:#e94560">Simple regression (misleading)</h4>
+        <code>lm(fev ~ smoke)</code><br>
+        <span style="font-size:0.8rem">Smoking coefficient: <strong>+0.71</strong></span><br>
+        <span style="font-size:0.78rem;color:#888">Looks like smoking helps lungs?!</span>
+      </div>
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">Multiple regression (correct)</h4>
+        <code>lm(fev ~ smoke + age)</code><br>
+        <span style="font-size:0.8rem">Smoking coefficient: <strong>&minus;0.21</strong></span><br>
+        <span style="font-size:0.78rem;color:#888">After controlling for age, smoking hurts</span>
+      </div>
+    </div>
+
+    <p>This is why multiple regression matters &mdash; it helps you untangle confounded relationships.</p>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">The multiple regression model</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <div class="eq-box">
+      $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \ldots$$
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Symbol</th><th>Name</th><th>What it represents</th></tr>
+      <tr><td>$\hat{\beta}_0$</td><td>Intercept</td><td>Predicted $y$ when ALL predictors = 0</td></tr>
+      <tr><td>$\hat{\beta}_1$</td><td>Slope for $x_1$</td><td>Change in $y$ per 1-unit increase in $x_1$, <strong>holding all other predictors constant</strong></td></tr>
+      <tr><td>$\hat{\beta}_2$</td><td>Slope for $x_2$</td><td>Change in $y$ per 1-unit increase in $x_2$, <strong>holding all other predictors constant</strong></td></tr>
+    </table>
+
+    <div class="callout memorize">
+      <strong>The big difference from simple regression:</strong> Each coefficient now has the phrase "holding all other predictors constant" attached to it. This is the single most important idea in this module.
+    </div>
+
+    <p><strong>Example (FEV data):</strong></p>
+    <div class="worked">
+&hat;y = 0.37 + (&minus;0.21) &middot; smoke + 0.23 &middot; age
+
+&beta;&#770;<sub>1</sub> = &minus;0.21 &rarr; Smoking is associated with
+  a 0.21 L decrease in FEV, holding age constant.
+
+&beta;&#770;<sub>2</sub> = 0.23 &rarr; Each additional year of age is
+  associated with a 0.23 L increase in FEV,
+  holding smoking status constant.
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">R code: adding predictors with +</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">multiple_regression.R</span></div>
+      <pre><code class="language-r"># Simple regression (one predictor)
+mod_simple <- lm(fev ~ smoke, data = FEV)
+
+# Multiple regression (two predictors)
+mod_adj <- lm(fev ~ smoke + age, data = FEV)
+
+# View the full summary
+summary(mod_adj)</code></pre>
+    </div>
+
+    <p>Adding a predictor is literally just adding <code>+ variable_name</code> to the formula. You can add as many as you want:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">more_predictors.R</span></div>
+      <pre><code class="language-r"># Three predictors
+lm(fev ~ smoke + age + height, data = FEV)
+
+# ds_jobs example from PQ2
+mod_adj <- lm(sal ~ emp_n + loc_type, data = ds_jobs)</code></pre>
+    </div>
+
+    <div class="callout warning">
+      <strong>Common mistake:</strong> Writing <code>lm(fev ~ smoke * age)</code> instead of <code>lm(fev ~ smoke + age)</code>. The <code>*</code> adds an interaction term, which is a different (more advanced) model. For this class, use <code>+</code> to add predictors.
+    </div>
+
+    <div class="callout insight">
+      <strong>Reading the output:</strong> The <code>summary()</code> table works the same as Module 7 &mdash; Estimate, Std. Error, t value, Pr(>|t|) &mdash; but now there's a row for each predictor. Each row's p-value tests whether that specific coefficient is zero, holding the other predictors in the model.
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">"Holding constant" interpretation &mdash; the key exam phrase</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>This is the most heavily tested concept from Lecture 8. You WILL see a question asking you to interpret a coefficient from a multiple regression.</p>
+
+    <div class="callout memorize">
+      <strong>"Holding constant" interpretation template:</strong><br>
+      "For every 1-unit increase in $x_1$, $y$ changes by $\hat{\beta}_1$, on average, <strong>holding $x_2$ constant</strong>."<br><br>
+      Alternative phrasing (equally correct):<br>
+      "...among [subjects] with the <strong>same</strong> value of $x_2$."
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "Smoking decreases FEV by 0.21 liters."<br><br>
+        <span style="color:#e94560">Missing "holding age constant"! Also says "decreases" (causal) instead of "associated with."</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "Smoking is associated with an average decrease in FEV of 0.21 liters, <strong>holding age constant</strong>."<br><br>
+        Or equivalently: "...when comparing children <strong>of the same age</strong>."
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>In <code>lm(sal ~ emp_n + loc_type, data = ds_jobs)</code>, the coefficient for <code>emp_n</code> is 0.85. Interpret it.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt4">
+        Every 1-unit increase in the number of employees is associated with an average difference in starting salary of &#36;0.85, <strong>holding location type constant</strong> (i.e., among companies with the same location type).
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Why coefficients change &mdash; Simpson's paradox &amp; confounding</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>When you add a variable to a regression, the other coefficients often change. Sometimes they even <strong>flip sign</strong>. This happens because the new variable was confounding the original relationship.</p>
+
+    <div class="callout memorize">
+      <strong>Simpson's Paradox:</strong> A trend that appears in the overall data <strong>reverses</strong> when you split the data into groups (or add a grouping variable to the model). It's the most dramatic version of confounding.
+    </div>
+
+    <p><strong>FEV example:</strong></p>
+    <div class="worked">
+Simple:  lm(fev ~ smoke)       &rarr; smoke = +0.71
+Multiple: lm(fev ~ smoke + age) &rarr; smoke = &minus;0.21
+
+The sign FLIPPED! Why?
+  &bull; Older kids smoke more (age &harr; smoke)
+  &bull; Older kids have bigger lungs (age &harr; fev)
+  &bull; Age confounds the smoke-fev relationship
+  &bull; Once we control for age, smoking hurts
+    </div>
+
+    <p><strong>Penguin example from lecture (also Simpson's Paradox):</strong></p>
+    <div class="callout insight">
+      <strong>Overall:</strong> Beak length and beak depth are <em>negatively</em> correlated. But <strong>within each species</strong>, they're <em>positively</em> correlated. Species is the confounder &mdash; different species have very different beak shapes, masking the true within-species relationship.
+    </div>
+
+    <p>Bottom line: coefficients change because the model is now separating the effect of each predictor instead of lumping them together.</p>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Multiple Regression Questions (Practice Quiz 2)</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">PQ2 Q2a: What makes a variable a confounder?</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Practice Quiz 2, Question 2a:</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>What conditions must be met for a variable to be a confounder in the relationship between X and Y?</p>
+    </div>
+
+    <div class="callout success">
+      <strong>Answer key (exact wording):</strong><br>
+      A confounder "must be associated with <strong>both</strong> the primary predictor AND the outcome."
+    </div>
+
+    <div class="callout memorize">
+      <strong>The two-check test:</strong><br>
+      1. Is the variable associated with X (the predictor)? <br>
+      2. Is the variable associated with Y (the outcome)?<br><br>
+      <strong>Both must be YES</strong> for it to be a confounder. If it's only related to one, it's not a confounder.
+    </div>
+
+    <p><strong>Example:</strong> Is <code>loc_type</code> a confounder in the relationship between <code>emp_n</code> and <code>sal</code>?</p>
+    <div class="worked">
+Check 1: Is loc_type related to emp_n?
+  &rarr; Yes: urban areas have bigger companies &check;
+
+Check 2: Is loc_type related to sal?
+  &rarr; Yes: urban areas have higher salaries &check;
+
+Both checks pass &rarr; loc_type IS a confounder
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>In a study of the relationship between exercise (<code>exercise_hrs</code>) and weight (<code>weight</code>), is <code>diet_quality</code> a potential confounder? Apply the two-check test.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+        Check 1: Is diet_quality associated with exercise_hrs? Yes &mdash; people who exercise more tend to eat healthier.<br>
+        Check 2: Is diet_quality associated with weight? Yes &mdash; better diet is associated with lower weight.<br>
+        Both checks pass, so diet_quality is a potential confounder.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">PQ2 Q2b: Writing simple vs adjusted regression code</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p><strong>Practice Quiz 2, Question 2b:</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Write R code for (1) a simple regression predicting <code>sal</code> from <code>emp_n</code>, and (2) an adjusted model that also controls for <code>loc_type</code>.</p>
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">pq2_q2b.R</span></div>
+      <pre><code class="language-r"># Simple regression (unadjusted)
+mod_simple <- lm(sal ~ emp_n, data = ds_jobs)
+
+# Adjusted model (controlling for loc_type)
+mod_adj <- lm(sal ~ emp_n + loc_type, data = ds_jobs)</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Interpreting the adjusted slope:</strong><br>
+      If the coefficient for <code>emp_n</code> in <code>mod_adj</code> is 0.85, you say:<br><br>
+      "Every 1-unit increase in number of employees is associated with an average difference in starting salary of &#36;0.85, <strong>holding location type constant</strong>."<br><br>
+      Or equivalently: "...among companies with the <strong>same number of employees</strong>."
+    </div>
+
+    <div class="callout insight">
+      <strong>Why "adjusted"?</strong> The second model "adjusts for" or "controls for" <code>loc_type</code>. This means it compares salaries across companies of different sizes <em>within the same location type</em>, removing the confounding influence of urban vs rural.
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Interpreting adjusted vs simple slopes &mdash; full walkthrough</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p>The exam loves asking you to compare the simple and adjusted models side by side.</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Simple: lm(sal ~ emp_n)</h4>
+        <span style="font-size:0.8rem"><code>emp_n</code> slope: 1.50</span><br>
+        <span style="font-size:0.78rem;color:#888">Interpretation: Every 1-unit increase in company size is associated with &#36;1.50 higher salary.</span>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Adjusted: lm(sal ~ emp_n + loc_type)</h4>
+        <span style="font-size:0.8rem"><code>emp_n</code> slope: 0.85</span><br>
+        <span style="font-size:0.78rem;color:#888">Interpretation: Every 1-unit increase in company size is associated with &#36;0.85 higher salary, <strong>holding loc_type constant</strong>.</span>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Why did the coefficient shrink from 1.50 to 0.85?</strong><br>
+      Because part of the original relationship was due to confounding by <code>loc_type</code>. Bigger companies tend to be in urban areas, and urban areas have higher salaries. The simple model was giving <code>emp_n</code> credit for the salary bump that was actually due to location.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A simple regression of GPA on study hours gives a slope of 0.30. After adding <code>motivation_score</code> as a second predictor, the slope for study hours drops to 0.12. Explain why the coefficient changed.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        Motivation is a confounder &mdash; it is associated with both study hours (more motivated students study more) and GPA (more motivated students earn higher grades). In the simple model, study hours was getting "credit" for the GPA boost that was actually driven by motivation. Once we control for motivation, the remaining effect of study hours shrinks to 0.12.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Multiple Regression</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1 &mdash; "Holding Constant" Interpretation</div>
+      <p>In the model <code>lm(fev ~ smoke + age, data = FEV)</code>, the coefficient for <code>smoke</code> is &minus;0.209. Interpret this coefficient in context.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        Smoking is associated with an average decrease in FEV of 0.209 liters, <strong>holding age constant</strong> (i.e., when comparing children of the same age).
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2 &mdash; Confounder Definition</div>
+      <p>A researcher studies the relationship between screen time (<code>screen_hrs</code>) and sleep quality (<code>sleep_score</code>). A classmate suggests that <code>caffeine_intake</code> is a confounder. What two conditions must <code>caffeine_intake</code> satisfy to be a confounder?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        To be a confounder, <code>caffeine_intake</code> must be associated with <strong>both</strong>:<br>
+        1. The predictor (<code>screen_hrs</code>) &mdash; e.g., people who drink more caffeine may have more screen time<br>
+        2. The outcome (<code>sleep_score</code>) &mdash; e.g., caffeine directly disrupts sleep quality<br>
+        Both conditions must hold.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3 &mdash; Writing Multiple Regression Code</div>
+      <p>Data is in <code>housing_df</code> with columns <code>price</code>, <code>sqft</code>, and <code>bedrooms</code>. Write R code for: (a) a simple regression predicting <code>price</code> from <code>sqft</code>, and (b) an adjusted model that also controls for <code>bedrooms</code>.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        (a) <code>mod_simple &lt;- lm(price ~ sqft, data = housing_df)</code><br>
+        (b) <code>mod_adj &lt;- lm(price ~ sqft + bedrooms, data = housing_df)</code>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4 &mdash; Why Coefficients Change</div>
+      <p>In a simple regression of test scores on class size, the slope for class size is &minus;2.5 (bigger classes, lower scores). After adding <code>school_funding</code> to the model, the slope for class size changes to &minus;0.8. Explain why the coefficient changed and what this tells you about <code>school_funding</code>.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <code>school_funding</code> is a confounder: it is associated with both class size (schools with less funding have larger classes) and test scores (less funding means fewer resources and lower scores). In the simple model, class size was getting "blame" for the score drop that was actually due to low funding. After controlling for funding, the remaining effect of class size shrinks from &minus;2.5 to &minus;0.8, meaning much of the original association was driven by the confounding effect of school funding.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 8 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 8 &rarr; Go to Module 9</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod8_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod8_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[8]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-09.html'}
+loadState();
+</script>
+</body>
+</html>

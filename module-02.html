@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 — Type I Error & When Tests Break</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+
+  /* Sim viz */
+  .sim-viz{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:8px;padding:1rem;margin:0.6rem 0;text-align:center}
+  .sim-viz canvas{display:block;margin:0 auto}
+  .sim-viz .caption{font-size:0.7rem;color:#888;margin-top:0.3rem}
+
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">← Course</a><span class="sep">/</span>
+  <a href="module-01.html">Module 1</a><span class="sep">/</span>
+  <span class="current">Module 2</span>
+  <a href="#" class="next-btn" id="nextBtn">Module 3 →</a>
+</div>
+<div class="mod-progress">
+  <span>Module 2 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Type I Error & When Tests Break</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">What IS a Type I Error? (The fire alarm analogy)</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>There are two ways to be wrong in hypothesis testing:</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-top:3px solid #e94560">
+        <h4 style="color:#e94560">Type I Error (False alarm)</h4>
+        <p>You reject $H_0$ when $H_0$ is actually true.</p>
+        <p>Like a fire alarm going off when there's no fire.</p>
+        <p><strong>Rate should equal $\alpha$</strong> (usually 0.05).</p>
+      </div>
+      <div class="compare-side" style="border-top:3px solid #4a9eff">
+        <h4 style="color:#4a9eff">Type II Error (Missed fire)</h4>
+        <p>You fail to reject $H_0$ when $H_0$ is actually false.</p>
+        <p>Like a fire alarm NOT going off when there IS a fire.</p>
+        <p><strong>Related to power:</strong> Power $= 1 - P(\text{Type II})$.</p>
+      </div>
+    </div>
+
+    <p>This module focuses on Type I Error — specifically, what happens when a test's Type I Error rate <strong>isn't actually $\alpha$</strong>.</p>
+
+    <div class="callout insight">
+      <strong>Validity:</strong> A test is "valid" when its actual Type I Error rate equals $\alpha$. An invalid test is like a broken fire alarm — it goes off too much (inflated) or not enough (deflated).
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">When the t-test breaks: skewed data + small $n$</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>The t-test assumes the sampling distribution of $\bar{x}$ is bell-shaped. This is true when:</p>
+    <ul>
+      <li>The data itself is normally distributed (any $n$), OR</li>
+      <li>$n$ is large enough for the Central Limit Theorem to kick in (roughly $n \geq 30$)</li>
+    </ul>
+    <p>What if neither is true? Say you have $n = 5$ from a right-skewed distribution like the Gamma:</p>
+
+    <div class="sim-viz">
+      <canvas id="skewViz" width="600" height="180"></canvas>
+      <div class="caption">Left: Normal distribution (symmetric). Right: Gamma distribution (right-skewed). With $n = 5$, the t-test assumes the left shape but gets the right shape.</div>
+    </div>
+
+    <p>Think of it like a metal detector calibrated for a flat beach. Take it to a rocky beach and it beeps more often — not because there's more metal, but because <strong>the calibration is wrong for this terrain</strong>.</p>
+
+    <p>The t-test's "calibration" (the $t$-distribution) assumes symmetry. Skewed data makes extreme $t_s$ values more common than the $t$-distribution expects. So the test says "significant!" more often than it should.</p>
+
+    <div class="callout warning">
+      <strong>Result:</strong> With skewed data and small $n$, the Type I Error rate is <strong>inflated above $\alpha$</strong>. Lecture simulations: Gamma data, $n = 5$, $\alpha = 0.05$ → actual Type I Error ≈ <strong>0.10–0.11</strong>. That's double!
+    </div>
+
+    <p>Why does large $n$ fix it? The CLT says: no matter what the data distribution looks like, $\bar{x}$ becomes approximately normal for large $n$. The rocky beach gets smoothed out.</p>
+
+    <div class="callout memorize">
+      <strong>Memorize the direction:</strong> skewed data + small $n$ → Type I Error <strong>INFLATED</strong> (too many false alarms, rejects too often). Not deflated. This tripped you up on the diagnostic.
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">The Type I Error simulation — the pattern you'll use forever</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>How do you <em>measure</em> a test's Type I Error rate? You can't do it with one dataset. You need a simulation:</p>
+
+    <ol>
+      <li>Generate data where <strong>$H_0$ is TRUE</strong> (you know the right answer)</li>
+      <li>Run the test, get the p-value</li>
+      <li>Check: did the test reject? (p-value $< \alpha$?)</li>
+      <li>Repeat 10,000 times</li>
+      <li>Proportion of rejections = estimated Type I Error rate</li>
+    </ol>
+
+    <p>If the test is valid, this proportion should be ≈ $\alpha$. If it's inflated (like 0.10 when $\alpha = 0.05$), the test is broken.</p>
+
+    <p>Here's the code, annotated line by line:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">type1_error_sim.R</span></div>
+      <pre><code class="language-r"># GOAL: Check if t-test has correct Type I Error rate
+# for Gamma(shape=1.2, scale=5) data with n=5
+
+count <- 0                        # counter for rejections
+
+for (i in 1:10000) {              # repeat 10,000 times
+
+  # Step 1: Generate data under H0 TRUE
+  # Gamma with shape=1.2, scale=5 has mean = 1.2 * 5 = 6
+  # We test H0: mu = 6, so H0 IS true here
+  samp <- rgamma(n = 5, shape = 1.2, scale = 5)
+
+  # Step 2: Run the test, extract p-value
+  p.val <- t.test(samp, mu = 6)$p.value
+
+  # Step 3: Did it (incorrectly) reject?
+  if (p.val < 0.05) {
+    count <- count + 1            # false alarm!
+  }
+}
+
+# Step 4: Proportion of false alarms
+TypeI <- count / 10000            # should be ~0.05 if test is valid
+                                  # actual result: ~0.10 (INFLATED!)</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>The key line is the mean.</strong> In a Type I Error simulation, you generate data where $H_0$ IS true. So the mean of your generated data EQUALS the null value. If the question says $H_0: \mu = 6$, you generate data with mean $= 6$.<br><br>
+      Contrast with power simulation (Module 4): there you generate data with mean $\neq$ null value because $H_A$ is true.
+    </div>
+
+    <div class="callout insight">
+      <strong>Lecture results (memorize these):</strong>
+      <table class="ref-table" style="margin-top:0.4rem">
+        <tr><th>Distribution</th><th>$n$</th><th>Actual Type I Error</th><th>Valid?</th></tr>
+        <tr><td>Normal</td><td>5</td><td>≈ 0.05</td><td style="color:#28c840">✓ Yes</td></tr>
+        <tr><td>Gamma (skewed)</td><td>5</td><td>≈ 0.10–0.11</td><td style="color:#e94560">✗ Inflated</td></tr>
+        <tr><td>Uniform</td><td>5</td><td>≈ 0.06–0.07</td><td style="color:#ffbd2e">~ Slightly</td></tr>
+      </table>
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Parametric vs non-parametric: what these words actually mean</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <div class="compare">
+      <div class="compare-side" style="border-top:3px solid #e94560">
+        <h4 style="color:#e94560">Parametric (e.g., t-test)</h4>
+        <p>Relies on <strong>distributional assumptions</strong> (normality) for the math to work.</p>
+        <p><strong>Pro:</strong> More powerful when conditions met — uses the shape of the distribution to squeeze out more information.</p>
+        <p><strong>Con:</strong> Can break (inflated Type I Error) when assumptions are violated.</p>
+      </div>
+      <div class="compare-side" style="border-top:3px solid #28c840">
+        <h4 style="color:#28c840">Non-parametric (e.g., sign test, permutation, bootstrap)</h4>
+        <p>Does NOT assume a specific distribution.</p>
+        <p><strong>Pro:</strong> Works for any data distribution — no normality needed.</p>
+        <p><strong>Con:</strong> Less powerful (harder to detect real effects). Sign test also has the discreteness problem (Module 3).</p>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Common trap:</strong> "Non-parametric = always better" — WRONG. Non-parametric tests have <strong>less power</strong> when the parametric conditions actually hold. HW1 showed: t-test power ≈ 0.75 vs sign test power ≈ 0.55 on normal data. You're trading power for robustness.
+    </div>
+
+    <div class="callout warning">
+      <strong>Another trap:</strong> "Bootstrap is non-parametric, so it guarantees correct Type I Error." — WRONG. Bootstrap CIs can have inflated or deflated Type I Error, especially for small samples. Non-parametric $\neq$ guaranteed valid.
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 5: Bootstrap Type I Error -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Bootstrap CIs: how they work and why they're not bulletproof</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>A bootstrap CI is a non-parametric way to build a confidence interval:</p>
+    <ol>
+      <li>Resample your data WITH replacement (same size as original)</li>
+      <li>Compute the mean of the resample</li>
+      <li>Repeat 10,000 times → you get 10,000 "bootstrap means"</li>
+      <li>Take the 2.5th and 97.5th percentiles → 95% CI</li>
+    </ol>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bootstrap_ci.R</span></div>
+      <pre><code class="language-r"># Build bootstrap 95% CI
+boot_means <- replicate(10000, mean(sample(data, replace = TRUE)))
+ci <- quantile(boot_means, probs = c(0.025, 0.975))
+
+# Decision: if null value is OUTSIDE the CI → reject H0
+# If null value is INSIDE the CI → fail to reject</code></pre>
+    </div>
+
+    <p><strong>How to use it as a hypothesis test:</strong> If $\mu_0$ is outside the 95% CI → reject $H_0$ at $\alpha = 0.05$. If inside → fail to reject.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e;">How to check bootstrap Type I Error (asked on Quiz 1)</h4>
+    <p>Same simulation idea as the t-test, but now you build a CI instead of computing a p-value:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">bootstrap_type1.R</span></div>
+      <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  # Generate under H0 TRUE (mean = 20)
+  samp <- rnorm(n = 10, mean = 20, sd = 5)
+
+  # Build bootstrap CI
+  boot_means <- replicate(5000, mean(sample(samp, replace = TRUE)))
+  ci <- quantile(boot_means, probs = c(0.025, 0.975))
+
+  # Check: does CI (incorrectly) exclude 20?
+  if (20 < ci[1] || 20 > ci[2]) {
+    count <- count + 1    # false rejection
+  }
+}
+type1_boot <- count / 10000</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>From Quiz 1 answer key:</strong> "The bootstrap can have an inflated or deflated Type I error rate. The accuracy of bootstrap confidence intervals relies on the sample being an accurate representation of the population, which is not always the case."
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: How Type I Error Gets Tested</span>
+</div>
+
+<!-- Step 6: Fill-in-blanks sim -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Question Type: "Fill in the simulation blanks"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <div class="callout insight">
+      <strong>📋 Real question (Quiz 1, Q1g):</strong><br>
+      Fill in blanks for a Type I Error simulation. Gamma data, true mean = 4, $\alpha = 0.10$.
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">quiz1_q1g.R</span></div>
+      <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rgamma(n = 6, shape = 2, scale = ___(a)___)
+  p.val <- t.test(samp, mu = ___(b)___)$___(c)___
+  if (___(d)___) {
+    count <- count + 1
+  }
+}
+TypeI <- ___(e)___</code></pre>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Common mistakes</h4>
+        <p>(a) Writing just "2" — need to make the mean equal the null value. Mean = shape × scale = 2 × scale, so scale = 4/2 = 2.</p>
+        <p>(c) Writing <code>$p</code> or <code>$pvalue</code> instead of <code>$p.value</code></p>
+        <p>(d) Using <code>0.05</code> when the question says $\alpha = 0.10$</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ Full-marks answers</h4>
+        <p>(a) <code>4/2</code> or <code>2</code> — so mean = shape × scale = 2 × 2 = 4</p>
+        <p>(b) <code>4</code> — the null value (= true mean for Type I Error sim)</p>
+        <p>(c) <code>p.value</code></p>
+        <p>(d) <code>p.val < 0.10</code> — use the $\alpha$ from the question!</p>
+        <p>(e) <code>count / 10000</code></p>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Fill-in-blank checklist (use every time):</strong><br>
+      1. What is the true mean? (shape × scale for Gamma, mean arg for Normal)<br>
+      2. Does the null value in <code>t.test(mu = ___)</code> match the true mean? (Type I Error: YES. Power: NO.)<br>
+      3. Is the $\alpha$ in the <code>if</code> statement what the question says? (Not always 0.05!)<br>
+      4. Is the accessor exactly <code>$p.value</code>?
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>Fill in blanks: Uniform data on $[0, 12]$ (true mean $= 6$), $n = 8$, $\alpha = 0.05$.</p>
+      <div class="r-editor">
+        <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">your_turn.R</span></div>
+        <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- runif(n = ___, min = ___, max = ___)
+  p.val <- t.test(samp, mu = ___)$___
+  if (p.val < ___) {
+    count <- count + 1
+  }
+}
+TypeI <- ___</code></pre>
+      </div>
+      <button class="reveal-btn" onclick="document.getElementById('a6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="a6">
+        <code>n = 8</code>, <code>min = 0</code>, <code>max = 12</code> (mean = (0+12)/2 = 6)<br>
+        <code>mu = 6</code>, <code>$p.value</code>, <code>0.05</code>, <code>count / 10000</code>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 7: What happens when conditions violated -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Question Type: "What happens to Type I Error?"</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <div class="callout insight">
+      <strong>📋 Real question (Quiz 1, Q1f):</strong><br>
+      Tip amounts are highly right-skewed. $n = 6$, $\alpha = 0.10$. What happens to the actual Type I Error rate?
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Wrong</h4>
+        <p>"It stays at 0.10 because we set alpha = 0.10."</p>
+        <p>"It is deflated below 0.10."</p>
+        <p style="color:#e94560;font-size:0.78rem;">$\alpha$ is what you WANT. Actual Type I Error is what you GET. They're not the same when conditions are violated. And skewed + small $n$ → inflated, not deflated.</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ Full marks (from answer key)</h4>
+        <p>"The Type I Error rate is <strong>likely to be inflated over 0.10</strong>."</p>
+        <p style="color:#28c840;font-size:0.78rem;">Why: the normality condition is violated (right-skewed, $n$ too small for CLT), so the $t$-distribution doesn't match the actual sampling distribution. The test rejects more often than it should.</p>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>The sentence:</strong> "The Type I Error rate is likely to be inflated above $\alpha$ because the normality condition is violated and $n$ is too small for CLT."<br><br>
+      This exact pattern appears on Quiz 1 and Practice Quiz 1. Memorize the direction: skewed + small $n$ = <strong>INFLATED</strong>.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>Wait times are right-skewed. $n = 5$, $\alpha = 0.05$. The colleague says: "I ran a t-test and got $p = 0.04$, so I reject $H_0$." What's the problem?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('a7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="a7">
+        The t-test's Type I Error rate is likely inflated above 0.05 because the data is right-skewed and $n = 5$ is too small for CLT. The $p = 0.04$ may not be trustworthy — the test may be rejecting more often than 5% of the time under $H_0$, so what looks like a significant result could just be the test's broken calibration.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 8: Bootstrap trap -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Question Type: "Is bootstrap guaranteed correct?"</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <div class="callout insight">
+      <strong>📋 Real question (Quiz 1, Q3c):</strong><br>
+      A colleague claims: "Bootstrap CIs are guaranteed to have 0.05 Type I Error because bootstrap is non-parametric." Select all correct responses.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Trap answer</h4>
+        <p>"Correct — bootstrap makes no distributional assumptions, so it works perfectly."</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ From Quiz 1 answer key</h4>
+        <p>"The bootstrap <strong>can have an inflated or deflated Type I error rate</strong>."</p>
+        <p>"The accuracy of bootstrap confidence intervals <strong>relies on the sample being an accurate representation of the population</strong>, which is not always the case."</p>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Why bootstrap can fail:</strong> Bootstrap resamples from your sample. If your sample is small or doesn't represent the population well (e.g., you missed the tail of a skewed distribution), the bootstrap CI inherits that problem. Non-parametric ≠ assumption-free. The assumption is that your sample looks like the population.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>How would you CHECK whether a bootstrap CI has correct Type I Error rate? Describe the simulation in 3 steps.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('a8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="a8">
+        1. Repeatedly generate samples where $H_0$ is true (e.g., <code>rnorm(n, mean = 20, sd = 5)</code>)<br>
+        2. For each sample, build a 95% bootstrap CI (<code>replicate(5000, mean(sample(samp, replace=TRUE)))</code>, then <code>quantile(..., c(0.025, 0.975))</code>)<br>
+        3. Count how often 20 falls OUTSIDE the CI. Proportion = estimated Type I Error rate. Should be ≈ 0.05 if bootstrap is valid.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quick Quiz — Module 2</span>
+</div>
+
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">Q</span>
+    <span class="step-title">Quiz: 4 questions</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>Define Type I Error in one sentence. What should its rate equal?</p>
+      <textarea class="fr-input" rows="1"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">Rejecting $H_0$ when $H_0$ is true (false positive). Its rate should equal $\alpha$ (the significance level).</div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>You simulate: generate from $\text{Gamma}(\text{shape}=3, \text{scale}=2)$ [mean $= 6$], run <code>t.test(samp, mu = 6)</code>, count rejections at $\alpha = 0.05$ over 10,000 reps. You get 0.08. What does 0.08 represent and is this test valid?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">0.08 is the estimated Type I Error rate. It is inflated above 0.05, so the test is NOT valid for this data distribution at $n$ = whatever was used. The t-test rejects $H_0$ 8% of the time when it should only reject 5%.</div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>What's the difference between a parametric and non-parametric test? Give one pro and one con of each.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3"><strong>Parametric</strong> (e.g., t-test): relies on distributional assumptions. Pro: more powerful when conditions met. Con: can break (inflated Type I Error) when violated.<br><strong>Non-parametric</strong> (e.g., sign test, bootstrap): no distributional assumptions. Pro: works for any distribution. Con: less powerful; bootstrap can still have inflated/deflated Type I Error for small samples.</div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>Write the FULL R code to estimate bootstrap Type I Error rate. Data: $n = 8$ from $\text{Normal}(\mu = 50, \sigma = 10)$. Check if 95% bootstrap CI excludes 50.</p>
+      <textarea class="fr-input" rows="8"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <div class="r-editor">
+          <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">answer.R</span></div>
+          <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rnorm(n = 8, mean = 50, sd = 10)
+  boot_means <- replicate(5000, mean(sample(samp, replace = TRUE)))
+  ci <- quantile(boot_means, probs = c(0.025, 0.975))
+  if (50 < ci[1] || 50 > ci[2]) {
+    count <- count + 1
+  }
+}
+type1_boot <- count / 10000</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 2 Complete ✓</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 2 → Go to Module 3</button>
+
+</div>
+
+<script>
+const TOTAL = 9;
+let doneSteps = new Set();
+
+function loadState(){try{const s=localStorage.getItem('mod2_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod2_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[2]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);alert('Module 2 complete! Tell Claude: "build module 3"')}
+
+// Skew visualization
+function drawSkewViz(){
+  const canvas=document.getElementById('skewViz');if(!canvas)return;
+  const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='#0f0f1a';ctx.fillRect(0,0,W,H);
+  function drawCurve(pts,xOff,color,label){
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();
+    pts.forEach((p,i)=>{const x=xOff+i*(W/2-40)/(pts.length-1)+20;const y=H-20-p*(H-50);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+    ctx.stroke();ctx.fillStyle='#888';ctx.font='11px Inter';ctx.textAlign='center';ctx.fillText(label,xOff+W/4,H-4)
+  }
+  // Normal
+  const norm=[];for(let i=0;i<50;i++){const x=(i-25)/8;norm.push(Math.exp(-x*x/2))}
+  const nMax=Math.max(...norm);norm.forEach((v,i)=>norm[i]=v/nMax);
+  drawCurve(norm,0,'#28c840','Normal (symmetric)');
+  // Gamma
+  const gam=[];for(let i=0;i<50;i++){const x=i/8;const v=Math.pow(x,0.2)*Math.exp(-x/3);gam.push(v)}
+  const gMax=Math.max(...gam);gam.forEach((v,i)=>gam[i]=v/gMax*0.9);
+  drawCurve(gam,W/2,'#e94560','Gamma (right-skewed)');
+  // Separator
+  ctx.strokeStyle='#333';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(W/2,10);ctx.lineTo(W/2,H-15);ctx.stroke();ctx.setLineDash([]);
+}
+document.addEventListener('DOMContentLoaded',()=>{drawSkewViz();Prism.highlightAll()});
+loadState();
+</script>
+</body>
+</html>

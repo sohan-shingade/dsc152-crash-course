@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 10 — Model Diagnostics (LINE)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-09.html">Module 9</a><span class="sep">/</span>
+  <span class="current">Module 10</span>
+  <a href="module-11.html" class="next-btn">Module 11 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 10 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Model Diagnostics (LINE Conditions)</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">LINE conditions &mdash; the four things that must hold for valid regression inference</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>Regression gives you coefficient estimates no matter what. But for your <strong>p-values, confidence intervals, and hypothesis tests</strong> to actually mean anything, four conditions need to hold. They spell <strong>LINE</strong>.</p>
+
+    <table class="ref-table">
+      <tr><th>Letter</th><th>Condition</th><th>What it means</th></tr>
+      <tr><td style="color:#ffbd2e;font-weight:700">L</td><td><strong>Linearity</strong></td><td>The true relationship between X and Y is linear (not curved)</td></tr>
+      <tr><td style="color:#ffbd2e;font-weight:700">I</td><td><strong>Independence</strong></td><td>Observations are independent of each other</td></tr>
+      <tr><td style="color:#ffbd2e;font-weight:700">N</td><td><strong>Normality</strong></td><td>The residuals follow a normal distribution</td></tr>
+      <tr><td style="color:#ffbd2e;font-weight:700">E</td><td><strong>Equal variance</strong></td><td>The spread of residuals is constant across all X values (homoscedasticity)</td></tr>
+    </table>
+
+    <div class="callout memorize">
+      <strong>ALL four</strong> must hold for regression inference to be valid. If any one is violated, your p-values and CIs could be wrong.
+    </div>
+
+    <div class="callout insight">
+      <strong>The model itself still runs.</strong> R will happily give you coefficients even if every condition is violated. The issue is whether you can <em>trust</em> the statistical inference (p-values, CIs, F-tests) built on top of those coefficients.
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">Linearity &mdash; residuals vs fitted should show NO pattern</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p><strong>What to check:</strong> The relationship between X and Y should be a straight line, not a curve. If you fit a line to curved data, your predictions are systematically wrong.</p>
+
+    <p><strong>How to check:</strong> Plot residuals vs. fitted values (or residuals vs. the predictor). You want to see <strong>random scatter</strong> around zero &mdash; no curves, no patterns.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">check_linearity.R</span></div>
+      <pre><code class="language-r"># Base R diagnostic plots
+plot(model, which = 1)  # residuals vs fitted
+
+# Or manually with ggplot
+df$resid <- model$residuals
+df$fitted <- model$fitted.values
+ggplot(data = df, aes(x = fitted, y = resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed")</code></pre>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side right">
+        <h4>Linearity holds</h4>
+        Points scattered randomly around zero. No obvious curve or pattern. Looks like a shapeless cloud.
+      </div>
+      <div class="compare-side wrong">
+        <h4>Linearity violated</h4>
+        Clear U-shape or curve in the residual plot. Points systematically above zero, then below, then above again.
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Why not just look at the original scatter plot?</strong> For multiple regression (more than one predictor), you can't see the overall relationship in a single scatter plot. Residual plots reveal patterns that are hidden in the raw data.
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">Independence &mdash; think about the study design</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p><strong>What to check:</strong> Each observation should be independent of all others. One data point shouldn't give you information about another.</p>
+
+    <p><strong>How to check:</strong> This one is mostly about <strong>thinking about how the data was collected</strong>, not about a plot.</p>
+
+    <div class="callout memorize">
+      <strong>Common violations of independence:</strong>
+      <ul style="padding-left:1rem;margin-top:0.3rem">
+        <li><strong>Time series data</strong> &mdash; today's stock price is related to yesterday's</li>
+        <li><strong>Clustered data</strong> &mdash; students in the same class, patients at the same hospital</li>
+        <li><strong>Repeated measures</strong> &mdash; measuring the same person multiple times</li>
+      </ul>
+    </div>
+
+    <p>If the data is collected over time, you can plot residuals in order of collection to look for trends:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">check_independence.R</span></div>
+      <pre><code class="language-r"># Plot residuals in order of data collection
+plot(model$residuals, type = "l")
+abline(h = 0, lty = 2)</code></pre>
+    </div>
+
+    <div class="callout insight">
+      <strong>On the exam:</strong> Independence is the hardest condition to check from a plot alone. The question usually asks you to think about the data source. If they say "data was collected monthly" or "repeated observations on the same subjects," that's a hint toward an independence violation.
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Normality &mdash; QQ plot should follow the diagonal</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p><strong>What to check:</strong> The residuals ($\varepsilon_i = y_i - \hat{y}_i$) should be approximately normally distributed.</p>
+
+    <p><strong>How to check:</strong> A QQ (quantile-quantile) plot. If the residuals are normal, the points follow the diagonal line closely.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">check_normality.R</span></div>
+      <pre><code class="language-r"># Base R QQ plot
+plot(model, which = 2)
+
+# Or manually
+qqnorm(model$residuals)
+qqline(model$residuals)</code></pre>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side right">
+        <h4>Normality holds</h4>
+        Points hug the diagonal line closely. Minor wiggles at the tails are normal (pun intended) and fine.
+      </div>
+      <div class="compare-side wrong">
+        <h4>Normality violated</h4>
+        Points curve away from the line systematically, especially at the tails. S-shapes or banana shapes are bad signs.
+      </div>
+    </div>
+
+    <div class="callout insight">
+      <strong>Good news:</strong> With large sample sizes, the Central Limit Theorem makes the normality condition less important. The sampling distribution of $\hat{\beta}$ will be approximately normal even if individual residuals aren't perfectly normal. So mild violations in large samples are usually okay.
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Equal variance &mdash; no fan or funnel in the residual plot</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p><strong>What to check:</strong> The spread (variance) of residuals should be roughly the same for all values of X. The fancy word is <strong>homoscedasticity</strong>.</p>
+
+    <p><strong>How to check:</strong> Same residuals vs. fitted plot as linearity. But now you're looking at the <strong>vertical spread</strong>, not the shape.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">check_equal_var.R</span></div>
+      <pre><code class="language-r"># From PQ2 Q1c: residual plot to check equal variance
+df$resid <- model$residuals
+ggplot(data = df, aes(x = predictor, y = resid)) +
+  geom_point()</code></pre>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side right">
+        <h4>Equal variance holds</h4>
+        Residuals form a band of roughly constant width across all X values. Like a horizontal rectangle of points.
+      </div>
+      <div class="compare-side wrong">
+        <h4>Equal variance violated</h4>
+        <strong>Fan/funnel shape</strong> &mdash; residuals spread out (or narrow) as X increases. Like a megaphone or cone. This is called <strong>heteroscedasticity</strong>.
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Same plot, two checks:</strong> The residuals vs. fitted plot checks BOTH linearity (look for curves) AND equal variance (look for changing spread). One plot, two conditions.
+    </div>
+
+    <div class="callout warning">
+      <strong>Classic exam scenario:</strong> "Here is a residual plot. Which LINE condition does it check?" If it's residuals vs. fitted values &rarr; could be checking <strong>Linearity</strong> or <strong>Equal variance</strong>. Read the question carefully to see which one they're asking about.
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Model Diagnostics Questions</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "Write R code for a residual plot"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Real exam question (PQ2 Q1c):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>You have a model called <code>model</code>. Create a column of residuals in the data frame, then plot them against a predictor to check the equal variance condition.</p>
+    </div>
+
+    <div class="callout success">
+      <strong>Answer key (PQ2 Q1c):</strong>
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">resid_plot_pq2.R</span></div>
+      <pre><code class="language-r"># Step 1: Extract residuals
+df$resid <- model$residuals
+
+# Step 2: Plot residuals vs predictor
+ggplot(data = df, aes(x = predictor, y = resid)) +
+  geom_point()</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Key R syntax to memorize:</strong><br>
+      &bull; <code>model$residuals</code> &mdash; extracts the residuals from a fitted model<br>
+      &bull; <code>model$fitted.values</code> &mdash; extracts the predicted $\hat{y}$ values<br>
+      &bull; You can plot residuals against a predictor OR against fitted values &mdash; both work for checking L and E
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>You have a model <code>house_mod <- lm(price ~ sqft, data = houses)</code>. Write R code to add a residuals column to <code>houses</code> and create a ggplot of residuals vs. <code>sqft</code>.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+<pre style="margin:0;font-size:0.82rem"><code>houses$resid <- house_mod$residuals
+ggplot(data = houses, aes(x = sqft, y = resid)) +
+  geom_point()</code></pre>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: "Which LINE condition does this plot check?"</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p>The exam loves showing you a plot and asking which condition it checks. Here's your cheat sheet:</p>
+
+    <table class="ref-table">
+      <tr><th>Plot type</th><th>Checks which condition(s)</th><th>What to look for</th></tr>
+      <tr><td>Residuals vs. fitted values</td><td><strong>Linearity</strong> + <strong>Equal variance</strong></td><td>No curve (L), constant spread (E)</td></tr>
+      <tr><td>Residuals vs. predictor</td><td><strong>Linearity</strong> + <strong>Equal variance</strong></td><td>Same as above</td></tr>
+      <tr><td>QQ plot of residuals</td><td><strong>Normality</strong></td><td>Points follow the diagonal line</td></tr>
+      <tr><td>Residuals vs. order / time</td><td><strong>Independence</strong></td><td>No trend or pattern over time</td></tr>
+      <tr><td>Histogram of residuals</td><td><strong>Normality</strong></td><td>Bell-shaped distribution</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Common trick question:</strong> They show a residuals vs. fitted plot with a clear funnel shape and ask "which LINE condition is violated?" Answer: <strong>Equal variance (E)</strong>, not linearity. A funnel = changing spread, not a curve.
+    </div>
+
+    <div class="callout insight">
+      <strong>Another trick:</strong> "No plot can check Independence directly." If the question asks about independence, the answer usually involves thinking about the study design (time series? repeated measures?), not looking at a plot.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Match each scenario to the LINE condition being checked or violated:</p>
+      <p style="font-size:0.82rem;padding-left:0.5rem">
+        (a) A QQ plot shows points curving away from the diagonal at both tails<br>
+        (b) A residuals vs. fitted plot shows a clear U-shaped curve<br>
+        (c) A residuals vs. fitted plot shows points fanning out to the right<br>
+        (d) Data was collected as monthly averages over 5 years
+      </p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+        (a) <strong>Normality</strong> &mdash; QQ plot checks N; tails curving away = non-normal residuals<br>
+        (b) <strong>Linearity</strong> &mdash; U-shaped curve = nonlinear relationship<br>
+        (c) <strong>Equal variance</strong> &mdash; fanning out = heteroscedasticity<br>
+        (d) <strong>Independence</strong> &mdash; monthly time series data = observations likely correlated over time
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: "What happens when LINE conditions are violated?"</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p><strong>This is the "so what?" question.</strong> Why do we care if a condition is violated?</p>
+
+    <div class="callout memorize">
+      <strong>The bottom line:</strong> When LINE conditions are violated, you <strong>cannot trust the inference</strong>. Specifically:<br>
+      <ul style="padding-left:1rem;margin-top:0.3rem">
+        <li><strong>p-values</strong> become unreliable (could be too small or too large)</li>
+        <li><strong>Confidence intervals</strong> may not have the claimed coverage (a "95% CI" might only cover 80% of the time)</li>
+        <li><strong>Hypothesis tests</strong> can give misleading results</li>
+      </ul>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "The model is wrong."<br><br>
+        <span style="color:#e94560">Too vague. Need to specify WHAT goes wrong: inference tools become unreliable.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "If LINE conditions are violated, the p-values and confidence intervals from the regression output are unreliable. We cannot trust the results of hypothesis tests or use the standard errors to construct valid intervals."
+      </div>
+    </div>
+
+    <div class="callout insight">
+      <strong>Important nuance:</strong> The coefficient <em>estimates</em> ($\hat{\beta}$) themselves can still be reasonable even when conditions are violated. It's the <em>inference built on top</em> &mdash; the standard errors, p-values, and CIs &mdash; that falls apart. You can still describe the fitted line, just can't make probabilistic claims about it.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A student fits a regression model and gets a p-value of 0.03. However, the residual plot shows a clear funnel shape. Should the student trust this p-value? Why or why not?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        No. The funnel shape in the residual plot indicates a violation of the <strong>Equal variance</strong> condition. When this condition is violated, p-values are unreliable &mdash; the true p-value could be larger or smaller than 0.03. The student cannot trust this result for making inference.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Model Diagnostics (LINE)</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>Name all four LINE conditions and briefly describe what each one requires.</p>
+      <textarea class="fr-input" rows="4"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        <strong>L &mdash; Linearity:</strong> The true relationship between X and Y is linear (no curves).<br>
+        <strong>I &mdash; Independence:</strong> Observations are independent of one another (no clustering, no time dependence).<br>
+        <strong>N &mdash; Normality:</strong> The residuals are approximately normally distributed.<br>
+        <strong>E &mdash; Equal variance:</strong> The spread of residuals is constant across all values of X (homoscedasticity).
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>Match each diagnostic plot to the LINE condition it primarily checks:</p>
+      <p style="font-size:0.82rem;padding-left:0.5rem">
+        (a) QQ plot of residuals<br>
+        (b) Residuals vs. fitted values showing a funnel shape<br>
+        (c) Residuals vs. fitted values showing a U-shaped curve
+      </p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        (a) <strong>Normality (N)</strong> &mdash; QQ plot checks whether residuals are normally distributed<br>
+        (b) <strong>Equal variance (E)</strong> &mdash; funnel/fan shape means spread is changing (heteroscedasticity)<br>
+        (c) <strong>Linearity (L)</strong> &mdash; U-shape means the true relationship is curved, not linear
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>You fit <code>fit <- lm(mpg ~ weight, data = cars)</code>. Write R code to: (1) add a residuals column to <code>cars</code>, and (2) create a residual plot using ggplot to check the equal variance condition.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+<pre style="margin:0;font-size:0.82rem"><code>cars$resid <- fit$residuals
+ggplot(data = cars, aes(x = weight, y = resid)) +
+  geom_point()</code></pre>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>A regression model's residual plot shows clear heteroscedasticity (funnel shape). The model reports a slope p-value of 0.04. A student says: "Since the p-value is below 0.05, the relationship is statistically significant." Do you agree? Explain.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <strong>No.</strong> The funnel shape indicates a violation of the Equal variance (E) condition. When LINE conditions are violated, p-values are unreliable &mdash; the reported p-value of 0.04 may not reflect the true significance level. We cannot trust this p-value to draw conclusions about statistical significance. The confidence intervals from this model would also be unreliable.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 10 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 10 &rarr; Go to Module 11</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod10_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod10_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[10]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-11.html'}
+loadState();
+</script>
+</body>
+</html>

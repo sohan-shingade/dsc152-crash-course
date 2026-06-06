@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSC 152 — Teach: Hypothesis Testing Foundations (Lec 1-5)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #f5f0e8; color: #1a1a1a; line-height: 1.65; padding: 2rem 1rem; }
+  .container { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; text-align: center; border-bottom: 3px double #333; padding-bottom: 1rem; margin-bottom: 0.3rem; }
+  .subtitle { text-align: center; color: #555; font-size: 0.88rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.12rem; color: #1a5276; margin: 2.5rem 0 0.8rem; border-bottom: 2px solid #6c3483; padding-bottom: 0.3rem; }
+  h3 { font-size: 0.95rem; color: #333; margin: 1rem 0 0.4rem; }
+  p { margin-bottom: 0.5rem; font-size: 0.9rem; }
+  ul, ol { margin: 0.3rem 0 0.6rem 1.5rem; font-size: 0.88rem; }
+  li { margin: 0.15rem 0; }
+  .card { background: #fff; border: 1px solid #d4cfc4; border-radius: 6px; padding: 1.3rem 1.5rem; margin-bottom: 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .card.hl { border-left: 4px solid #6c3483; }
+  .card.key { border-left: 4px solid #2d8a4e; background: #f0faf3; }
+  .card.ref { border-left: 4px solid #268bd2; background: #f0f7ff; }
+  .r-editor { border-radius: 6px; overflow: hidden; margin: 0.5rem 0; border: 1px solid #3a3a3a; }
+  .r-editor-bar { background: #1e1e1e; padding: 4px 10px; display: flex; align-items: center; gap: 5px; border-bottom: 1px solid #3a3a3a; }
+  .r-editor-bar .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .r-editor-bar .dot.red { background: #ff5f57; } .r-editor-bar .dot.yellow { background: #ffbd2e; } .r-editor-bar .dot.green { background: #28c840; }
+  .r-editor-bar .title { margin-left: 6px; color: #888; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; }
+  .r-editor pre { margin: 0 !important; border-radius: 0 !important; border: none !important; }
+  .r-editor pre[class*="language-"] { background: #1d1f21 !important; padding: 0.7rem 1rem !important; font-size: 0.8rem !important; line-height: 1.5 !important; }
+  .eq-box { background: #fdf6e3; border: 1px solid #d4cfc4; border-radius: 4px; padding: 0.6rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; }
+  .wording { background: #e8f5e9; border-left: 3px solid #2d8a4e; padding: 0.5rem 0.8rem; margin: 0.4rem 0; font-style: italic; font-size: 0.87rem; }
+  .trap { background: #fff3cd; border-left: 3px solid #b58900; padding: 0.5rem 0.8rem; margin: 0.4rem 0; font-size: 0.87rem; }
+  .memorize { background: #e8eaf6; border-left: 3px solid #3f51b5; padding: 0.5rem 0.8rem; margin: 0.4rem 0; font-size: 0.87rem; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.6rem 0; }
+  .compare-box { background: #fff; border: 1px solid #d4cfc4; border-radius: 6px; padding: 0.8rem; font-size: 0.85rem; }
+  .compare-box h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; padding-bottom: 0.25rem; border-bottom: 1px solid #eee; }
+
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.5rem 0; }
+  .ref-table th, .ref-table td { padding: 5px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+  .ref-table th { background: #e8eaf6; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .ref-table code { background: #2d2d2d; color: #f8f8f2; padding: 1px 5px; border-radius: 3px; font-size: 0.78rem; }
+
+  .practice-block { background: #fff; border: 2px solid #6c3483; border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.3rem; }
+  .practice-block .p-number { font-weight: 700; color: #6c3483; font-size: 0.9rem; margin-bottom: 0.2rem; }
+  .practice-block .p-type { display: inline-block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; background: #e8daef; color: #6c3483; padding: 2px 8px; border-radius: 3px; margin-bottom: 0.7rem; }
+  .fr-input { width: 100%; min-height: 60px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; resize: vertical; background: #fefcf6; }
+  .fr-input:focus { outline: 2px solid #6c3483; border-color: #6c3483; }
+  .answer-box { display: none; margin-top: 0.7rem; padding: 0.9rem; background: #f0faf3; border: 1px solid #a3d9b1; border-radius: 4px; font-size: 0.85rem; line-height: 1.55; }
+  .answer-box.shown { display: block; }
+  .reveal-btn { background: #6c3483; color: #fff; border: none; padding: 0.4rem 1.1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-top: 0.3rem; }
+  .reveal-btn:hover { background: #5b2c6f; }
+  .subpart { margin: 0.7rem 0; }
+  .subpart-label { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.25rem; }
+  .toc { background: #fff; border: 1px solid #d4cfc4; border-radius: 6px; padding: 1rem 1.3rem; margin-bottom: 1.5rem; font-size: 0.85rem; }
+  .toc a { color: #1a5276; text-decoration: none; } .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 0.2rem 0; }
+  .tag { font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 0.3rem; }
+  .tag.t { background: #d6eaf8; color: #1a5276; } .tag.p { background: #e8daef; color: #6c3483; } .tag.r { background: #fce4ec; color: #c0392b; }
+  @media (max-width: 650px) { .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Hypothesis Testing Foundations &mdash; Deep Teach + Practice</h1>
+<div class="subtitle">Lectures 1&ndash;5 &bull; Targeting your gaps from the diagnostic (61%)</div>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#ref">R Reference Sheet</a> <span class="tag r">REF</span></li>
+    <li><a href="#s1">The Three Simulation Patterns</a> <span class="tag t">TEACH</span></li>
+    <li><a href="#s2">Sign Test &mdash; Median, pbinom, Discreteness</a> <span class="tag t">TEACH</span></li>
+    <li><a href="#s3">Power &mdash; The Full Picture</a> <span class="tag t">TEACH</span></li>
+    <li><a href="#s4">Key Wording &amp; Traps</a> <span class="tag t">TEACH</span></li>
+    <li><a href="#s5">Practice (8 problems)</a> <span class="tag p">PRACTICE</span></li>
+  </ol>
+  <div style="margin-top:0.4rem; font-size:0.78rem; color:#888;">Skipping: p-value interpretation (SOLID)</div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="ref">R Reference Sheet</h2>
+<!-- ================================================================ -->
+
+<div class="card ref">
+  <h3>Hypothesis Testing Functions</h3>
+  <table class="ref-table">
+    <tr><th>What</th><th>R Code</th><th>Notes</th></tr>
+    <tr><td>One-sample t-test</td><td><code>t.test(x, mu = 6)</code></td><td>Two-sided by default</td></tr>
+    <tr><td>One-sided t-test</td><td><code>t.test(x, mu = 6, alternative = "greater")</code></td><td>"less" or "greater"</td></tr>
+    <tr><td>Extract p-value</td><td><code>t.test(x, mu = 6)$p.value</code></td><td>Use <code>$p.value</code> not <code>$p</code></td></tr>
+    <tr><td>Extract CI</td><td><code>t.test(x, mu = 6)$conf.int</code></td><td></td></tr>
+    <tr><td>t-statistic formula</td><td><code>(mean(x) - mu0) / (sd(x) / sqrt(n))</code></td><td>$t_s = \frac{\bar{x} - \mu_0}{s / \sqrt{n}}$</td></tr>
+  </table>
+</div>
+
+<div class="card ref">
+  <h3>Binomial / Sign Test Functions</h3>
+  <table class="ref-table">
+    <tr><th>What</th><th>R Code</th><th>Gives you</th></tr>
+    <tr><td>$P(X = k)$</td><td><code>dbinom(k, size = n, prob = 0.5)</code></td><td>Exact probability</td></tr>
+    <tr><td>$P(X \leq k)$</td><td><code>pbinom(k, size = n, prob = 0.5)</code></td><td>CDF (left tail)</td></tr>
+    <tr><td>$P(X > k)$</td><td><code>pbinom(k, size = n, prob = 0.5, lower.tail = FALSE)</code></td><td>Right tail (STRICT &gt;)</td></tr>
+    <tr><td>$P(X \geq k)$</td><td><code>pbinom(k - 1, size = n, prob = 0.5, lower.tail = FALSE)</code></td><td>Off-by-one!</td></tr>
+    <tr><td>Sign test p-value</td><td><code>min(1, 2 * pbinom(min(n_pos, n_neg), n_eff, 0.5))</code></td><td>Two-sided</td></tr>
+  </table>
+  <div class="trap"><strong>The off-by-one:</strong> <code>pbinom(k, ..., lower.tail=FALSE)</code> gives $P(X > k)$ (strictly greater). For $P(X \geq k)$, use <code>pbinom(k-1, ...)</code>. This comes up on every quiz.</div>
+</div>
+
+<div class="card ref">
+  <h3>Power Functions</h3>
+  <table class="ref-table">
+    <tr><th>What</th><th>R Code</th><th>Notes</th></tr>
+    <tr><td>Theory-based power</td><td><code>power.t.test(n, delta, sd, sig.level = 0.05, type = "one.sample", alternative = "two.sided")</code></td><td>Normal data ONLY</td></tr>
+    <tr><td>Generate normal</td><td><code>rnorm(n, mean, sd)</code></td><td></td></tr>
+    <tr><td>Generate gamma</td><td><code>rgamma(n, shape, scale)</code></td><td>Gamma mean = shape $\times$ scale</td></tr>
+    <tr><td>Generate uniform</td><td><code>runif(n, min, max)</code></td><td></td></tr>
+    <tr><td>Bootstrap resample</td><td><code>sample(x, replace = TRUE)</code></td><td>Same size as original</td></tr>
+    <tr><td>Bootstrap CI</td><td><code>quantile(boot_means, c(0.025, 0.975))</code></td><td>95% CI</td></tr>
+  </table>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s1">1. The Three Simulation Patterns</h2>
+<!-- ================================================================ -->
+
+<div class="card hl">
+  <h3>Every simulation in this course is ONE of three patterns</h3>
+  <p>Same loop structure every time. Only the <code>mean</code> argument and what you count changes.</p>
+
+  <div class="compare-grid">
+    <div class="compare-box" style="border-top: 3px solid #c0392b;">
+      <h4 style="color:#c0392b;">Type I Error Simulation</h4>
+      <p><strong>Q:</strong> How often does the test falsely reject $H_0$?</p>
+      <p><strong>Key:</strong> Generate under $H_0$ TRUE</p>
+      <div class="r-editor" style="margin:0.3rem 0;">
+        <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">type1_sim.R</span></div>
+        <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rgamma(n = 5, shape = 1.2,
+                 scale = 6 / 1.2)  # mean = 6 = null
+  p <- t.test(samp, mu = 6)$p.value
+  if (p < 0.05) count <- count + 1
+}
+TypeI <- count / 10000</code></pre>
+      </div>
+    </div>
+    <div class="compare-box" style="border-top: 3px solid #2d8a4e;">
+      <h4 style="color:#2d8a4e;">Power Simulation</h4>
+      <p><strong>Q:</strong> How often does the test correctly reject $H_0$?</p>
+      <p><strong>Key:</strong> Generate under $H_A$ TRUE</p>
+      <div class="r-editor" style="margin:0.3rem 0;">
+        <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">power_sim.R</span></div>
+        <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rnorm(n = 30, mean = 22,
+                sd = 5)  # mean = 22 ≠ 20 (null)
+  p <- t.test(samp, mu = 20)$p.value
+  if (p < 0.05) count <- count + 1
+}
+power <- count / 10000</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-top: 3px solid #268bd2; margin-top: 0.5rem;">
+    <h4 style="color:#268bd2; font-size:0.82rem; text-transform:uppercase; letter-spacing:1px;">Bootstrap Type I Error Simulation</h4>
+    <p><strong>Q:</strong> How often does the bootstrap CI falsely exclude $\mu_0$?</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">boot_type1.R</span></div>
+      <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rnorm(n = 10, mean = 20, sd = 5)  # H0 true
+  boots <- replicate(5000, mean(sample(samp, replace = TRUE)))
+  ci <- quantile(boots, c(0.025, 0.975))
+  if (20 < ci[1] || 20 > ci[2]) count <- count + 1  # 20 outside CI
+}
+type1_boot <- count / 10000</code></pre>
+    </div>
+  </div>
+
+  <div class="memorize">
+    <strong>The ONLY difference between Type I Error sim and Power sim:</strong><br>
+    Type I Error: <code>mean = null value</code> ($H_0$ is true)<br>
+    Power: <code>mean = null value + delta</code> ($H_A$ is true)<br>
+    Everything else is identical.
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s2">2. Sign Test &mdash; Full Breakdown</h2>
+<!-- ================================================================ -->
+
+<div class="card hl">
+  <h3>What the Sign Test Does</h3>
+  <p>Tests whether the <strong>median</strong> equals some value $m_0$. Compare to t-test which tests the <strong>mean</strong>.</p>
+  <p>Why this matters: for skewed data, mean $\neq$ median. The tests can give different answers.</p>
+
+  <h3>Step-by-Step</h3>
+  <ol>
+    <li>Subtract $m_0$ from every observation</li>
+    <li>Count positives ($n_+$) and negatives ($n_-$). Ignore zeros (ties).</li>
+    <li>Effective $n = n_+ + n_-$ (excluding ties)</li>
+    <li>Under $H_0$: $n_+ \sim \text{Binomial}(n_{\text{eff}}, 0.5)$</li>
+    <li>Two-sided p-value: $2 \times P(X \leq \min(n_+, n_-))$, capped at 1</li>
+  </ol>
+
+  <div class="r-editor">
+    <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">sign_test_function.R</span></div>
+    <pre><code class="language-r">sign_test <- function(x, mu0) {
+  signs <- x - mu0
+  n_pos <- sum(signs > 0)
+  n_neg <- sum(signs < 0)
+  n_eff <- n_pos + n_neg           # exclude ties
+  min_count <- min(n_pos, n_neg)
+  p_val <- 2 * pbinom(min_count, size = n_eff, prob = 0.5)
+  return(min(1, p_val))            # cap at 1
+}</code></pre>
+  </div>
+</div>
+
+<div class="card key">
+  <h3>The Discreteness Problem</h3>
+  <p>With $n = 7$, the achievable significance levels are fixed by the Binomial:</p>
+  <table class="ref-table" style="max-width:400px;">
+    <tr><th>Rejection if $\min \leq k$</th><th>$2 \times P(X \leq k)$</th></tr>
+    <tr><td>$k = 0$</td><td>$2 \times 0.0078 = 0.016$</td></tr>
+    <tr><td>$k = 1$</td><td>$2 \times 0.0625 = 0.125$</td></tr>
+    <tr><td>$k = 2$</td><td>$2 \times 0.227 = 0.453$</td></tr>
+  </table>
+  <p>Jumps from 0.016 to 0.125 — skips 0.05 entirely. The binomial is discrete, so you can only achieve certain $\alpha$ levels. With $n = 7$, the closest to 0.05 is 0.016.</p>
+
+  <div class="wording"><strong>Exam answer:</strong> "The Binomial distribution is discrete, so the achievable significance levels are a fixed set determined by $n$. With $n = 7$, no combination of outcomes gives a tail probability of exactly 0.05."</div>
+</div>
+
+<div class="card">
+  <h3>Sign Test vs t-Test: When They Disagree</h3>
+  <p>From HW1: minutes played data ($n = 32$):</p>
+  <ul>
+    <li>t-test: $p = 0.035$ → reject $H_0$</li>
+    <li>Sign test: $p = 0.377$ → fail to reject $H_0$</li>
+  </ul>
+  <p>Why? t-test tests the <strong>mean</strong>, sign test tests the <strong>median</strong>. If data is skewed, mean $\neq$ median. Also, sign test throws away magnitude info (only counts signs), so it has <strong>less power</strong> than t-test when normality holds.</p>
+
+  <div class="trap"><strong>From HW1:</strong> Simulation showed t-test power ~0.75 vs sign test power ~0.55 with normal data. The t-test wins when conditions are met because it uses magnitude, not just direction.</div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s3">3. Power &mdash; The Full Picture</h2>
+<!-- ================================================================ -->
+
+<div class="card hl">
+  <h3>Definition</h3>
+  <div class="eq-box">
+    $$\text{Power} = P(\text{reject } H_0 \mid H_0 \text{ is false}) = 1 - P(\text{Type II Error})$$
+  </div>
+  <p>Target: 80%+ is "adequate." Power = 1.0 means you'd reject in every possible sample under $H_A$.</p>
+</div>
+
+<div class="card key">
+  <h3>Four Factors (Memorize the Arrows)</h3>
+  <div class="eq-box" style="font-size:1.1rem;">
+    $$n \uparrow \quad \delta \uparrow \quad \sigma \downarrow \quad \alpha \uparrow \qquad \Longrightarrow \qquad \text{Power} \uparrow$$
+  </div>
+  <table class="ref-table">
+    <tr><th>Factor</th><th>Direction for more power</th><th>Why</th></tr>
+    <tr><td>Sample size $n$</td><td>$\uparrow$ increase</td><td>More data = more evidence</td></tr>
+    <tr><td>Effect size $\delta$</td><td>$\uparrow$ increase</td><td>Bigger signal = easier to detect</td></tr>
+    <tr><td>Std dev $\sigma$</td><td>$\downarrow$ decrease</td><td>Less noise = signal stands out</td></tr>
+    <tr><td>Significance $\alpha$</td><td>$\uparrow$ increase</td><td>Lower bar to reject = easier to reject</td></tr>
+  </table>
+
+  <div class="trap"><strong>Common trap:</strong> "Decrease $\alpha$ from 0.05 to 0.01" sounds stricter and better, but it <em>decreases</em> power. Stricter threshold = harder to reject = more likely to miss real effects.</div>
+</div>
+
+<div class="card">
+  <h3>power.t.test() — When It Works and When It Doesn't</h3>
+  <div class="r-editor">
+    <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">power_theory.R</span></div>
+    <pre><code class="language-r"># Full call with all arguments explicit
+power.t.test(
+  n           = 30,
+  delta       = 2,          # true mean - null mean
+  sd          = 5,
+  sig.level   = 0.05,
+  type        = "one.sample",
+  alternative = "two.sided"
+)</code></pre>
+  </div>
+  <div class="trap"><strong>When it CANNOT be used:</strong> Data come from a non-normal distribution (Gamma, Uniform, etc.). <code>power.t.test()</code> assumes normality. For non-normal data, you MUST use simulation. This is asked on every quiz.</div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s4">4. Key Wording &amp; Named Concepts</h2>
+<!-- ================================================================ -->
+
+<div class="card key">
+  <h3>Wording Cheat Sheet (Exam Loves These)</h3>
+  <table class="ref-table">
+    <tr><th>Concept</th><th>Correct Wording</th></tr>
+    <tr><td>P-value</td><td>"Probability of observing a test statistic as extreme or more extreme than the one observed, <strong>assuming $H_0$ is true</strong>"</td></tr>
+    <tr><td>Reject $H_0$</td><td>"We reject $H_0$ / there is sufficient evidence to conclude..."</td></tr>
+    <tr><td>Fail to reject</td><td>"We fail to reject $H_0$ / there is insufficient evidence." <strong>NEVER</strong> "We accept $H_0$"</td></tr>
+    <tr><td>Stat. vs practical significance</td><td>"With large $n$, even tiny meaningless differences become statistically significant. Must also examine effect size."</td></tr>
+    <tr><td>Power = 1.0</td><td>"The test would reject $H_0$ in every possible sample drawn under $H_A$"</td></tr>
+    <tr><td>Bootstrap Type I Error</td><td>"Bootstrap CIs can have inflated or deflated Type I Error, especially for small samples. Non-parametric $\neq$ guaranteed 0.05."</td></tr>
+    <tr><td>Type I Error</td><td>"Rejecting $H_0$ when $H_0$ is true" (false positive). Rate should = $\alpha$.</td></tr>
+    <tr><td>Type II Error</td><td>"Failing to reject $H_0$ when $H_0$ is false" (false negative). Power $= 1 - \beta$.</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Named Concepts the Exam Tests by Name</h3>
+  <ul>
+    <li><strong>Statistical significance vs practical significance</strong> (Lec 5) — large $n$ makes everything "significant"</li>
+    <li><strong>Parametric vs non-parametric</strong> — parametric (t-test) requires distributional assumptions; non-parametric (sign test, permutation, bootstrap) doesn't</li>
+    <li><strong>Validity of a test</strong> — a test is "valid" when its Type I Error rate equals $\alpha$</li>
+    <li><strong>Absence of evidence ≠ evidence of absence</strong> — failing to reject $H_0$ doesn't mean $H_0$ is true (could be low power)</li>
+  </ul>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s5">5. Practice Problems</h2>
+<!-- ================================================================ -->
+
+<!-- P1 -->
+<div class="practice-block">
+  <div class="p-number">Practice 1</div>
+  <div class="p-type">Type I Error Sim &bull; Fill in Blanks</div>
+  <p>Fill in the blanks to estimate Type I Error for a one-sample t-test at $\alpha = 0.10$ on data from $\text{Gamma}(\text{shape}=2, \text{scale}=2)$ (true mean $= 4$), $n = 8$:</p>
+  <div class="r-editor">
+    <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">fill_blanks.R</span></div>
+    <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rgamma(n = ___(a)___, shape = 2, scale = 2)
+  p.val <- t.test(samp, mu = ___(b)___)$___(c)___
+  if (p.val < ___(d)___) {
+    count <- count + 1
+  }
+}
+TypeI <- ___(e)___</code></pre>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p1a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p1a">
+    (a) <code>8</code> &mdash; sample size<br>
+    (b) <code>4</code> &mdash; null value (= true mean, since $H_0$ is true in Type I Error sim)<br>
+    (c) <code>p.value</code> &mdash; extract p-value from t.test object<br>
+    (d) <code>0.10</code> &mdash; alpha level (NOTE: 0.10 not 0.05!)<br>
+    (e) <code>count / 10000</code>
+  </div>
+</div>
+
+<!-- P2 -->
+<div class="practice-block">
+  <div class="p-number">Practice 2</div>
+  <div class="p-type">Sign Test Computation</div>
+  <p>Data: $\{12, 8, 15, 6, 20, 11, 9\}$. Test $H_0$: median $= 10$ vs $H_A$: median $\neq 10$.</p>
+  <div class="subpart">
+    <div class="subpart-label">(a) Count signs, compute p-value by hand using <code>pbinom</code>.</div>
+    <textarea class="fr-input" rows="3"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) What is the closest achievable $\alpha$ to 0.05 with $n = 7$?</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p2a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p2a">
+    <strong>(a)</strong> Signs: $+, -, +, -, +, +, -$ → $n_+ = 4$, $n_- = 3$, $n_{\text{eff}} = 7$<br>
+    $p = 2 \times P(X \leq 3) = 2 \times$ <code>pbinom(3, size=7, prob=0.5)</code> $= 2 \times 0.5 = 1.0$<br>
+    Fail to reject.<br><br>
+    <strong>(b)</strong> $2 \times P(X \leq 0) = 2 \times 0.0078 = 0.016$. That's the closest achievable to 0.05.
+  </div>
+</div>
+
+<!-- P3 -->
+<div class="practice-block">
+  <div class="p-number">Practice 3</div>
+  <div class="p-type">power.t.test vs Simulation</div>
+  <div class="subpart">
+    <div class="subpart-label">(a) True mean = 7, null mean = 6, $\sigma = 2$, $n = 25$. Write <code>power.t.test()</code>.</div>
+    <textarea class="fr-input" rows="2"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) Data is actually Gamma-distributed. Can you use <code>power.t.test()</code>? What do you use instead?</div>
+    <textarea class="fr-input" rows="2"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(c) Write the simulation loop for Gamma data ($\text{shape} = 1.2$, $\text{scale} = 7/1.2$, null $= 6$).</div>
+    <textarea class="fr-input" rows="7"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p3a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p3a">
+    <strong>(a)</strong> <code>power.t.test(n = 25, delta = 1, sd = 2, sig.level = 0.05, type = "one.sample", alternative = "two.sided")</code><br><br>
+    <strong>(b)</strong> No. <code>power.t.test()</code> assumes normality. Must use simulation.<br><br>
+    <strong>(c)</strong>
+    <div class="r-editor" style="margin:0.3rem 0;">
+      <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">gamma_power.R</span></div>
+      <pre><code class="language-r">count <- 0
+for (i in 1:10000) {
+  samp <- rgamma(n = 25, shape = 1.2, scale = 7 / 1.2)  # mean = 7
+  p <- t.test(samp, mu = 6)$p.value                      # test against null
+  if (p < 0.05) count <- count + 1
+}
+power <- count / 10000</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- P4 -->
+<div class="practice-block">
+  <div class="p-number">Practice 4</div>
+  <div class="p-type">Binomial Rejection Region</div>
+  <p>Test $H_0$: $p = 0.30$ vs $H_A$: $p > 0.30$ with $n = 9$ trials. Find the rejection region closest to $\alpha = 0.05$.</p>
+  <div class="subpart">
+    <div class="subpart-label">(a) Compute $P(X \geq 5)$, $P(X \geq 6)$, $P(X \geq 7)$ under $H_0$. Which is closest to 0.05?</div>
+    <textarea class="fr-input" rows="4" placeholder="P(X >= 5) = pbinom(4, size=9, prob=0.3, lower.tail=FALSE) = ..."></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p4a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p4a">
+    <div class="r-editor" style="margin:0.3rem 0;">
+      <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">rejection_region.R</span></div>
+      <pre><code class="language-r">pbinom(4, size = 9, prob = 0.30, lower.tail = FALSE) # P(X>=5) = 0.0988
+pbinom(5, size = 9, prob = 0.30, lower.tail = FALSE) # P(X>=6) = 0.0253
+pbinom(6, size = 9, prob = 0.30, lower.tail = FALSE) # P(X>=7) = 0.0043</code></pre>
+    </div>
+    Closest to 0.05 is $P(X \geq 6) = 0.0253$. Rejection region: $\{6, 7, 8, 9\}$. Actual $\alpha = 0.0253$.
+    <br><br><strong>Note:</strong> For $P(X \geq k)$, use <code>pbinom(k-1, ..., lower.tail=FALSE)</code>. The $k-1$ is because <code>lower.tail=FALSE</code> gives strictly greater.
+  </div>
+</div>
+
+<!-- P5 -->
+<div class="practice-block">
+  <div class="p-number">Practice 5</div>
+  <div class="p-type">Significance vs Effect Size</div>
+  <p>A poker player tracks 10,000 hands. Mean profit = $0.10/hand, $p = 0.22$. At 300 hands/hour, that's $30/hr.</p>
+  <div class="subpart">
+    <div class="subpart-label">(a) Should she reject $H_0$ (no profit) at $\alpha = 0.05$?</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) Is this result practically meaningful?</div>
+    <textarea class="fr-input" rows="2"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(c) What does this illustrate — and how is it the opposite of the TSA example?</div>
+    <textarea class="fr-input" rows="2"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p5a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p5a">
+    <strong>(a)</strong> No. $p = 0.22 > 0.05$, fail to reject.<br><br>
+    <strong>(b)</strong> YES — $30/hr is meaningful income. The effect is real and large in practical terms.<br><br>
+    <strong>(c)</strong> This is the <strong>flip side</strong> of statistical vs practical significance. TSA: statistically significant but practically meaningless (tiny effect, huge $n$). Poker: practically meaningful but NOT statistically significant (real effect, but high variance makes it hard to detect). Failing to reject $\neq$ $H_0$ is true. She may simply need more data (higher $n$) or lower variance.
+  </div>
+</div>
+
+<!-- P6 -->
+<div class="practice-block">
+  <div class="p-number">Practice 6</div>
+  <div class="p-type">Bootstrap CI</div>
+  <div class="subpart">
+    <div class="subpart-label">(a) Write R code: bootstrap 95% CI for the mean of <code>tips</code> data ($n = 8$).</div>
+    <textarea class="fr-input" rows="5"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) CI = [3.10, 5.19]. Null is $\mu_0 = 4$. Decision?</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p6a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p6a">
+    <strong>(a)</strong>
+    <div class="r-editor" style="margin:0.3rem 0;">
+      <div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">bootstrap_ci.R</span></div>
+      <pre><code class="language-r">boot_means <- replicate(10000, mean(sample(tips, replace = TRUE)))
+ci <- quantile(boot_means, probs = c(0.025, 0.975))</code></pre>
+    </div>
+    <strong>(b)</strong> 4 is INSIDE [3.10, 5.19] → fail to reject $H_0$.
+  </div>
+</div>
+
+<!-- P7 -->
+<div class="practice-block">
+  <div class="p-number">Practice 7</div>
+  <div class="p-type">One-sided P-value from Two-sided</div>
+  <p>Two-sided $p = 0.14$. Sample mean is below $\mu_0$. You want to test $H_A$: $\mu < \mu_0$.</p>
+  <div class="subpart">
+    <div class="subpart-label">(a) What is the one-sided p-value?</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) At $\alpha = 0.10$, do you reject?</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p7a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p7a">
+    <strong>(a)</strong> $0.14 / 2 = 0.07$. Since the sample mean is in the direction of $H_A$, divide the two-sided p-value by 2.<br><br>
+    <strong>(b)</strong> $0.07 < 0.10$ → reject $H_0$ at $\alpha = 0.10$.
+    <div class="trap"><strong>Key:</strong> Only divide by 2 if the sample mean is in the direction of $H_A$. If it's in the opposite direction, the one-sided p-value is $1 - 0.14/2 = 0.93$.</div>
+  </div>
+</div>
+
+<!-- P8 -->
+<div class="practice-block">
+  <div class="p-number">Practice 8</div>
+  <div class="p-type">Conceptual Rapid Fire</div>
+  <p>True or false:</p>
+  <div class="subpart">
+    <div class="subpart-label">(a) "Failing to reject $H_0$ means $H_0$ is true."</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(b) "The sign test has more power than the t-test when data are normal."</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(c) "A valid test has Type I Error rate equal to $\alpha$."</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(d) "The bootstrap CI is guaranteed to have correct Type I Error because it's non-parametric."</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <div class="subpart">
+    <div class="subpart-label">(e) "$P(X \geq 5)$ = <code>pbinom(5, n, p, lower.tail=FALSE)</code>"</div>
+    <textarea class="fr-input" rows="1"></textarea>
+  </div>
+  <button class="reveal-btn" onclick="document.getElementById('p8a').classList.add('shown'); this.style.display='none';">Show Answer</button>
+  <div class="answer-box" id="p8a">
+    <strong>(a) FALSE</strong> — absence of evidence $\neq$ evidence of absence. Could be low power.<br>
+    <strong>(b) FALSE</strong> — t-test has MORE power when normality holds (uses magnitude info).<br>
+    <strong>(c) TRUE</strong> — definition of validity.<br>
+    <strong>(d) FALSE</strong> — bootstrap can have inflated/deflated Type I Error, especially small $n$.<br>
+    <strong>(e) FALSE</strong> — <code>pbinom(5, ...)</code> gives $P(X > 5)$, not $P(X \geq 5)$. Need <code>pbinom(4, ..., lower.tail=FALSE)</code>.
+  </div>
+</div>
+
+<!-- Bottom -->
+<div class="card" style="text-align:center; padding:1.5rem; border: 2px solid #6c3483;">
+  <p style="font-size:0.95rem;">Done? Tell Claude how you did and what to cover next.</p>
+  <p style="font-size:0.85rem; color:#888; margin-top:0.3rem;">"ready for Lec 6-11" &bull; "need more practice on [topic]" &bull; "move to practice exam"</p>
+</div>
+
+</div>
+<script>document.addEventListener('DOMContentLoaded', () => Prism.highlightAll());</script>
+</body>
+</html>

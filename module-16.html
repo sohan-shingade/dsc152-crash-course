@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 16 — Time Series: ACF/PACF & AR Models</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-15.html">Module 15</a><span class="sep">/</span>
+  <span class="current">Module 16</span>
+  <a href="module-17.html" class="next-btn">Module 17 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 16 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: ACF/PACF & AR Models (Lec 18)</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">What makes time series special &mdash; observations are NOT independent</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>In all the regression we've done so far, we assumed the <strong>Independence</strong> condition in LINE: each observation is independent of the others. Time series data <strong>violates</strong> this.</p>
+
+    <p>Today's value depends on yesterday's. A basketball player who scored 40 points last game might get double-teamed tonight, affecting his score. Stock prices carry momentum from one day to the next. These are <strong>not</strong> independent observations.</p>
+
+    <div class="callout memorize">
+      <strong>LINE conditions for regression:</strong><br>
+      <strong>L</strong>inearity &bull; <strong>I</strong>ndependence &bull; <strong>N</strong>ormality of $\epsilon_i$ &bull; <strong>E</strong>qual variance (homoskedasticity)<br><br>
+      Time series data violates the <strong>I</strong> &mdash; so we need special models that account for this dependency.
+    </div>
+
+    <div class="callout insight">
+      <strong>Why does this matter?</strong> If you ignore time dependency and just use <code>lm()</code>, your p-values will be wrong. The Independence assumption is baked into how standard errors are calculated. Violate it, and the whole inference breaks down.
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">Key terminology: $Y_t$, $\eta_t$, and the difference between them</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>Two symbols you need to keep straight:</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a5c2a">
+        <h4 style="color:#28c840">$Y_t$ &mdash; the observation</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>The actual value at time $t$</li>
+          <li>e.g., points scored in game $t$</li>
+          <li><strong>NOT independent</strong> across time</li>
+          <li>$Y_t$ depends on $Y_{t-1}$, $Y_{t-2}$, etc.</li>
+        </ul>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">$\eta_t$ &mdash; the shock / innovation</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>The random noise entering at time $t$</li>
+          <li>e.g., a random hot or cold streak</li>
+          <li><strong>Independent</strong> across time</li>
+          <li>Each $\eta_t \sim N(0, \sigma^2)$ on its own</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>The key distinction:</strong> The shocks $\eta_t$ (also written $\epsilon_t$ in some notation) are independent of each other. But the observations $Y_t$ are <strong>not</strong> independent, because each $Y_t$ is built from previous $Y$ values plus the current shock. The dependency between observations is what makes this time series data.
+    </div>
+
+    <p>Think of it like dominoes: each shock $\eta_t$ is an independent push, but the observation $Y_t$ reflects all the previous pushes that haven't died out yet.</p>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">ACF &mdash; Autocorrelation Function</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>The <strong>ACF</strong> measures the correlation between $Y_t$ and $Y_{t-k}$ at different lags $k$.</p>
+
+    <ul style="font-size:0.85rem;padding-left:1.2rem;margin-bottom:0.5rem">
+      <li>Lag 1: correlation between $Y_t$ and $Y_{t-1}$ (consecutive observations)</li>
+      <li>Lag 2: correlation between $Y_t$ and $Y_{t-2}$ (two steps apart)</li>
+      <li>Lag $k$: correlation between $Y_t$ and $Y_{t-k}$</li>
+    </ul>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">acf_example.R</span></div>
+      <pre><code class="language-r"># Plot the ACF
+acf(data)
+
+# The plot shows bars at each lag
+# Bars outside the blue dashed lines = significant autocorrelation</code></pre>
+    </div>
+
+    <div class="callout insight">
+      <strong>How to read an ACF plot:</strong> The x-axis is the lag number, the y-axis is the correlation. The blue dashed lines mark the significance threshold. If a bar extends past those lines, there is statistically significant autocorrelation at that lag.
+    </div>
+
+    <p>For an <strong>AR(p)</strong> process, the ACF <strong>decays gradually</strong> (tails off slowly). It doesn't cut off sharply &mdash; it just gets smaller and smaller. This is because in an AR model, impacts linger: $Y_t$ depends on $Y_{t-1}$, which depends on $Y_{t-2}$, and so on. So even distant lags show some correlation.</p>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">PACF &mdash; Partial Autocorrelation Function</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>The <strong>PACF</strong> measures the correlation between $Y_t$ and $Y_{t-k}$ <strong>after removing the effect of all intermediate lags</strong> ($Y_{t-1}, Y_{t-2}, \ldots, Y_{t-k+1}$).</p>
+
+    <div class="callout insight">
+      <strong>Why "partial"?</strong> The regular ACF at lag 2 includes both the direct effect of $Y_{t-2}$ on $Y_t$ AND the indirect effect through $Y_{t-1}$. The PACF strips out the indirect part, showing only the direct connection.
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">pacf_example.R</span></div>
+      <pre><code class="language-r"># Plot the PACF
+pacf(data)
+
+# For AR(p): PACF cuts off sharply after lag p
+# This is how you identify the order of an AR model</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>The PACF is the key tool for identifying AR order:</strong><br>
+      &bull; PACF cuts off after lag 1 &rarr; AR(1)<br>
+      &bull; PACF cuts off after lag 2 &rarr; AR(2)<br>
+      &bull; PACF cuts off after lag $p$ &rarr; AR($p$)<br><br>
+      "Cuts off" means the bars after lag $p$ are all within the blue dashed significance lines.
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Model</th><th>ACF pattern</th><th>PACF pattern</th></tr>
+      <tr><td>AR($p$)</td><td>Decays gradually (tails off)</td><td><strong>Cuts off after lag $p$</strong></td></tr>
+      <tr><td>MA($q$)</td><td><strong>Cuts off after lag $q$</strong></td><td>Decays gradually (tails off)</td></tr>
+    </table>
+
+    <p>Notice the symmetry: ACF and PACF swap roles for AR vs MA models. This pattern is how you tell them apart.</p>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">AR($p$) model &mdash; the equation and fitting in R</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>The <strong>AR($p$)</strong> (autoregressive of order $p$) model says each observation is a linear combination of the previous $p$ observations plus noise:</p>
+
+    <div class="eq-box">
+      $$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \eta_t$$
+    </div>
+
+    <p>where $c$ is a drift/intercept constant, each $\phi_i$ is a coefficient, and $\eta_t \sim N(0, \sigma^2)$ independently.</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">AR(1)</h4>
+        <p style="font-size:0.8rem">$Y_t = c + \phi_1 Y_{t-1} + \eta_t$</p>
+        <p style="font-size:0.78rem">Each value depends on the <strong>previous one</strong> plus noise. Impacts linger because $Y_{t-1}$ depended on $Y_{t-2}$, and so on.</p>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">AR(2)</h4>
+        <p style="font-size:0.8rem">$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \eta_t$</p>
+        <p style="font-size:0.78rem">Each value depends on the <strong>previous two</strong> plus noise. Even longer memory of the past.</p>
+      </div>
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Fitting in R</h4>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">fit_ar.R</span></div>
+      <pre><code class="language-r">library(forecast)
+
+# Fit an AR(1) model
+model <- Arima(data, order = c(1, 0, 0))
+
+# Fit an AR(2) model
+model <- Arima(data, order = c(2, 0, 0))
+
+# order = c(p, d, q)
+#   p = AR order (autoregressive)
+#   d = differencing (we don't use this)
+#   q = MA order (moving average)</code></pre>
+    </div>
+
+    <div class="callout warning">
+      <strong>Note the capital A!</strong> It's <code>Arima()</code> from the <code>forecast</code> package, not <code>arima()</code> (base R). The capital-A version is what we use in this course.
+    </div>
+
+    <div class="callout memorize">
+      <strong>Key property of AR models:</strong> Shocks to the system <strong>linger</strong> for many steps. Even though $Y_t$ only explicitly depends on $p$ previous values, those previous values each depended on <em>their</em> previous values. So the effect of a shock at time $t$ ripples forward for a long time. This is different from MA models where shocks die out after exactly $q$ steps.
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: ACF/PACF & AR Models</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "Is an AR(1) or AR(2) model more appropriate?"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Typical exam setup:</strong> You're shown a PACF plot and asked to determine the AR order.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>The PACF plot shows a significant spike at lag 1, a significant spike at lag 2, and all subsequent lags are within the significance bands. Is an AR(1) or AR(2) model more appropriate?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "AR(2) because the PACF has two spikes."<br><br>
+        <span style="color:#e94560">Right answer but too vague. Need to explain the reasoning.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "An AR(2) model is more appropriate. The PACF shows significant spikes at lags 1 and 2, then <strong>cuts off</strong> (all subsequent lags fall within the significance bands). Since the PACF cuts off at lag $p$ for an AR($p$) model, the cutoff after lag 2 indicates AR(2)."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Decision rule:</strong><br>
+      1. Look at the PACF plot<br>
+      2. Find the last lag with a significant spike<br>
+      3. That lag number = the order $p$ of your AR model<br>
+      4. Confirm: all lags after $p$ should be inside the blue bands
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A PACF plot shows a significant spike at lag 1 only. Lags 2, 3, 4, ... are all within the significance bands. Meanwhile, the ACF plot shows a slow, gradual decay. What model is appropriate and why?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+        An AR(1) model is appropriate. The PACF cuts off after lag 1 (only lag 1 is significant, all others are within the bands), which is the signature pattern of an AR(1) process. The gradually decaying ACF confirms this &mdash; for AR($p$) models, the ACF tails off while the PACF cuts off at lag $p$.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: ACF vs PACF pattern matching</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p>You might be asked to distinguish between AR and MA models based on ACF/PACF plots. Here's the cheat sheet:</p>
+
+    <table class="ref-table">
+      <tr><th>Model</th><th>ACF</th><th>PACF</th></tr>
+      <tr><td><strong>AR($p$)</strong></td><td>Tails off (gradual decay)</td><td>Cuts off after lag $p$</td></tr>
+      <tr><td><strong>MA($q$)</strong></td><td>Cuts off after lag $q$</td><td>Tails off (gradual decay)</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <strong>Memory trick:</strong> AR and PACF both have the letter "R" &mdash; the PA<strong>R</strong>tial autocorrelation is what <strong>cuts off</strong> for A<strong>R</strong> models. Or just remember: "AR &rarr; PACF cuts off" and the MA case is the opposite.
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">acf_pacf.R</span></div>
+      <pre><code class="language-r"># Always run both plots together
+acf(data)   # check for gradual decay vs cutoff
+pacf(data)  # check for cutoff at specific lag
+
+# Fitting based on what you find:
+library(forecast)
+# AR(1): PACF cuts at 1
+Arima(data, order = c(1, 0, 0))
+# AR(2): PACF cuts at 2
+Arima(data, order = c(2, 0, 0))
+# MA(1): ACF cuts at 1
+Arima(data, order = c(0, 0, 1))</code></pre>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>You see an ACF that cuts off sharply after lag 3 (lags 4+ are within the bands) and a PACF that decays gradually. What type of model is this, and what order?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+        This is an <strong>MA(3)</strong> model. The ACF cutting off after lag 3 with a gradually decaying PACF is the signature pattern of an MA($q$) process with $q = 3$.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: R code for fitting AR models</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p>You may be asked to write the R code to fit a specific AR model. The function is <code>Arima()</code> from the <code>forecast</code> package.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">arima_syntax.R</span></div>
+      <pre><code class="language-r">library(forecast)
+
+# Arima(y, order = c(p, d, q))
+#   y     = the time series data (vector or column)
+#   order = c(p, d, q)
+#     p = AR order
+#     d = differencing (always 0 in this course)
+#     q = MA order
+
+# Example: Fit AR(2) to a vector called y
+model <- Arima(y, order = c(2, 0, 0))
+
+# To see coefficients and p-values:
+library(lmtest)
+coeftest(model)</code></pre>
+    </div>
+
+    <div class="callout warning">
+      <strong>Common exam mistakes:</strong><br>
+      &bull; Writing <code>arima()</code> (lowercase) instead of <code>Arima()</code> (capital A)<br>
+      &bull; Getting the order wrong: <code>c(p, d, q)</code> &mdash; AR is first, MA is last<br>
+      &bull; Forgetting <code>library(forecast)</code><br>
+      &bull; Confusing AR(2) = <code>c(2, 0, 0)</code> with MA(2) = <code>c(0, 0, 2)</code>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Write the R code to fit an AR(1) model to data stored in a vector called <code>stock_prices</code>. Include the library call.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        <code>library(forecast)</code><br>
+        <code>model &lt;- Arima(stock_prices, order = c(1, 0, 0))</code>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: ACF/PACF & AR Models</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>Time series data violates one of the LINE conditions for regression. Which condition is violated, and why?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        Time series data violates the <strong>Independence</strong> condition (the "I" in LINE). In time series, each observation $Y_t$ depends on previous observations ($Y_{t-1}$, $Y_{t-2}$, etc.), so the observations are not independent of each other. This means the standard errors and p-values from ordinary linear regression (<code>lm()</code>) are unreliable.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>You run <code>acf(data)</code> and see a slow, gradual decay across many lags. You run <code>pacf(data)</code> and see significant spikes at lags 1 and 2, with all subsequent lags inside the significance bands. What model is appropriate and what R code would you use to fit it?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        An <strong>AR(2)</strong> model. The gradually decaying ACF combined with a PACF that cuts off after lag 2 is the signature pattern of an AR(2) process.<br><br>
+        <code>library(forecast)</code><br>
+        <code>model &lt;- Arima(data, order = c(2, 0, 0))</code>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>For an AR(1) model $Y_t = c + \phi_1 Y_{t-1} + \eta_t$, explain why the PACF would show a significant spike only at lag 1, even though $Y_t$ is correlated with $Y_{t-2}$, $Y_{t-3}$, etc.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        The PACF measures the <strong>direct</strong> correlation between $Y_t$ and $Y_{t-k}$ after removing the effect of intermediate lags. In AR(1), $Y_t$ is directly connected only to $Y_{t-1}$. Its correlation with $Y_{t-2}$ is entirely <strong>indirect</strong> &mdash; it passes through $Y_{t-1}$. Once you remove the effect of $Y_{t-1}$ (which is what the "partial" does), there is no remaining direct link between $Y_t$ and $Y_{t-2}$. So the PACF at lag 2 is zero.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>What is the difference between $\eta_t$ and $Y_t$ in a time series model? Which one is independent across time and which is not?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        $\eta_t$ is the <strong>shock</strong> (or innovation/noise) at time $t$ &mdash; it is <strong>independent</strong> across time, with each $\eta_t \sim N(0, \sigma^2)$. $Y_t$ is the <strong>observation</strong> at time $t$ &mdash; it is <strong>NOT independent</strong> across time because it is built from previous observations plus the current shock. In an AR(1): $Y_t = c + \phi_1 Y_{t-1} + \eta_t$, so $Y_t$ carries forward the influence of all past shocks through $Y_{t-1}$.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 16 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 16 &rarr; Go to Module 17</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod16_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod16_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[16]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-17.html'}
+loadState();
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSC 152 — Final Exam Crash Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;min-height:100vh}
+
+  .hero{background:linear-gradient(135deg,#0f0f2d 0%,#1a0a2e 50%,#0f1a3e 100%);padding:3rem 2rem;text-align:center;border-bottom:2px solid #1a1a3e}
+  .hero h1{font-size:2rem;font-weight:900;letter-spacing:2px;margin-bottom:0.3rem}
+  .hero h1 span{background:linear-gradient(90deg,#e94560,#ffbd2e,#28c840);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .sub{color:#888;font-size:0.85rem;margin-bottom:1.5rem}
+  .hero-stats{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+  .hero-stat{text-align:center}
+  .hero-stat .val{font-size:2.2rem;font-weight:900;font-family:'JetBrains Mono',monospace}
+  .hero-stat .lbl{font-size:0.6rem;text-transform:uppercase;letter-spacing:2px;color:#888;margin-top:0.1rem}
+  .val.xp{color:#ffbd2e}.val.mod{color:#28c840}.val.rdy{color:#e94560}
+
+  .container{max-width:900px;margin:0 auto;padding:2rem 1rem}
+
+  .unit{margin-bottom:2.5rem}
+  .unit-header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid #1a1a3e}
+  .unit-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:4px}
+  .unit-badge.u1{background:#e94560;color:#fff}
+  .unit-badge.u2{background:#0f3460;color:#a8d8ff}
+  .unit-badge.u3{background:#6c3483;color:#d2b4de}
+  .unit-badge.uf{background:#28c840;color:#000}
+  .unit-title{font-size:1rem;font-weight:700}
+  .unit-pct{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700}
+
+  .module-list{display:flex;flex-direction:column;gap:0.5rem}
+
+  .mod{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;padding:0.9rem 1.2rem;display:flex;align-items:center;gap:0.8rem;transition:all 0.2s;cursor:pointer;text-decoration:none;color:inherit}
+  .mod:hover{border-color:#0f3460;background:#161630;transform:translateX(3px)}
+  .mod.done{border-color:#1a3a1a}
+  .mod.active{border-color:#ffbd2e;box-shadow:0 0 15px rgba(255,189,46,0.1)}
+  .mod.locked{opacity:0.4;cursor:default}
+  .mod.locked:hover{transform:none;border-color:#1a1a3e;background:#12121e}
+
+  .mod-num{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:800;flex-shrink:0}
+  .mod-num.done-n{background:#28c840;color:#000}
+  .mod-num.active-n{background:#ffbd2e;color:#000}
+  .mod-num.todo-n{background:#1a1a3e;color:#666}
+
+  .mod-info{flex:1;min-width:0}
+  .mod-title{font-size:0.88rem;font-weight:700;margin-bottom:0.15rem}
+  .mod-desc{font-size:0.72rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .mod-bar{width:100px;flex-shrink:0}
+  .mod-bar-track{height:5px;background:#0a0a14;border-radius:3px;overflow:hidden}
+  .mod-bar-fill{height:100%;border-radius:3px;transition:width 0.5s}
+  .mod-bar-fill.g{background:#28c840}.mod-bar-fill.y{background:#ffbd2e}.mod-bar-fill.r{background:#e94560}.mod-bar-fill.z{background:#1a1a3e}
+
+  .mod-pct{width:35px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#666;flex-shrink:0}
+
+  .checkpoint{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px dashed #0f3460;border-radius:8px;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.8rem;margin-top:0.3rem}
+  .checkpoint .cp-icon{font-size:1.2rem}
+  .checkpoint .cp-title{font-weight:700;font-size:0.85rem}
+  .checkpoint .cp-desc{font-size:0.7rem;color:#888}
+
+  .how-it-works{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;padding:1.5rem;margin-bottom:2rem}
+  .how-it-works h3{font-size:0.9rem;color:#ffbd2e;margin-bottom:0.8rem}
+  .hiw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .hiw-step{text-align:center;padding:0.8rem;border-radius:6px;background:#0a0a14}
+  .hiw-step .num{font-size:1.5rem;font-weight:900;color:#ffbd2e;font-family:'JetBrains Mono',monospace}
+  .hiw-step .title{font-size:0.78rem;font-weight:700;margin:0.3rem 0 0.2rem}
+  .hiw-step .desc{font-size:0.68rem;color:#888}
+
+  @media(max-width:650px){.hiw-grid{grid-template-columns:1fr}.hero-stats{gap:1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>DSC 152 <span>CRASH COURSE</span></h1>
+  <div class="sub">17 modules &bull; 3 unit checkpoints &bull; 1 final &bull; Exam: Sat June 7 @ 3 PM</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val mod" id="modDone">0/17</div><div class="lbl">Modules Done</div></div>
+    <div class="hero-stat"><div class="val xp" id="totalXp">0%</div><div class="lbl">Coverage</div></div>
+    <div class="hero-stat"><div class="val rdy" id="quizDone">0/3</div><div class="lbl">Checkpoints</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="how-it-works">
+  <h3>How Each Module Works</h3>
+  <div class="hiw-grid">
+    <div class="hiw-step">
+      <div class="num">A</div>
+      <div class="title">Learn the Concept</div>
+      <div class="desc">Intuition → definition → R code → worked example → common confusions</div>
+    </div>
+    <div class="hiw-step">
+      <div class="num">B</div>
+      <div class="title">On the Exam</div>
+      <div class="desc">Real exam question → wrong answer → full-marks answer → wording keys</div>
+    </div>
+    <div class="hiw-step">
+      <div class="num">C</div>
+      <div class="title">Your Turn</div>
+      <div class="desc">Practice question → write your answer → check wording → mark done</div>
+    </div>
+  </div>
+</div>
+
+<div id="courseContent"></div>
+
+</div>
+
+<script>
+const MODULES = [
+  // Unit 1
+  { id: 1, title: 'Hypothesis Testing & the t-Test', desc: 'H0/HA, p-values, t.test() syntax, what p-values are NOT', lec: '1-2', unit: 1, pct: 0 },
+  { id: 2, title: 'Type I Error & When Tests Break', desc: 'Inflated Type I Error, skewed data + small n, simulation pattern', lec: '2-3', unit: 1, pct: 0 },
+  { id: 3, title: 'The Sign Test', desc: 'Testing the median, pbinom(), discreteness problem, sign test vs t-test', lec: '3', unit: 1, pct: 0 },
+  { id: 4, title: 'Power Analysis', desc: '4 factors, power.t.test(), simulation-based power, when theory fails', lec: '4', unit: 1, pct: 0 },
+  { id: 5, title: 'Statistical vs Practical Significance', desc: 'Big n problem, effect size, CIs more useful than p-values, failing to reject ≠ H0 true', lec: '5', unit: 1, pct: 0 },
+  { id: 'cp1', checkpoint: true, title: 'Quiz 1 Checkpoint', desc: '5 questions covering Modules 1-5' },
+  // Unit 2
+  { id: 6, title: 'A/B Testing & Experiment Design', desc: 'Designed vs observational, random assignment → causation, t-test vs permutation', lec: '6', unit: 2, pct: 0 },
+  { id: 7, title: 'Simple Linear Regression Inference', desc: 'Inference on slope, CI for β₁, hypothesis test for slope = 0', lec: '7', unit: 2, pct: 0 },
+  { id: 8, title: 'Multiple Regression & "Holding Constant"', desc: 'Interpreting coefficients, global F-test, adjusted R²', lec: '8', unit: 2, pct: 0 },
+  { id: 9, title: 'Categorical Predictors & Partial F-Test', desc: 'Dummy variables, reference category, testing groups of coefficients', lec: '9', unit: 2, pct: 0 },
+  { id: 10, title: 'Model Diagnostics (LINE)', desc: 'Linearity, Independence, Normality, Equal variance — residual plots', lec: '10', unit: 2, pct: 0 },
+  { id: 11, title: 'Interaction Terms', desc: 'Subgroup equations, interpreting interactions, centering/scaling, partial F-test', lec: '11-12', unit: 2, pct: 0 },
+  { id: 12, title: 'Model Selection Pitfalls', desc: 'Select-then-infer fallacy, primary/secondary analysis, backward elimination', lec: '13', unit: 2, pct: 0 },
+  { id: 13, title: 'Transformations', desc: 'Log-linear, double-log derivation, linear-log, still linear regression', lec: '14', unit: 2, pct: 0 },
+  { id: 'cp2', checkpoint: true, title: 'Quiz 2 Checkpoint', desc: '5 questions covering Modules 6-13' },
+  // Unit 3
+  { id: 14, title: 'Odds Ratios & Relative Risk', desc: 'Odds vs probability, OR from 2x2 table, OR vs RR, rare disease approximation', lec: '15', unit: 3, pct: 0 },
+  { id: 15, title: 'Logistic Regression', desc: 'glm(), log-odds → odds ratio, CI conversion, predicted probability, 3 conditions', lec: '16', unit: 3, pct: 0 },
+  { id: 16, title: 'Time Series — ACF/PACF & AR/MA', desc: 'Autocorrelation, PACF cuts off → AR(p), ACF cuts off → MA(q)', lec: '17', unit: 3, pct: 0 },
+  { id: 17, title: 'Time Series Regression & Power', desc: 'Arima() syntax, coeftest(), lm vs Arima power, simulation study', lec: '18-19', unit: 3, pct: 0 },
+  { id: 'cp3', checkpoint: true, title: 'Quiz 3 Checkpoint', desc: '5 questions covering Modules 14-17' },
+  // Final
+  { id: 'final', checkpoint: true, title: 'FINAL EXAM PREP', desc: 'Full practice exam + cheat sheet + wording drill' },
+];
+
+const UNITS = {
+  1: { label: 'UNIT 1 — HYPOTHESIS TESTING', badge: 'u1', lecs: '1-5' },
+  2: { label: 'UNIT 2 — LINEAR REGRESSION', badge: 'u2', lecs: '6-14' },
+  3: { label: 'UNIT 3 — LOGISTIC & TIME SERIES', badge: 'u3', lecs: '15-19' },
+};
+
+function loadPct() {
+  try {
+    const s = localStorage.getItem('dsc152_course');
+    if (s) {
+      const data = JSON.parse(s);
+      MODULES.forEach(m => { if (data[m.id] !== undefined) m.pct = data[m.id]; });
+    }
+  } catch(e) {}
+}
+
+function savePct() {
+  const data = {};
+  MODULES.forEach(m => { if (!m.checkpoint) data[m.id] = m.pct; });
+  localStorage.setItem('dsc152_course', JSON.stringify(data));
+}
+
+function render() {
+  loadPct();
+  let html = '';
+  let currentUnit = 0;
+  let unitMods = [];
+
+  MODULES.forEach((m, idx) => {
+    if (m.checkpoint) {
+      // Close current unit if open
+      if (currentUnit > 0) {
+        const unitPct = unitMods.length > 0 ? Math.round(unitMods.reduce((a,b) => a + b, 0) / unitMods.length) : 0;
+        // Insert unit pct into header (done via DOM after)
+        const cpBuilt = {cp1:'quiz1-checkpoint.html',final:'final-simulator.html'};
+        const cpLink = cpBuilt[m.id];
+        html += `<div class="checkpoint" ${cpLink?'onclick="window.location.href=\''+cpLink+'\'" style="cursor:pointer"':''}>
+          <span class="cp-icon">⚡</span>
+          <div><div class="cp-title">${m.title}</div><div class="cp-desc">${m.desc}</div></div>
+        </div>`;
+        html += `</div></div>`; // close module-list and unit
+      }
+      if (m.id === 'final') {
+        html += `<div class="unit"><div class="unit-header"><span class="unit-badge uf">FINAL</span><span class="unit-title">Final Exam Prep</span></div>`;
+        html += `<div class="module-list">`;
+        html += `<div class="mod active" onclick="window.location.href='lab9-review.html'" style="border-color:#e94560">
+          <div class="mod-num active-n" style="background:#e94560">L9</div>
+          <div class="mod-info"><div class="mod-title">Lab 9 Review (APPEARS ON FINAL)</div><div class="mod-desc">Model selection vs inference, Lucas 2013, correct workflow, diagnostic checks, log traps</div></div>
+        </div>`;
+        html += `<div class="mod" onclick="window.location.href='final-simulator.html'" style="border-color:#28c840">
+          <div class="mod-num" style="background:#28c840;color:#000">FE</div>
+          <div class="mod-info"><div class="mod-title">Final Exam Simulator</div><div class="mod-desc">15 questions, 3-hour timer, all topics, auto-graded</div></div>
+        </div>`;
+        html += `</div></div>`;
+      }
+      unitMods = [];
+      return;
+    }
+
+    if (m.unit !== currentUnit) {
+      if (currentUnit > 0) {
+        // Don't close — checkpoint handles it
+      }
+      currentUnit = m.unit;
+      const u = UNITS[m.unit];
+      html += `<div class="unit"><div class="unit-header"><span class="unit-badge ${u.badge}">${u.label}</span><span class="unit-title">Lectures ${u.lecs}</span></div>`;
+      html += `<div class="module-list">`;
+    }
+
+    unitMods.push(m.pct);
+    const status = m.pct >= 85 ? 'done' : m.pct > 0 ? 'active' : '';
+    const numCls = m.pct >= 85 ? 'done-n' : m.pct > 0 ? 'active-n' : 'todo-n';
+    const barCls = m.pct >= 85 ? 'g' : m.pct >= 40 ? 'y' : m.pct > 0 ? 'r' : 'z';
+
+    html += `<div class="mod ${status}" onclick="openModule(${m.id})">
+      <div class="mod-num ${numCls}">${m.id}</div>
+      <div class="mod-info">
+        <div class="mod-title">${m.title}</div>
+        <div class="mod-desc">${m.desc}</div>
+      </div>
+      <div class="mod-bar"><div class="mod-bar-track"><div class="mod-bar-fill ${barCls}" style="width:${m.pct}%"></div></div></div>
+      <div class="mod-pct">${m.pct}%</div>
+    </div>`;
+  });
+
+  document.getElementById('courseContent').innerHTML = html;
+
+  // Stats
+  const realMods = MODULES.filter(m => !m.checkpoint);
+  const done = realMods.filter(m => m.pct >= 85).length;
+  const avgPct = Math.round(realMods.reduce((a, m) => a + m.pct, 0) / realMods.length);
+  document.getElementById('modDone').textContent = done + '/17';
+  document.getElementById('totalXp').textContent = avgPct + '%';
+  document.getElementById('totalXp').style.color = avgPct >= 85 ? '#28c840' : avgPct >= 50 ? '#ffbd2e' : '#e94560';
+}
+
+function openModule(id) {
+  const built = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
+  if (built.includes(id)) {
+    window.location.href = 'module-' + String(id).padStart(2,'0') + '.html';
+  } else {
+    const m = MODULES.find(x => x.id === id);
+    if (m) alert(`Tell Claude: "build module ${id}"\n\nClaude will create the full lesson page.`);
+  }
+}
+
+render();
+</script>
+</body>
+</html>

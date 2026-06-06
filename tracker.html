@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSC 152 — Final Exam Skill Tree</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-bottom: 2px solid #0f3460;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 {
+    font-size: 1.4rem; font-weight: 900; letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #e94560, #ffbd2e, #28c840);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header .exam-countdown {
+    font-size: 0.8rem; color: #e94560; font-weight: 700;
+    letter-spacing: 1px; margin-top: 0.3rem;
+  }
+
+  /* Overall stats bar */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 2rem;
+    padding: 1rem 2rem; background: #1a1a2e;
+    border-bottom: 1px solid #2a2a4a;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .stat-value {
+    font-size: 1.8rem; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stat-item .stat-label {
+    font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 1.5px; color: #888; margin-top: 0.1rem;
+  }
+  .stat-value.xp { color: #ffbd2e; }
+  .stat-value.topics { color: #28c840; }
+  .stat-value.ready { color: #e94560; }
+
+  /* Main content */
+  .main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+  /* Tier sections */
+  .tier {
+    margin-bottom: 2rem;
+  }
+  .tier-header {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 1rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid #2a2a4a;
+  }
+  .tier-badge {
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 4px;
+  }
+  .tier-badge.t1 { background: #e94560; color: #fff; }
+  .tier-badge.t2 { background: #0f3460; color: #a8d8ff; }
+  .tier-badge.t3 { background: #2a2a4a; color: #888; }
+  .tier-title { font-size: 0.9rem; font-weight: 700; color: #ccc; }
+  .tier-pct {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem; font-weight: 700;
+  }
+
+  /* Connection lines (SVG drawn between topics) */
+  .tree-container { position: relative; }
+
+  /* Topic nodes */
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+  .topic-node {
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    position: relative;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .topic-node:hover {
+    border-color: #0f3460;
+    box-shadow: 0 0 20px rgba(15, 52, 96, 0.3);
+    transform: translateY(-1px);
+  }
+  .topic-node.mastered { border-color: #28c840; box-shadow: 0 0 10px rgba(40, 200, 64, 0.15); }
+  .topic-node.in-progress { border-color: #ffbd2e; box-shadow: 0 0 10px rgba(255, 189, 46, 0.1); }
+  .topic-node.locked { opacity: 0.5; border-color: #2a2a4a; }
+
+  .topic-head {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .topic-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .topic-icon.mastered-icon { background: #28c840; color: #000; }
+  .topic-icon.progress-icon { background: #ffbd2e; color: #000; }
+  .topic-icon.todo-icon { background: #2a2a4a; color: #666; }
+  .topic-icon.locked-icon { background: #1a1a2e; color: #444; border: 1px solid #333; }
+
+  .topic-name { font-size: 0.88rem; font-weight: 700; }
+  .topic-lec { font-size: 0.68rem; color: #666; margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+
+  /* Main XP bar */
+  .xp-bar-container {
+    margin-bottom: 0.5rem;
+  }
+  .xp-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.68rem; color: #888; margin-bottom: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .xp-bar-track {
+    height: 8px; background: #0f0f1a; border-radius: 4px; overflow: hidden;
+  }
+  .xp-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .xp-bar-fill.green { background: linear-gradient(90deg, #28c840, #5dff77); }
+  .xp-bar-fill.yellow { background: linear-gradient(90deg, #ffbd2e, #ffe066); }
+  .xp-bar-fill.red { background: linear-gradient(90deg, #e94560, #ff6b81); }
+  .xp-bar-fill.gray { background: #2a2a4a; }
+
+  /* Sub-skill bars */
+  .sub-skills { margin-top: 0.5rem; }
+  .sub-skill-row {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin: 3px 0; font-size: 0.72rem;
+  }
+  .sub-skill-name { color: #999; width: 140px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sub-bar-track {
+    flex: 1; height: 4px; background: #0f0f1a; border-radius: 2px; overflow: hidden;
+  }
+  .sub-bar-fill {
+    height: 100%; border-radius: 2px; transition: width 0.6s ease;
+  }
+  .sub-pct {
+    width: 28px; text-align: right; color: #666;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  }
+
+  /* Dependency arrows */
+  .dep-tag {
+    display: inline-block; font-size: 0.6rem; padding: 1px 6px;
+    border-radius: 3px; margin: 1px; background: #16213e; color: #4a9eff;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .deps-row {
+    margin-top: 0.4rem; display: flex; flex-wrap: wrap; gap: 3px;
+    align-items: center;
+  }
+  .deps-label { font-size: 0.6rem; color: #555; margin-right: 3px; }
+
+  /* Status tags */
+  .status-tag {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 0.55rem; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
+  }
+  .status-tag.mastered-tag { background: #28c840; color: #000; }
+  .status-tag.progress-tag { background: #ffbd2e; color: #000; }
+  .status-tag.todo-tag { background: #2a2a4a; color: #888; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 1.5rem; justify-content: center;
+    padding: 0.8rem; font-size: 0.72rem; color: #888;
+    border-top: 1px solid #2a2a4a; margin-top: 1rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* Edit mode */
+  .edit-panel {
+    display: none; position: fixed; top: 0; right: 0; bottom: 0;
+    width: 380px; background: #1a1a2e; border-left: 2px solid #0f3460;
+    z-index: 200; padding: 1.5rem; overflow-y: auto;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+  }
+  .edit-panel.open { display: block; }
+  .edit-panel h3 { font-size: 1rem; margin-bottom: 1rem; color: #ffbd2e; }
+  .edit-panel label { display: block; font-size: 0.75rem; color: #888; margin: 0.6rem 0 0.2rem; text-transform: uppercase; letter-spacing: 1px; }
+  .edit-panel input[type="range"] { width: 100%; accent-color: #ffbd2e; }
+  .edit-panel .range-val { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #ffbd2e; float: right; }
+  .edit-panel .save-btn {
+    width: 100%; padding: 0.7rem; margin-top: 1.5rem;
+    background: #28c840; color: #000; font-weight: 800;
+    border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .edit-panel .save-btn:hover { background: #5dff77; }
+  .edit-panel .close-btn {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer;
+  }
+
+  @media (max-width: 700px) {
+    .topic-grid { grid-template-columns: 1fr; }
+    .stats-bar { gap: 1rem; }
+    .stat-item .stat-value { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>DSC 152 Skill Tree</h1>
+  <div class="exam-countdown" id="countdown">EXAM: SAT JUNE 7 @ 3 PM</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-value xp" id="totalXp">0</div>
+    <div class="stat-label">Total XP</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value topics" id="topicsDone">0/16</div>
+    <div class="stat-label">Topics Mastered</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value ready" id="readiness">0%</div>
+    <div class="stat-label">Exam Ready</div>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#28c840;"></div> Mastered (85%+)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffbd2e;"></div> In Progress</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e94560;"></div> Needs Work</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2a2a4a;"></div> Not Started</div>
+  <div style="margin-left:1rem; color:#666;">Click any topic to update scores</div>
+</div>
+
+<!-- Edit panel -->
+<div class="edit-panel" id="editPanel">
+  <button class="close-btn" onclick="closeEdit()">&times;</button>
+  <h3 id="editTitle"></h3>
+  <div id="editSliders"></div>
+  <button class="save-btn" onclick="saveEdit()">Save Progress</button>
+</div>
+
+<script>
+const TOPICS = [
+  // Tier 1 — High Priority (Lec 11+)
+  {
+    id: 'interaction', name: 'Interaction Terms', lec: '11-12', tier: 1,
+    deps: ['categorical', 'multiple-reg'],
+    subSkills: [
+      { name: 'Write subgroup equations', val: 0 },
+      { name: 'Interpret interaction coefs', val: 0 },
+      { name: 'Partial F-test', val: 0 },
+      { name: 'Centering & scaling', val: 0 },
+    ]
+  },
+  {
+    id: 'model-selection', name: 'Model Selection Pitfalls', lec: '13', tier: 1,
+    deps: ['interaction'],
+    subSkills: [
+      { name: 'Select-then-infer fallacy', val: 0 },
+      { name: 'Primary vs secondary analysis', val: 0 },
+      { name: 'Backward elimination role', val: 0 },
+    ]
+  },
+  {
+    id: 'transformations', name: 'Transformations', lec: '14', tier: 1,
+    deps: ['simple-reg', 'diagnostics'],
+    subSkills: [
+      { name: 'Log-linear interpretation', val: 0 },
+      { name: 'Double-log derivation', val: 0 },
+      { name: 'Linear-log interpretation', val: 0 },
+      { name: '"Still linear regression"', val: 0 },
+    ]
+  },
+  {
+    id: 'odds-ratios', name: 'Odds Ratios & RR', lec: '15', tier: 1,
+    deps: ['hypothesis'],
+    subSkills: [
+      { name: 'Odds vs probability', val: 0 },
+      { name: 'OR from 2x2 table', val: 0 },
+      { name: 'OR vs RR (when similar)', val: 0 },
+    ]
+  },
+  {
+    id: 'logistic', name: 'Logistic Regression', lec: '16', tier: 1,
+    deps: ['odds-ratios', 'multiple-reg'],
+    subSkills: [
+      { name: 'Write fitted model', val: 0 },
+      { name: 'Interpret on odds scale', val: 0 },
+      { name: 'CI for odds ratio', val: 0 },
+      { name: 'Compute predicted prob', val: 0 },
+      { name: '3 conditions for inference', val: 0 },
+    ]
+  },
+  {
+    id: 'timeseries-intro', name: 'Time Series Intro', lec: '17', tier: 1,
+    deps: [],
+    subSkills: [
+      { name: 'ACF plot reading', val: 0 },
+      { name: 'PACF plot reading', val: 0 },
+      { name: 'Identify AR order from PACF', val: 0 },
+      { name: 'AR vs MA patterns', val: 0 },
+    ]
+  },
+  {
+    id: 'timeseries-reg', name: 'Time Series Regression', lec: '18-19', tier: 1,
+    deps: ['timeseries-intro', 'simple-reg'],
+    subSkills: [
+      { name: 'LINE violation (Independence)', val: 85 },
+      { name: 'AR vs MA error structures', val: 30 },
+      { name: 'Arima() syntax & order', val: 40 },
+      { name: 'coeftest() for p-values', val: 30 },
+      { name: 'Read Arima output', val: 40 },
+      { name: 'Power: lm vs Arima', val: 85 },
+    ]
+  },
+  // Tier 2 — Foundation (Lec 6-11)
+  {
+    id: 'ab-testing', name: 'A/B Testing', lec: '6', tier: 2,
+    deps: ['hypothesis', 'power'],
+    subSkills: [
+      { name: 'Designed vs observational', val: 0 },
+      { name: 't-test vs permutation', val: 0 },
+      { name: 'When each is valid', val: 0 },
+    ]
+  },
+  {
+    id: 'simple-reg', name: 'Simple Linear Regression', lec: '7', tier: 2,
+    deps: ['hypothesis'],
+    subSkills: [
+      { name: 'Inference on slope', val: 0 },
+      { name: 'Interpret R output', val: 0 },
+      { name: 'Confidence interval', val: 0 },
+    ]
+  },
+  {
+    id: 'multiple-reg', name: 'Multiple Linear Regression', lec: '8', tier: 2,
+    deps: ['simple-reg'],
+    subSkills: [
+      { name: 'Interpret coefs (holding constant)', val: 0 },
+      { name: 'Global F-test', val: 0 },
+      { name: 'Adjusted R-squared', val: 0 },
+    ]
+  },
+  {
+    id: 'categorical', name: 'Categorical Predictors', lec: '9', tier: 2,
+    deps: ['multiple-reg'],
+    subSkills: [
+      { name: 'Dummy variables', val: 0 },
+      { name: 'Reference category', val: 0 },
+      { name: 'Partial F-test basics', val: 0 },
+    ]
+  },
+  {
+    id: 'diagnostics', name: 'Model Diagnostics', lec: '10', tier: 2,
+    deps: ['simple-reg'],
+    subSkills: [
+      { name: 'LINE conditions', val: 0 },
+      { name: 'Residual plots', val: 0 },
+      { name: 'Identifying violations', val: 0 },
+    ]
+  },
+  // Tier 3 — Foundations (Lec 1-5)
+  {
+    id: 'hypothesis', name: 'Hypothesis Testing', lec: '1-2', tier: 3,
+    deps: [],
+    subSkills: [
+      { name: 'H0 / HA setup', val: 0 },
+      { name: 'Type I error definition', val: 0 },
+      { name: 'p-value interpretation', val: 0 },
+      { name: 't-test mechanics', val: 0 },
+    ]
+  },
+  {
+    id: 'nonparametric', name: 'Nonparametric Tests', lec: '3', tier: 3,
+    deps: ['hypothesis'],
+    subSkills: [
+      { name: 'When to use (assumptions fail)', val: 0 },
+      { name: 'Wilcoxon test', val: 0 },
+    ]
+  },
+  {
+    id: 'power', name: 'Power Analysis', lec: '4', tier: 3,
+    deps: ['hypothesis'],
+    subSkills: [
+      { name: 'Power definition', val: 0 },
+      { name: 'Factors affecting power', val: 0 },
+      { name: 'Power simulation', val: 0 },
+    ]
+  },
+  {
+    id: 'effect-size', name: 'Significance vs Effect Size', lec: '5', tier: 3,
+    deps: ['hypothesis', 'power'],
+    subSkills: [
+      { name: 'Statistical vs practical', val: 0 },
+      { name: 'Large n problem', val: 0 },
+    ]
+  },
+];
+
+const TIER_META = {
+  1: { label: 'TIER 1 — HIGH PRIORITY', badge: 't1', weight: 3 },
+  2: { label: 'TIER 2 — FOUNDATION', badge: 't2', weight: 2 },
+  3: { label: 'TIER 3 — FUNDAMENTALS', badge: 't3', weight: 1 },
+};
+
+let editingTopic = null;
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('dsc152_tracker');
+    if (saved) {
+      const state = JSON.parse(saved);
+      TOPICS.forEach(t => {
+        if (state[t.id]) {
+          t.subSkills.forEach((s, i) => {
+            if (state[t.id][i] !== undefined) s.val = state[t.id][i];
+          });
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  const state = {};
+  TOPICS.forEach(t => {
+    state[t.id] = t.subSkills.map(s => s.val);
+  });
+  localStorage.setItem('dsc152_tracker', JSON.stringify(state));
+}
+
+function topicAvg(t) {
+  if (t.subSkills.length === 0) return 0;
+  return Math.round(t.subSkills.reduce((a, s) => a + s.val, 0) / t.subSkills.length);
+}
+
+function getStatus(avg) {
+  if (avg >= 85) return 'mastered';
+  if (avg > 0) return 'in-progress';
+  return 'todo';
+}
+
+function getBarClass(val) {
+  if (val >= 85) return 'green';
+  if (val >= 40) return 'yellow';
+  if (val > 0) return 'red';
+  return 'gray';
+}
+
+function computeStats() {
+  let totalXp = 0, mastered = 0, weightedSum = 0, weightedMax = 0;
+  TOPICS.forEach(t => {
+    const avg = topicAvg(t);
+    const w = TIER_META[t.tier].weight;
+    totalXp += Math.round(avg * w * t.subSkills.length / 10);
+    weightedSum += avg * w;
+    weightedMax += 100 * w;
+    if (avg >= 85) mastered++;
+  });
+  const readiness = Math.round(weightedSum / weightedMax * 100);
+  return { totalXp, mastered, readiness };
+}
+
+function renderTier(tier) {
+  const topics = TOPICS.filter(t => t.tier === tier);
+  const meta = TIER_META[tier];
+  const tierAvg = topics.length > 0 ? Math.round(topics.reduce((a, t) => a + topicAvg(t), 0) / topics.length) : 0;
+
+  let html = `<div class="tier">`;
+  html += `<div class="tier-header">
+    <span class="tier-badge ${meta.badge}">${meta.label}</span>
+    <span class="tier-pct" style="color:${tierAvg >= 85 ? '#28c840' : tierAvg > 0 ? '#ffbd2e' : '#666'}">${tierAvg}%</span>
+  </div>`;
+  html += `<div class="topic-grid">`;
+
+  topics.forEach(t => {
+    const avg = topicAvg(t);
+    const status = getStatus(avg);
+    const barClass = getBarClass(avg);
+
+    html += `<div class="topic-node ${status === 'mastered' ? 'mastered' : status === 'in-progress' ? 'in-progress' : ''}" onclick="openEdit('${t.id}')">`;
+    html += `<span class="status-tag ${status}-tag">${status === 'mastered' ? 'MASTERED' : status === 'in-progress' ? 'IN PROGRESS' : 'NOT STARTED'}</span>`;
+
+    html += `<div class="topic-head">`;
+    html += `<div class="topic-icon ${status === 'mastered' ? 'mastered-icon' : status === 'in-progress' ? 'progress-icon' : 'todo-icon'}">${avg}</div>`;
+    html += `<span class="topic-name">${t.name}</span>`;
+    html += `<span class="topic-lec">L${t.lec}</span>`;
+    html += `</div>`;
+
+    // Main XP bar
+    html += `<div class="xp-bar-container">`;
+    html += `<div class="xp-bar-label"><span>MASTERY</span><span>${avg}%</span></div>`;
+    html += `<div class="xp-bar-track"><div class="xp-bar-fill ${barClass}" style="width:${avg}%"></div></div>`;
+    html += `</div>`;
+
+    // Sub-skill bars
+    html += `<div class="sub-skills">`;
+    t.subSkills.forEach(s => {
+      const sc = getBarClass(s.val);
+      html += `<div class="sub-skill-row">`;
+      html += `<span class="sub-skill-name" title="${s.name}">${s.name}</span>`;
+      html += `<div class="sub-bar-track"><div class="sub-bar-fill ${sc}" style="width:${s.val}%"></div></div>`;
+      html += `<span class="sub-pct">${s.val}</span>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+
+    // Dependencies
+    if (t.deps.length > 0) {
+      html += `<div class="deps-row"><span class="deps-label">requires:</span>`;
+      t.deps.forEach(d => {
+        const dep = TOPICS.find(x => x.id === d);
+        const dAvg = dep ? topicAvg(dep) : 0;
+        const dColor = dAvg >= 85 ? '#28c840' : dAvg > 0 ? '#ffbd2e' : '#666';
+        html += `<span class="dep-tag" style="border:1px solid ${dColor}; color:${dColor}">${dep ? dep.name : d}</span>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div>`; // close topic-node
+  });
+
+  html += `</div></div>`; // close grid, tier
+  return html;
+}
+
+function render() {
+  const stats = computeStats();
+  document.getElementById('totalXp').textContent = stats.totalXp;
+  document.getElementById('topicsDone').textContent = `${stats.mastered}/16`;
+  document.getElementById('readiness').textContent = `${stats.readiness}%`;
+
+  // Color readiness
+  const readyEl = document.getElementById('readiness');
+  if (stats.readiness >= 85) readyEl.style.color = '#28c840';
+  else if (stats.readiness >= 50) readyEl.style.color = '#ffbd2e';
+  else readyEl.style.color = '#e94560';
+
+  let html = '';
+  [1, 2, 3].forEach(tier => { html += renderTier(tier); });
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function openEdit(topicId) {
+  const t = TOPICS.find(x => x.id === topicId);
+  if (!t) return;
+  editingTopic = t;
+
+  document.getElementById('editTitle').textContent = t.name + ' (L' + t.lec + ')';
+
+  let html = '';
+  t.subSkills.forEach((s, i) => {
+    html += `<label>${s.name} <span class="range-val" id="rv_${i}">${s.val}%</span></label>`;
+    html += `<input type="range" min="0" max="100" step="5" value="${s.val}" id="slider_${i}" oninput="document.getElementById('rv_${i}').textContent=this.value+'%'">`;
+  });
+  document.getElementById('editSliders').innerHTML = html;
+  document.getElementById('editPanel').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('editPanel').classList.remove('open');
+  editingTopic = null;
+}
+
+function saveEdit() {
+  if (!editingTopic) return;
+  editingTopic.subSkills.forEach((s, i) => {
+    const slider = document.getElementById('slider_' + i);
+    if (slider) s.val = parseInt(slider.value);
+  });
+  saveState();
+  render();
+  closeEdit();
+}
+
+// Init
+loadState();
+render();
+</script>
+</body>
+</html>

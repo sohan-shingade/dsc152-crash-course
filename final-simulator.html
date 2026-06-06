@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Exam Simulator — DSC 152</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .current{color:#e94560;font-weight:700}
+  .timer-bar{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.75rem;color:#888;position:sticky;top:38px;z-index:99}
+  .timer-bar .clock{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:800;color:#ffbd2e}
+  .timer-bar .q-count{margin-left:auto;font-family:'JetBrains Mono',monospace}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  h1{font-size:1.4rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
+  h1 span{color:#e94560}
+  .subtitle{text-align:center;color:#888;font-size:0.8rem;margin-bottom:0.5rem}
+  .unit-divider{text-align:center;margin:2rem 0 1rem;padding:0.5rem;border:1px solid #1a1a3e;border-radius:6px;background:#0f0f1a}
+  .unit-divider h2{font-size:1rem;font-weight:800;color:#ffbd2e;margin:0}
+  .unit-divider p{font-size:0.72rem;color:#888;margin:0}
+  .q{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem}
+  .q.correct{border-color:#28c840;background:rgba(40,200,64,0.03)}
+  .q.incorrect{border-color:#e94560;background:rgba(233,69,96,0.03)}
+  .q-head{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem}
+  .q-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;background:#1a1a3e;padding:2px 8px;border-radius:4px}
+  .q-tag{font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:#888;margin-left:auto}
+  .q-text{font-size:0.88rem;margin-bottom:0.6rem}
+  .q-text p{margin-bottom:0.4rem}
+  .opts{display:flex;flex-direction:column;gap:0.3rem}
+  .opt{display:flex;align-items:flex-start;gap:0.5rem;padding:0.4rem 0.6rem;border:1px solid #1a1a3e;border-radius:4px;cursor:pointer;font-size:0.83rem;transition:all 0.15s}
+  .opt:hover{background:#161630;border-color:#2a2a4a}
+  .opt.selected{border-color:#4a9eff;background:rgba(74,158,255,0.08)}
+  .opt.graded-correct{border-color:#28c840;background:rgba(40,200,64,0.1)}
+  .opt.graded-wrong{border-color:#e94560;background:rgba(233,69,96,0.08)}
+  .opt .radio{width:16px;height:16px;border:2px solid #444;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center}
+  .opt .radio.check{border-radius:3px}
+  .opt.selected .radio{border-color:#4a9eff}
+  .opt.selected .radio::after{content:'';width:8px;height:8px;background:#4a9eff;border-radius:50%;display:block}
+  .opt.selected .radio.check::after{border-radius:1px}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .output-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.7rem 1rem;margin:0.5rem 0;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.6;overflow-x:auto;white-space:pre}
+  .submit-btn{display:block;width:100%;padding:0.9rem;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;margin-top:1.5rem}.submit-btn:hover{background:#ff6b81}
+  .submit-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .feedback{display:none;margin-top:0.5rem;padding:0.7rem;border-radius:6px;font-size:0.83rem}
+  .feedback.shown{display:block}
+  .feedback.right{background:rgba(40,200,64,0.08);border:1px solid #2a5c2a}
+  .feedback.wrong{background:rgba(233,69,96,0.08);border:1px solid #5c2a2a}
+  .results{display:none;background:#12121e;border:2px solid #ffbd2e;border-radius:12px;padding:1.5rem;margin-top:2rem;text-align:center}
+  .results.shown{display:block}
+  .results h2{font-size:1.5rem;font-weight:900;margin-bottom:0.5rem}
+  .results .score{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:900}
+  .results .score.good{color:#28c840}.results .score.ok{color:#ffbd2e}.results .score.bad{color:#e94560}
+  .skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem;text-align:left}
+  .skill-row{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.5rem 0.7rem;font-size:0.78rem}
+  .skill-row .name{color:#888;font-size:0.65rem;text-transform:uppercase;letter-spacing:1px}
+  .skill-row .bar-track{height:4px;background:#1a1a3e;border-radius:2px;margin-top:3px;overflow:hidden}
+  .skill-row .bar-fill{height:100%;border-radius:2px;transition:width 0.8s}
+  .unit-score-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin:1rem 0}
+  .unit-score-card{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:8px;padding:0.8rem;text-align:center}
+  .unit-score-card .label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:0.3rem}
+  .unit-score-card .val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  table.contingency{border-collapse:collapse;margin:0.5rem 0;font-size:0.82rem}
+  table.contingency th,table.contingency td{border:1px solid #333;padding:0.3rem 0.7rem;text-align:center}
+  table.contingency th{background:#1a1a3e;color:#ffbd2e;font-weight:700}
+  table.contingency td{background:#0f0f1a}
+  @media(max-width:600px){.skill-grid{grid-template-columns:1fr}.unit-score-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a>
+  <span class="current">Final Exam Simulator</span>
+</div>
+<div class="timer-bar">
+  <span>Time:</span><span class="clock" id="timer">180:00</span>
+  <span class="q-count"><span id="answered">0</span>/15 answered</span>
+</div>
+
+<div class="container">
+
+<h1><span>Final Exam</span> Simulator</h1>
+<p class="subtitle">All Topics &bull; Lectures 1&ndash;19 &bull; 15 Questions &bull; 180 Minutes</p>
+<p style="text-align:center;color:#666;font-size:0.72rem;margin-bottom:2rem">Covers: Hypothesis Testing, Regression, Logistic Regression &amp; Time Series</p>
+
+<!-- ===================== UNIT 1 ===================== -->
+<div class="unit-divider">
+  <h2>Unit 1: Hypothesis Testing</h2>
+  <p>Questions 1&ndash;4 &bull; p-values, Type I Error, Sign Test, Power</p>
+</div>
+
+<!-- Q1: p-value interpretation -->
+<div class="q" id="q1" data-unit="1" data-skill="p-value interpretation">
+  <div class="q-head">
+    <span class="q-num">Q1</span>
+    <span class="q-tag">Unit 1 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher tests $H_0: \mu = 100$ vs $H_A: \mu \neq 100$ and obtains a p-value of 0.04. Which interpretation is correct?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="1">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>(a) There is a 4% chance that $H_0$ is true.</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>(b) If $H_0$ is true, there is a 4% probability of observing a test statistic at least as extreme as the one observed.</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>(c) There is a 96% chance that $H_A$ is true.</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>(d) The Type I Error rate is 4%.</div>
+  </div>
+  <div class="feedback" id="fb1"></div>
+</div>
+
+<!-- Q2: Type I Error simulation code -->
+<div class="q" id="q2" data-unit="1" data-skill="Type I Error simulation">
+  <div class="q-head">
+    <span class="q-num">Q2</span>
+    <span class="q-tag">Unit 1 &bull; Fill in blanks</span>
+  </div>
+  <div class="q-text">
+    <p>Fill in the three blanks to estimate the Type I Error rate for a one-sample t-test when data come from a normal distribution with true mean 50.</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">type1_sim.R</span></div>
+      <pre><code class="language-r">count <- 0
+for(i in 1:10000){
+    samp <- rnorm(n = 30, mean = 50, sd = 10)
+    p.val <- t.test(samp, __(a)__)__(b)__
+    if(__(c)__){
+        count <- count + 1
+    }
+}
+TypeI <- count / 10000</code></pre>
+    </div>
+  </div>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(a): What value for mu? (We are simulating under $H_0$)</p>
+  <textarea class="fr-input" id="a2a" rows="1" style="min-height:30px" placeholder="(a) mu = ..."></textarea>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(b): How to extract the p-value?</p>
+  <textarea class="fr-input" id="a2b" rows="1" style="min-height:30px" placeholder="(b) $..."></textarea>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(c): Condition to count a rejection?</p>
+  <textarea class="fr-input" id="a2c" rows="1" style="min-height:30px" placeholder="(c) p.val ..."></textarea>
+  <div class="feedback" id="fb2"></div>
+</div>
+
+<!-- Q3: Sign test computation -->
+<div class="q" id="q3" data-unit="1" data-skill="Sign test">
+  <div class="q-head">
+    <span class="q-num">Q3</span>
+    <span class="q-tag">Unit 1 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>Sample: $\{14.2,\; 9.5,\; 12.0,\; 8.3,\; 11.7,\; 10.1\}$.</p>
+    <p>Test $H_0$: median $= 12$ vs $H_A$: median $\neq 12$ using a sign test.</p>
+    <p>(a) Write the sign sequence (subtract 12 from each value). Note: exact ties are excluded ($n_{\text{eff}}$ = number of non-ties).</p>
+    <p>(b) Compute the two-sided p-value using <code>pbinom()</code>.</p>
+  </div>
+  <textarea class="fr-input" id="a3" rows="5" placeholder="(a) Signs: ...&#10;(b) p-value = 2 * pbinom(...)"></textarea>
+  <div class="feedback" id="fb3"></div>
+</div>
+
+<!-- Q4: Power factors -->
+<div class="q" id="q4" data-unit="1" data-skill="Power factors">
+  <div class="q-head">
+    <span class="q-num">Q4</span>
+    <span class="q-tag">Unit 1 &bull; Select all that apply</span>
+  </div>
+  <div class="q-text">
+    <p>Which of the following changes, applied individually, would <strong>increase</strong> the statistical power of a one-sample t-test?</p>
+  </div>
+  <div class="opts" data-type="multi" data-answer="0,1">
+    <div class="opt" onclick="toggleOpt(this,0)"><span class="radio check"></span>Increase the sample size $n$ from 25 to 100</div>
+    <div class="opt" onclick="toggleOpt(this,1)"><span class="radio check"></span>Increase the effect size $\delta$ (the difference between the true mean and the null mean)</div>
+    <div class="opt" onclick="toggleOpt(this,2)"><span class="radio check"></span>Increase the population standard deviation $\sigma$</div>
+    <div class="opt" onclick="toggleOpt(this,3)"><span class="radio check"></span>Decrease the significance level $\alpha$ from 0.05 to 0.01</div>
+  </div>
+  <div class="feedback" id="fb4"></div>
+</div>
+
+<!-- ===================== UNIT 2 ===================== -->
+<div class="unit-divider">
+  <h2>Unit 2: Regression</h2>
+  <p>Questions 5&ndash;10 &bull; SLR, MLR, Partial F-test, Interactions, Diagnostics</p>
+</div>
+
+<!-- Q5: Interpret slope coefficient -->
+<div class="q" id="q5" data-unit="2" data-skill="Slope interpretation">
+  <div class="q-head">
+    <span class="q-num">Q5</span>
+    <span class="q-tag">Unit 2 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher fits a simple linear regression of <strong>salary</strong> (in &#36;1000s) on <strong>years of experience</strong> using observational data from a company survey. The output is:</p>
+    <div class="output-box">Coefficients:
+                    Estimate  Std. Error  t value  Pr(>|t|)
+(Intercept)         32.50      2.10      15.48    < 2e-16 ***
+years_experience     4.20      0.35      12.00    < 2e-16 ***</div>
+    <p>Interpret the slope coefficient <strong>in context</strong>. Be precise about causation vs association.</p>
+  </div>
+  <textarea class="fr-input" id="a5" rows="4" placeholder="For each additional year of experience..."></textarea>
+  <div class="feedback" id="fb5"></div>
+</div>
+
+<!-- Q6: Association vs causation -->
+<div class="q" id="q6" data-unit="2" data-skill="Association vs causation">
+  <div class="q-head">
+    <span class="q-num">Q6</span>
+    <span class="q-tag">Unit 2 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher finds a statistically significant positive relationship between daily coffee consumption and heart rate using an observational study of 500 adults, and concludes: "Drinking more coffee <em>causes</em> increased heart rate." Is this conclusion appropriate?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="1">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>(a) Yes &mdash; the p-value is significant so the causal claim is justified.</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>(b) No &mdash; this is observational data, so confounders may exist and we can only claim association, not causation.</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>(c) Yes &mdash; the large sample size (500) eliminates confounding.</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>(d) No &mdash; significant p-values only tell us about Type II Errors.</div>
+  </div>
+  <div class="feedback" id="fb6"></div>
+</div>
+
+<!-- Q7: Holding constant interpretation -->
+<div class="q" id="q7" data-unit="2" data-skill="Multiple regression interpretation">
+  <div class="q-head">
+    <span class="q-num">Q7</span>
+    <span class="q-tag">Unit 2 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A multiple regression model predicts <strong>house price</strong> (in &#36;1000s) from <strong>square footage</strong> and <strong>number of bedrooms</strong>:</p>
+    <div class="output-box">Coefficients:
+                Estimate  Std. Error  t value  Pr(>|t|)
+(Intercept)     50.00      12.30      4.07    0.0001 ***
+sqft             0.15       0.02      7.50    < 2e-16 ***
+bedrooms        25.00       5.80      4.31    < 2e-16 ***</div>
+    <p>Interpret the coefficient on <code>sqft</code> in context. Your answer must include the phrase "holding constant" (or equivalent).</p>
+  </div>
+  <textarea class="fr-input" id="a7" rows="4" placeholder="For each additional square foot..."></textarea>
+  <div class="feedback" id="fb7"></div>
+</div>
+
+<!-- Q8: Partial F-test -->
+<div class="q" id="q8" data-unit="2" data-skill="Partial F-test">
+  <div class="q-head">
+    <span class="q-num">Q8</span>
+    <span class="q-tag">Unit 2 &bull; Fill in blanks</span>
+  </div>
+  <div class="q-text">
+    <p>We want to test whether a categorical variable <code>region</code> (with 4 levels) is a useful predictor of <code>sales</code>, beyond what <code>price</code> and <code>advertising</code> already explain. Fill in the blanks to set up the partial F-test.</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">partial_f.R</span></div>
+      <pre><code class="language-r">null_mod <- lm(sales ~ __(a)__, data = df)
+full_mod <- lm(sales ~ __(b)__, data = df)
+anova(null_mod, full_mod)</code></pre>
+    </div>
+    <p style="font-size:0.82rem;margin-top:0.4rem">(c) If the F-test is significant, what do we conclude about <code>region</code>?</p>
+  </div>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(a): Null model formula (without region):</p>
+  <textarea class="fr-input" id="a8a" rows="1" style="min-height:30px" placeholder="(a) price + ..."></textarea>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(b): Full model formula (with region):</p>
+  <textarea class="fr-input" id="a8b" rows="1" style="min-height:30px" placeholder="(b) price + ..."></textarea>
+  <p style="font-size:0.82rem;margin-top:0.3rem">(c): Conclusion if significant:</p>
+  <textarea class="fr-input" id="a8c" rows="1" style="min-height:30px" placeholder="(c) At least one..."></textarea>
+  <div class="feedback" id="fb8"></div>
+</div>
+
+<!-- Q9: Interaction term interpretation -->
+<div class="q" id="q9" data-unit="2" data-skill="Interaction terms">
+  <div class="q-head">
+    <span class="q-num">Q9</span>
+    <span class="q-tag">Unit 2 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A regression predicts <strong>test score</strong> from <strong>hours studied</strong> and <strong>tutoring</strong> (1 = has tutor, 0 = no tutor), with an interaction:</p>
+    <div class="output-box">Coefficients:
+                       Estimate  Std. Error  t value  Pr(>|t|)
+(Intercept)             55.00      3.20     17.19    < 2e-16 ***
+hours                    3.50      0.40      8.75    < 2e-16 ***
+tutoring                 8.00      4.50      1.78    0.078
+hours:tutoring           2.00      0.60      3.33    0.001 **</div>
+    <p>(a) Write the fitted equation for students <strong>with</strong> a tutor (tutoring = 1).</p>
+    <p>(b) Interpret the interaction coefficient (2.00) in context.</p>
+  </div>
+  <textarea class="fr-input" id="a9" rows="5" placeholder="(a) score_hat = ...&#10;(b) The interaction means..."></textarea>
+  <div class="feedback" id="fb9"></div>
+</div>
+
+<!-- Q10: Residual plot / transformation -->
+<div class="q" id="q10" data-unit="2" data-skill="Residual diagnostics">
+  <div class="q-head">
+    <span class="q-num">Q10</span>
+    <span class="q-tag">Unit 2 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A residual vs. fitted values plot from a linear regression shows a clear <strong>fan shape</strong> &mdash; residuals spread out as fitted values increase. Which remedy is most appropriate?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="1">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>(a) No transformation is needed &mdash; this is normal behavior.</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>(b) Apply a $\log(y)$ transformation to stabilize the variance (fix heteroscedasticity).</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>(c) Apply a $\log(x)$ transformation to fix non-linearity.</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>(d) Remove all outliers from the dataset.</div>
+  </div>
+  <div class="feedback" id="fb10"></div>
+</div>
+
+<!-- ===================== UNIT 3 ===================== -->
+<div class="unit-divider">
+  <h2>Unit 3: Logistic Regression &amp; Time Series</h2>
+  <p>Questions 11&ndash;15 &bull; Odds Ratios, Logistic Regression, Time Series</p>
+</div>
+
+<!-- Q11: Odds ratio from 2x2 table -->
+<div class="q" id="q11" data-unit="3" data-skill="Odds ratio">
+  <div class="q-head">
+    <span class="q-num">Q11</span>
+    <span class="q-tag">Unit 3 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A study examines the relationship between smoking and lung disease:</p>
+    <table class="contingency">
+      <tr><th></th><th>Disease</th><th>No Disease</th></tr>
+      <tr><th>Smoker</th><td>40</td><td>60</td></tr>
+      <tr><th>Non-smoker</th><td>10</td><td>90</td></tr>
+    </table>
+    <p>(a) Compute the odds ratio (OR) for disease comparing smokers to non-smokers.</p>
+    <p>(b) Interpret the odds ratio in one sentence.</p>
+  </div>
+  <textarea class="fr-input" id="a11" rows="4" placeholder="(a) OR = ...&#10;(b) The odds of ..."></textarea>
+  <div class="feedback" id="fb11"></div>
+</div>
+
+<!-- Q12: Logistic regression interpretation -->
+<div class="q" id="q12" data-unit="3" data-skill="Logistic regression">
+  <div class="q-head">
+    <span class="q-num">Q12</span>
+    <span class="q-tag">Unit 3 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A logistic regression predicts the probability of <strong>default</strong> (1 = default, 0 = no default) from <strong>balance</strong> (credit card balance in &#36;):</p>
+    <div class="output-box">Coefficients:
+             Estimate   Std. Error  z value  Pr(>|z|)
+(Intercept) -10.65      0.36       -29.58   < 2e-16 ***
+balance       0.0055     0.0002     27.50   < 2e-16 ***</div>
+    <p>(a) Interpret the coefficient on <code>balance</code> (0.0055) in terms of <strong>log-odds</strong>.</p>
+    <p>(b) Convert to an <strong>odds ratio</strong>. What does it mean? (Hint: $e^{0.0055} \approx 1.0055$)</p>
+    <p>(c) Compute the predicted probability of default for a customer with balance = &#36;2000. Use the logistic function: $P = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}$</p>
+  </div>
+  <textarea class="fr-input" id="a12" rows="6" placeholder="(a) For each &#36;1 increase in balance...&#10;(b) OR = e^0.0055 = ...&#10;(c) P = 1 / (1 + exp(-(...))) = ..."></textarea>
+  <div class="feedback" id="fb12"></div>
+</div>
+
+<!-- Q13: Logistic regression conditions -->
+<div class="q" id="q13" data-unit="3" data-skill="Logistic conditions">
+  <div class="q-head">
+    <span class="q-num">Q13</span>
+    <span class="q-tag">Unit 3 &bull; Select all that apply</span>
+  </div>
+  <div class="q-text">
+    <p>Which of the following are conditions/assumptions required for logistic regression?</p>
+  </div>
+  <div class="opts" data-type="multi" data-answer="0,1,2">
+    <div class="opt" onclick="toggleOpt(this,0)"><span class="radio check"></span>Independent observations</div>
+    <div class="opt" onclick="toggleOpt(this,1)"><span class="radio check"></span>Binary (or binomial) outcome variable</div>
+    <div class="opt" onclick="toggleOpt(this,2)"><span class="radio check"></span>Linear relationship between predictors and the <strong>log-odds</strong> of the outcome</div>
+    <div class="opt" onclick="toggleOpt(this,3)"><span class="radio check"></span>Normally distributed residuals</div>
+  </div>
+  <div class="feedback" id="fb13"></div>
+</div>
+
+<!-- Q14: Time series - why lm() fails -->
+<div class="q" id="q14" data-unit="3" data-skill="Time series autocorrelation">
+  <div class="q-head">
+    <span class="q-num">Q14</span>
+    <span class="q-tag">Unit 3 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher fits <code>lm(y ~ x)</code> to time-series data. The residual ACF plot shows significant spikes at multiple lags. What is the primary consequence?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="2">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>(a) The coefficient estimates are biased.</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>(b) The $R^2$ value is inflated above 1.</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>(c) Standard errors are wrong, making p-values unreliable (typically too small) &mdash; the independence condition is violated.</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>(d) The model cannot make any predictions.</div>
+  </div>
+  <div class="feedback" id="fb14"></div>
+</div>
+
+<!-- Q15: Arima regression code -->
+<div class="q" id="q15" data-unit="3" data-skill="ARIMA regression code">
+  <div class="q-head">
+    <span class="q-num">Q15</span>
+    <span class="q-tag">Unit 3 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>Write R code to fit an AR(1) model with a predictor <code>x</code> to an outcome <code>y</code> (both vectors). Then extract the coefficient table with standard errors and p-values.</p>
+    <p>Hint: Use the <code>forecast</code> package's <code>Arima()</code> function and the <code>lmtest</code> package's <code>coeftest()</code>.</p>
+  </div>
+  <textarea class="fr-input" id="a15" rows="4" placeholder="model <- Arima(...)&#10;coeftest(...)"></textarea>
+  <div class="feedback" id="fb15"></div>
+</div>
+
+<button class="submit-btn" id="submitBtn" onclick="gradeExam()">Submit Final Exam</button>
+<button class="submit-btn" id="copyBtn" style="background:#0f3460;margin-top:0.5rem;display:none" onclick="copyForClaude()">Copy All Answers for Claude Grading</button>
+
+<div class="results" id="results">
+  <h2>Final Exam Results</h2>
+  <div class="score" id="scoreVal"></div>
+  <p id="scoreSummary" style="color:#888;font-size:0.85rem;margin-top:0.3rem"></p>
+
+  <div class="unit-score-grid" id="unitScoreGrid"></div>
+
+  <div class="skill-grid" id="skillGrid"></div>
+  <p style="color:#888;font-size:0.75rem;margin-top:1rem">Free response grading is approximate (keyword-based). Use "Copy for Claude" for precise grading.</p>
+  <button class="submit-btn" style="background:#28c840;color:#000;margin-top:1rem" onclick="window.location.href='course.html'">&larr; Back to Course Home</button>
+</div>
+
+</div>
+
+<script>
+/* ── Timer ── */
+let timerSec = 180*60;
+let timerInterval = setInterval(()=>{
+  timerSec--;
+  if(timerSec<=0){clearInterval(timerInterval);gradeExam();return}
+  const h=Math.floor(timerSec/3600), m=Math.floor((timerSec%3600)/60), s=timerSec%60;
+  let display = '';
+  if(h>0) display = h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  else display = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timer').textContent=display;
+  if(timerSec<600)document.getElementById('timer').style.color='#e94560';
+  else if(timerSec<1800)document.getElementById('timer').style.color='#ff6b81';
+},1000);
+
+/* ── Selection logic ── */
+const selections={};
+function selectOpt(el,idx){
+  const opts=el.parentElement;
+  opts.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const qid=el.closest('.q').id;
+  selections[qid]=idx;
+  updateCount();
+}
+function toggleOpt(el,idx){
+  el.classList.toggle('selected');
+  const qid=el.closest('.q').id;
+  if(!selections[qid])selections[qid]=new Set();
+  if(el.classList.contains('selected'))selections[qid].add(idx);
+  else selections[qid].delete(idx);
+  updateCount();
+}
+function updateCount(){
+  const seen=new Set();
+  document.querySelectorAll('.q').forEach(q=>{
+    const id=q.id;
+    let answered=false;
+    if(selections[id]!==undefined){
+      if(selections[id] instanceof Set){if(selections[id].size>0)answered=true}
+      else answered=true;
+    }
+    const tas=q.querySelectorAll('textarea');
+    tas.forEach(ta=>{if(ta&&ta.value.trim())answered=true});
+    if(answered)seen.add(id);
+  });
+  document.getElementById('answered').textContent=seen.size;
+}
+document.querySelectorAll('textarea').forEach(ta=>ta.addEventListener('input',updateCount));
+
+/* ── Answer Key ── */
+const ANSWERS = {
+  q1: {type:'single', correct:1,
+    explain:'The p-value is the probability of observing a test statistic at least as extreme as the one observed, assuming H0 is true. It is NOT the probability that H0 is true (a), NOT the probability that HA is true (c), and NOT the Type I Error rate (d) -- that is alpha, not the p-value.'},
+
+  q2: {type:'blanks', fields:['a2a','a2b','a2c'],
+    answers:['mu = 50','$p.value','p.val < 0.05'],
+    explain:'(a) mu = 50 -- we simulate under H0 being TRUE, so the null value is 50. (b) $p.value -- extract the p-value from the t.test output. (c) p.val < 0.05 -- count rejections at alpha = 0.05.'},
+
+  q3: {type:'free',
+    keywords:['pbinom','sign','+','-','0.5'],
+    answer:'(a) 14.2-12=+2.2, 9.5-12=-2.5, 12.0-12=0 (tie, exclude), 8.3-12=-3.7, 11.7-12=-0.3, 10.1-12=-1.9.\nSigns: +, -, [tie], -, -, -. n_eff = 5, n_pos = 1, n_neg = 4.\n(b) p-value = 2 * pbinom(min(1,4), size = 5, prob = 0.5) = 2 * pbinom(1, 5, 0.5) = 2 * 0.1875 = 0.375.',
+    explain:'Subtract 12 from each: +2.2, -2.5, 0 (tie!), -3.7, -0.3, -1.9. Exclude the tie: n_eff = 5. Positives: 1, Negatives: 4. p-value = 2 * pbinom(min(1,4), 5, 0.5) = 2 * pbinom(1, 5, 0.5) = 0.375. Fail to reject H0.'},
+
+  q4: {type:'multi', correct:new Set([0,1]),
+    explain:'Increase n: more data = more power. Increase effect size delta: larger effect = easier to detect. Increase sigma: more noise = LESS power (wrong). Decrease alpha: stricter threshold = LESS power (wrong).'},
+
+  q5: {type:'free',
+    keywords:['associated','average','4.20','experience','salary','predicted'],
+    answer:'For each additional year of experience, salary is associated with an increase of $4,200 (4.20 thousand dollars) on average. Because this is observational data, we cannot say experience causes higher salary -- only that the two are associated.',
+    explain:'Must: (1) use "associated with" NOT "causes" since observational data, (2) include "on average" or "predicted," (3) state the slope value in context (units: $1000s of salary per year of experience).'},
+
+  q6: {type:'single', correct:1,
+    explain:'Observational studies cannot establish causation. Confounders (age, stress, exercise, etc.) may explain the relationship. A significant p-value tells us the association is unlikely due to chance, but does not rule out confounding. Only randomized experiments can support causal claims.'},
+
+  q7: {type:'free',
+    keywords:['holding','constant','sqft','0.15','bedrooms','average','associated'],
+    answer:'Holding the number of bedrooms constant, each additional square foot of space is associated with a predicted increase of $150 (0.15 thousand dollars) in house price, on average.',
+    explain:'Must include: (1) "holding number of bedrooms constant" or equivalent, (2) the slope value 0.15 in context ($150 per sqft), (3) directional language (increase/associated with).'},
+
+  q8: {type:'blanks', fields:['a8a','a8b','a8c'],
+    answers:['price + advertising','price + advertising + region','at least one region'],
+    explain:'(a) Null model: sales ~ price + advertising (without region). (b) Full model: sales ~ price + advertising + region (with region). (c) Conclusion: at least one region coefficient differs from zero, meaning region is a useful predictor beyond price and advertising.'},
+
+  q9: {type:'free',
+    keywords:['interaction','hours','tutor','slope','63','5.5'],
+    answer:'(a) For tutoring = 1: score_hat = (55 + 8) + (3.5 + 2.0) * hours = 63 + 5.5 * hours.\n(b) The interaction coefficient of 2.00 means that having a tutor increases the effect of each additional hour of studying by 2 points. In other words, the slope of hours on test score is 2.00 points steeper for students with a tutor (5.5 per hour) compared to students without a tutor (3.5 per hour).',
+    explain:'(a) Plug in tutoring=1: intercept becomes 55+8=63, slope on hours becomes 3.5+2.0=5.5. (b) The interaction means the effect of hours differs by tutoring status: each hour is worth 2 extra points for tutored students.'},
+
+  q10:{type:'single', correct:1,
+    explain:'A fan shape (increasing spread) in residuals vs fitted values indicates heteroscedasticity -- non-constant variance. The standard remedy is a log transformation of y, which stabilizes the variance. Log(x) addresses non-linearity, not heteroscedasticity. Simply removing outliers does not fix a systematic pattern.'},
+
+  q11:{type:'free',
+    keywords:['odds','ratio','6','smoker','disease','times'],
+    answer:'(a) Odds(disease | smoker) = 40/60 = 2/3. Odds(disease | non-smoker) = 10/90 = 1/9. OR = (2/3) / (1/9) = (2/3) * (9/1) = 6.\n(b) The odds of developing lung disease are 6 times higher for smokers compared to non-smokers.',
+    explain:'OR = (40*90) / (60*10) = 3600/600 = 6. Smokers have 6 times the odds of disease compared to non-smokers.'},
+
+  q12:{type:'free',
+    keywords:['log-odds','odds','0.0055','balance','1.0055','probability','default'],
+    answer:'(a) For each $1 increase in credit card balance, the log-odds of default increase by 0.0055.\n(b) OR = e^0.0055 ≈ 1.0055. For each $1 increase in balance, the odds of default are multiplied by 1.0055 (increase by 0.55%).\n(c) P = 1 / (1 + exp(-(-10.65 + 0.0055*2000))) = 1 / (1 + exp(-(-10.65 + 11))) = 1 / (1 + exp(-0.35)) = 1 / (1 + 0.7047) ≈ 0.587.',
+    explain:'(a) Log-odds interpretation: each $1 in balance adds 0.0055 to log-odds. (b) Exponentiate: e^0.0055 ≈ 1.0055, meaning odds multiply by ~1.006 per dollar. (c) Plug in x=2000: linear predictor = -10.65 + 0.0055(2000) = 0.35, P = 1/(1+e^-0.35) ≈ 0.587.'},
+
+  q13:{type:'multi', correct:new Set([0,1,2]),
+    explain:'Logistic regression requires: (1) independent observations, (2) binary outcome, (3) linearity between predictors and log-odds. It does NOT require normally distributed residuals -- that is a linear regression assumption. Logistic regression uses a binomial likelihood, not a normal one.'},
+
+  q14:{type:'single', correct:2,
+    explain:'When residuals show autocorrelation, the independence condition of OLS is violated. The coefficient estimates may still be unbiased, but the standard errors are wrong (typically underestimated), making p-values unreliable and too small. This leads to false positives. The fix is to use an ARIMA model or similar time-series approach.'},
+
+  q15:{type:'free',
+    keywords:['Arima','order','c(1,0,0)','xreg','coeftest'],
+    answer:'model <- Arima(y, order = c(1, 0, 0), xreg = x)\ncoeftest(model)',
+    explain:'Arima() from the forecast package with order=c(1,0,0) fits an AR(1). xreg=x includes the external predictor. coeftest() from lmtest gives the coefficient table with standard errors and p-values.'}
+};
+
+/* ── Helper: get answer text ── */
+function getAnswerText(qid){
+  const q=document.getElementById(qid);
+  const a=ANSWERS[qid];
+  if(a.type==='single'||a.type==='multi'){
+    const opts=q.querySelectorAll('.opt');
+    const selected=[];
+    opts.forEach((o,i)=>{if(o.classList.contains('selected'))selected.push(o.textContent.trim())});
+    return selected.length?selected.join('; '):'(no answer)';
+  } else if(a.type==='blanks'){
+    return a.fields.map((f,i)=>'('+String.fromCharCode(97+i)+'): '+document.getElementById(f).value.trim()).join(', ');
+  } else {
+    const ta=q.querySelector('textarea');
+    return ta&&ta.value.trim()?ta.value.trim():'(no answer)';
+  }
+}
+
+function getQuestionText(qid){
+  const q=document.getElementById(qid);
+  const textEl=q.querySelector('.q-text');
+  let txt=textEl?textEl.innerText.trim():'';
+  const codeEl=q.querySelector('pre code');
+  if(codeEl)txt+='\n[Code shown]\n'+codeEl.textContent.trim();
+  return txt;
+}
+
+/* ── Copy for Claude ── */
+function copyForClaude(){
+  let out='DSC 152 FINAL EXAM SIMULATOR — Grade my answers\n';
+  out+='=================================================\n\n';
+  const qids=Array.from({length:15},(_,i)=>'q'+(i+1));
+  qids.forEach(qid=>{
+    const num=qid.slice(1);
+    const tag=document.getElementById(qid).querySelector('.q-tag').textContent;
+    out+='Q'+num+' ('+tag+'):\n';
+    out+=getQuestionText(qid)+'\n\n';
+    out+='MY ANSWER: '+getAnswerText(qid)+'\n\n';
+    out+='---\n\n';
+  });
+  navigator.clipboard.writeText(out).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='Copied! Paste to Claude.';
+    btn.style.background='#28c840';btn.style.color='#000';
+    setTimeout(()=>{btn.textContent='Copy All Answers for Claude Grading';btn.style.background='#0f3460';btn.style.color='#fff'},3000);
+  });
+}
+
+/* ── Grading ── */
+function gradeExam(){
+  clearInterval(timerInterval);
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('copyBtn').style.display='block';
+
+  let total=0, correct=0;
+  const skills={};
+  const unitScores={1:{correct:0,total:0},2:{correct:0,total:0},3:{correct:0,total:0}};
+  const qids=Array.from({length:15},(_,i)=>'q'+(i+1));
+
+  qids.forEach(qid=>{
+    const q=document.getElementById(qid);
+    if(!q)return;
+    const a=ANSWERS[qid];
+    if(!a)return;
+    const fbId='fb'+qid.slice(1);
+    const fb=document.getElementById(fbId);
+    if(!fb)return;
+    const unit=parseInt(q.dataset.unit);
+    const skill=q.dataset.skill;
+    if(!skills[skill])skills[skill]={correct:0,total:0,unit:unit};
+    skills[skill].total++;
+    unitScores[unit].total++;
+    total++;
+
+    let isCorrect=false;
+
+    if(a.type==='single'){
+      const sel=selections[qid];
+      isCorrect=(sel===a.correct);
+      q.querySelectorAll('.opt').forEach((o,i)=>{
+        if(i===a.correct)o.classList.add('graded-correct');
+        else if(i===sel&&sel!==a.correct)o.classList.add('graded-wrong');
+      });
+    } else if(a.type==='multi'){
+      const sel=selections[qid]||new Set();
+      isCorrect=(sel.size===a.correct.size&&[...sel].every(v=>a.correct.has(v)));
+      q.querySelectorAll('.opt').forEach((o,i)=>{
+        if(a.correct.has(i))o.classList.add('graded-correct');
+        else if(sel.has(i))o.classList.add('graded-wrong');
+      });
+    } else if(a.type==='blanks'){
+      const fields=a.fields;
+      const vals=fields.map(f=>document.getElementById(f).value.trim().toLowerCase());
+      let blanksRight=0;
+
+      if(qid==='q2'){
+        if(vals[0].includes('mu')&&vals[0].includes('50'))blanksRight++;
+        if(vals[1].includes('p.value'))blanksRight++;
+        if(vals[2].includes('p.val')&&vals[2].includes('0.05')&&vals[2].includes('<'))blanksRight++;
+      } else if(qid==='q8'){
+        if(vals[0].includes('price')&&vals[0].includes('advertising')&&!vals[0].includes('region'))blanksRight++;
+        if(vals[1].includes('price')&&vals[1].includes('advertising')&&vals[1].includes('region'))blanksRight++;
+        if(vals[2].includes('at least one')&&vals[2].includes('region'))blanksRight++;
+        else if(vals[2].includes('least one')&&(vals[2].includes('group')||vals[2].includes('differ')||vals[2].includes('region')))blanksRight++;
+      }
+      isCorrect=(blanksRight>=Math.ceil(a.answers.length*0.67));
+    } else if(a.type==='free'){
+      const ta=q.querySelector('textarea');
+      const text=(ta?ta.value:'').toLowerCase();
+      if(!text.trim()){
+        isCorrect=false;
+      } else {
+        let hits=0;
+        a.keywords.forEach(kw=>{if(text.includes(kw.toLowerCase()))hits++});
+        isCorrect=(hits>=Math.ceil(a.keywords.length*0.5));
+      }
+    }
+
+    if(isCorrect){correct++;skills[skill].correct++;unitScores[unit].correct++;q.classList.add('correct')}
+    else{q.classList.add('incorrect')}
+
+    const answerHtml=a.answer?a.answer.replace(/\n/g,'<br>'):'';
+    fb.innerHTML='<strong style="color:'+(isCorrect?'#28c840':'#e94560')+'">'+(isCorrect?'&#10003; Correct':'&#10007; Incorrect / Needs Review')+'</strong><br><br>'+
+      '<strong>Full-marks answer:</strong><br>'+answerHtml+'<br><br>'+
+      '<strong>Explanation:</strong> '+a.explain;
+    fb.className='feedback shown '+(isCorrect?'right':'wrong');
+  });
+
+  /* Overall score */
+  const pct=Math.round(correct/total*100);
+  const scoreEl=document.getElementById('scoreVal');
+  scoreEl.textContent=pct+'%';
+  scoreEl.className='score '+(pct>=80?'good':pct>=60?'ok':'bad');
+  document.getElementById('scoreSummary').textContent=correct+'/'+total+' correct — free response grading is approximate (keyword-based). Use "Copy for Claude" for precise grading.';
+
+  /* Unit sub-scores */
+  const unitNames={1:'Unit 1: Hypothesis Testing',2:'Unit 2: Regression',3:'Unit 3: Logistic & Time Series'};
+  let unitHtml='';
+  [1,2,3].forEach(u=>{
+    const us=unitScores[u];
+    const upct=us.total>0?Math.round(us.correct/us.total*100):0;
+    const color=upct>=80?'#28c840':upct>=60?'#ffbd2e':'#e94560';
+    unitHtml+=`<div class="unit-score-card">
+      <div class="label">${unitNames[u]}</div>
+      <div class="val" style="color:${color}">${us.correct}/${us.total}</div>
+      <div style="font-size:0.7rem;color:${color};margin-top:2px">${upct}%</div>
+    </div>`;
+  });
+  document.getElementById('unitScoreGrid').innerHTML=unitHtml;
+
+  /* Skill breakdown */
+  let gridHtml='';
+  Object.keys(skills).forEach(s=>{
+    const sk=skills[s];
+    const spct=Math.round(sk.correct/sk.total*100);
+    const color=spct>=80?'#28c840':spct>=50?'#ffbd2e':'#e94560';
+    gridHtml+=`<div class="skill-row">
+      <div class="name">U${sk.unit}: ${s}</div>
+      <div style="font-weight:700;color:${color}">${spct}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${spct}%;background:${color}"></div></div>
+    </div>`;
+  });
+  document.getElementById('skillGrid').innerHTML=gridHtml;
+  document.getElementById('results').classList.add('shown');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+
+  document.querySelectorAll('.opt').forEach(o=>o.style.pointerEvents='none');
+  document.querySelectorAll('textarea').forEach(t=>t.disabled=true);
+}
+Prism.highlightAll();
+</script>
+</body>
+</html>

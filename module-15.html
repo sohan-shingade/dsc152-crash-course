@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 15 — Logistic Regression</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-14.html">Module 14</a><span class="sep">/</span>
+  <span class="current">Module 15</span>
+  <a href="module-16.html" class="next-btn">Module 16 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 15 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Logistic Regression</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">Why logistic regression &mdash; linear regression breaks for binary outcomes</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>When your outcome is binary (0/1, yes/no, admitted/rejected), <strong>linear regression doesn't work</strong>.</p>
+
+    <div class="callout warning">
+      <strong>The problem with linear regression for binary outcomes:</strong> A linear model $\hat{y} = \beta_0 + \beta_1 x$ can predict values <strong>outside 0 and 1</strong>. If you're predicting probability of admission, you could get $\hat{y} = -0.3$ or $\hat{y} = 1.4$. Those aren't valid probabilities.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Linear regression</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Predictions can go below 0 or above 1</li>
+          <li>Assumes normally distributed errors</li>
+          <li>Not appropriate for binary Y</li>
+        </ul>
+      </div>
+      <div class="compare-side right">
+        <h4>Logistic regression</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Predictions always between 0 and 1</li>
+          <li>Models log-odds as linear in X</li>
+          <li>Designed for binary Y</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>The fix: instead of modeling $p$ directly, model the <strong>log-odds</strong> of $p$. That's what logistic regression does.</p>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">The logistic regression model &mdash; log-odds = linear function</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>The core equation of logistic regression:</p>
+
+    <div class="eq-box">
+      $$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x$$
+    </div>
+
+    <p>where $p = P(Y = 1)$ is the probability of the outcome occurring.</p>
+
+    <table class="ref-table">
+      <tr><th>Piece</th><th>Name</th><th>What it is</th></tr>
+      <tr><td>$p$</td><td>Probability</td><td>$P(Y=1)$, between 0 and 1</td></tr>
+      <tr><td>$\frac{p}{1-p}$</td><td>Odds</td><td>Between 0 and $\infty$</td></tr>
+      <tr><td>$\log\left(\frac{p}{1-p}\right)$</td><td>Log-odds (logit)</td><td>Between $-\infty$ and $+\infty$</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <strong>Why log-odds?</strong> Probability is bounded [0, 1]. Odds are bounded [0, $\infty$). Log-odds range over all real numbers $(-\infty, +\infty)$ &mdash; perfect for the right-hand side of a linear equation, which can also be any real number. The logit transformation maps probabilities to an unrestricted scale.
+    </div>
+
+    <div class="callout memorize">
+      <strong>From Practice Quiz 3 Q4a:</strong> The fitted logistic regression model is written as:<br>
+      $\log\left(\frac{\hat{p}}{1-\hat{p}}\right) = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \ldots$<br><br>
+      where $\hat{p}$ is the <em>estimated</em> probability of the outcome.
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">R code &mdash; <code>glm()</code> with <code>family = binomial</code></span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>In R, logistic regression uses <code>glm()</code>, <strong>not</strong> <code>lm()</code>.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">logistic_regression.R</span></div>
+      <pre><code class="language-r"># Logistic regression syntax
+model_logit <- glm(admitted ~ gre + gpa,
+                   data = grad,
+                   family = "binomial")
+summary(model_logit)</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Three things that differ from linear regression:</strong><br>
+      1. Use <code>glm()</code> instead of <code>lm()</code><br>
+      2. Add <code>family = "binomial"</code> (or <code>family = binomial</code>)<br>
+      3. The output shows <strong>z values</strong> instead of t values
+    </div>
+
+    <div class="callout warning">
+      <strong>From Practice Quiz 3 Q4:</strong> The exact syntax from the quiz is:<br>
+      <code>model_logit &lt;- glm(admitted ~ gre + gpa, data = grad, family = "binomial")</code><br><br>
+      If you forget <code>family = "binomial"</code>, R will fit a regular linear model instead. That's a common exam mistake.
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Interpreting coefficients &mdash; log-odds and odds ratios</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>This is the most commonly tested concept. Coefficients in logistic regression are on the <strong>log-odds scale</strong>.</p>
+
+    <div class="eq-box">
+      $$\beta_1 = \text{change in log-odds of } Y=1 \text{ for a 1-unit increase in } X$$
+    </div>
+
+    <p>But nobody thinks in log-odds. To make it interpretable, <strong>exponentiate</strong> to get the odds ratio:</p>
+
+    <div class="eq-box">
+      $$e^{\beta_1} = \text{multiplicative change in odds for a 1-unit increase in } X$$
+    </div>
+
+    <div class="callout success">
+      <strong>From Practice Quiz 3 Q4b (exact solution wording):</strong><br>
+      With $\hat{\beta}_{\text{gre}} = 0.08$: "For any small value $x$, $e^x \approx 1 + x$. Thus, $e^{0.08} \approx 1.08$. This indicates that each additional point on the GRE score is associated with a multiplicative increase of approximately 1.08 in the estimated <em>odds</em> of admission (roughly an 8% increase in the odds of admission), holding GPA constant."
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "A 1-point increase in GRE increases the probability of admission by 0.08."<br><br>
+        <span style="color:#e94560">Wrong! 0.08 is the change in LOG-ODDS, not probability. And it's a multiplicative effect on odds, not additive on probability.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "A 1-point increase in GRE is associated with a multiplicative increase of $e^{0.08} \approx 1.08$ in the odds of admission, holding GPA constant."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Interpretation checklist:</strong><br>
+      1. Say "log-odds" or convert to odds ratio with $e^{\beta}$<br>
+      2. Say "1-unit increase in X"<br>
+      3. Say "holding other variables constant"<br>
+      4. Say "associated with" (not "causes") unless it's an experiment
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Predicted probability &mdash; going from coefficients to $\hat{p}$</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>Given coefficients, you can compute the predicted probability for any values of X. Here's the step-by-step process:</p>
+
+    <div class="worked">
+Step 1: Compute log-odds
+  log-odds = &beta;&#8320; + &beta;&#8321;x&#8321; + &beta;&#8322;x&#8322;
+
+Step 2: Convert to odds
+  odds = e^(log-odds)
+
+Step 3: Convert to probability
+  p = odds / (1 + odds)
+    </div>
+
+    <p>Or in one formula:</p>
+    <div class="eq-box">
+      $$\hat{p} = \frac{e^{\beta_0 + \beta_1 x_1 + \beta_2 x_2}}{1 + e^{\beta_0 + \beta_1 x_1 + \beta_2 x_2}}$$
+    </div>
+
+    <div class="callout success">
+      <strong>From Practice Quiz 3 Q4e:</strong> "An applicant has a GRE score of 160 and a GPA of 3.5. Write an expression for their estimated probability of admission."<br><br>
+      <strong>Solution:</strong><br>
+      Log-odds = $-14.82 + 0.08(160) + 0.77(3.5)$<br>
+      $\hat{p} = \frac{e^{-14.82 + 0.08(160) + 0.77(3.5)}}{1 + e^{-14.82 + 0.08(160) + 0.77(3.5)}}$
+    </div>
+
+    <div class="callout insight">
+      <strong>You don't always need the final number.</strong> On a no-calculator exam, writing the expression is usually full credit. Just make sure you plug in correctly and show the steps: log-odds &rarr; odds &rarr; probability.
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Confidence intervals for odds ratios &mdash; <code>exp(confint())</code></span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p>The <code>summary()</code> output gives CIs on the log-odds scale. To get CIs for the <strong>odds ratio</strong>, exponentiate.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">or_confidence_interval.R</span></div>
+      <pre><code class="language-r"># CI for odds ratio
+exp(confint(model_logit))</code></pre>
+    </div>
+
+    <div class="callout success">
+      <strong>From Practice Quiz 3 Q4c:</strong> "A 95% confidence interval for $\beta_{\text{gre}}$ on the log-odds scale is (0.06, 0.10). Give the corresponding 95% CI for the odds ratio."<br><br>
+      <strong>Solution:</strong> Exponentiate both endpoints: $(e^{0.06},\; e^{0.10}) \approx (1.06,\; 1.10)$.<br>
+      "We are 95% confident that a 1-point increase in GRE score multiplies the odds of admission by a factor between approximately 1.06 and 1.10."
+    </div>
+
+    <div class="callout memorize">
+      <strong>Key idea:</strong> If the log-odds CI is $(L, U)$, the odds ratio CI is $(e^L, e^U)$. Just exponentiate both endpoints. If the OR CI contains 1, the predictor is not significant at that level.
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Three conditions for logistic regression</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p>Just like linear regression has conditions (LINE), logistic regression has three conditions you need to check.</p>
+
+    <div class="callout success">
+      <strong>From Practice Quiz 3 Q4d (exact solution):</strong>
+    </div>
+
+    <table class="ref-table">
+      <tr><th>#</th><th>Condition</th><th>How to check (grad admissions context)</th></tr>
+      <tr><td>1</td><td><strong>Binary outcome</strong></td><td><code>admitted</code> takes only values 0 and 1. Satisfied by construction.</td></tr>
+      <tr><td>2</td><td><strong>Independence of observations</strong></td><td>Each row is a different applicant. Approximately satisfied if applicants are not clustered (e.g., not many pairs from the same program sharing advisors).</td></tr>
+      <tr><td>3</td><td><strong>Linearity on the log-odds scale</strong></td><td>The log-odds of admission should be approximately linear in <code>gre</code> and <code>gpa</code>. Check via a deviance residual plot (fitted values vs. deviance residuals), looking for a loess smoother that approximately tracks the horizontal zero line.</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Common mistake:</strong> Saying "normality" is a condition. Logistic regression does <strong>not</strong> require normally distributed data. That's a linear regression condition. The outcome is binary &mdash; it can't be normal!
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">check_linearity.R</span></div>
+      <pre><code class="language-r"># Checking linearity condition via deviance residuals
+fitted_vals <- model_logit$fitted.values
+dev_resids  <- residuals(model_logit, type = "deviance")
+
+ggplot(data.frame(fitted = fitted_vals, resid = dev_resids),
+       aes(x = fitted, y = resid)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE) +
+  geom_hline(yintercept = 0, linetype = "dashed")</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Logistic Regression</span>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: "Interpret the coefficient"</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p>This will almost certainly be on the exam. You'll get a logistic regression summary table and be asked to interpret a coefficient.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>From a logistic regression of <code>admitted ~ gre + gpa</code>:</p>
+      <table class="ref-table" style="text-align:center">
+        <tr><th></th><th>Estimate</th><th>Std. Error</th><th>z value</th><th>Pr(&gt;|z|)</th></tr>
+        <tr><td>(Intercept)</td><td>$-14.82$</td><td>2.07</td><td>$-7.16$</td><td>&lt;0.001</td></tr>
+        <tr><td>gre</td><td>$0.08$</td><td>0.01</td><td>8.00</td><td>&lt;0.001</td></tr>
+        <tr><td>gpa</td><td>$0.77$</td><td>0.19</td><td>4.05</td><td>&lt;0.001</td></tr>
+      </table>
+      <p>Interpret the coefficient for <code>gre</code> on the odds ratio scale.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "A 1-point increase in GRE increases admission probability by 8%."<br><br>
+        <span style="color:#e94560">Confuses log-odds with probability. The effect is on ODDS, not probability. And the relationship to probability is nonlinear.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "Each additional point on the GRE is associated with a multiplicative increase of $e^{0.08} \approx 1.08$ in the estimated odds of admission, holding GPA constant. That's roughly an 8% increase in the odds."
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Using the same table, interpret the coefficient for <code>gpa</code> on the odds ratio scale.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        Each additional point of GPA is associated with a multiplicative increase of $e^{0.77} \approx 2.16$ in the estimated odds of admission, holding GRE score constant. In other words, a 1-point increase in GPA roughly doubles the odds of being admitted.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">Exam Q Type: "Compute the predicted probability for x = ..."</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+    <p>You'll be given specific values and asked to write an expression (or compute) the predicted probability.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Using the model $\log\left(\frac{\hat{p}}{1-\hat{p}}\right) = -14.82 + 0.08 \cdot \text{gre} + 0.77 \cdot \text{gpa}$, find the estimated probability of admission for an applicant with GRE = 160 and GPA = 3.5.</p>
+    </div>
+
+    <div class="worked">
+Step 1: log-odds = -14.82 + 0.08(160) + 0.77(3.5)
+                 = -14.82 + 12.80 + 2.695
+                 = 0.675
+
+Step 2: odds = e^0.675
+
+Step 3: p&#770; = e^0.675 / (1 + e^0.675)
+    </div>
+
+    <div class="callout memorize">
+      <strong>On a no-calculator exam:</strong> You typically just need to write the expression correctly. Show three clear steps: (1) plug in to get log-odds, (2) exponentiate to get odds, (3) convert to probability. You won't be expected to evaluate $e^{0.675}$ by hand.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Same model. Compute the predicted probability expression for an applicant with GRE = 155 and GPA = 3.8.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt9').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt9">
+        Log-odds = $-14.82 + 0.08(155) + 0.77(3.8) = -14.82 + 12.40 + 2.926 = 0.506$<br><br>
+        $\hat{p} = \frac{e^{0.506}}{1 + e^{0.506}}$<br><br>
+        (If you want to approximate: $e^{0.5} \approx 1.65$, so $\hat{p} \approx 1.65 / 2.65 \approx 0.62$)
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 10 -->
+<div class="step" id="s10">
+  <div class="step-header" onclick="toggleStep(10)">
+    <span class="step-num">10</span>
+    <span class="step-title">Exam Q Type: "Write R code" + CI for odds ratio</span>
+    <span class="step-check" id="check10"></span>
+  </div>
+  <div class="step-body" id="body10">
+    <p>Two quick-fire question types that come up together.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">"Write R code for logistic regression"</h4>
+    <div class="callout success">
+      <strong>Answer:</strong><br>
+      <code>glm(outcome ~ predictor1 + predictor2, data = df, family = "binomial")</code><br><br>
+      Three things to remember: <code>glm</code>, not <code>lm</code>. Include <code>data = </code>. Include <code>family = "binomial"</code>.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">"Give the CI for the odds ratio"</h4>
+    <div class="callout success">
+      <strong>R code:</strong> <code>exp(confint(model_logit))</code><br><br>
+      <strong>By hand:</strong> If CI for $\beta$ on log-odds scale is $(L, U)$, then CI for OR is $(e^L, e^U)$.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>The 95% CI for $\beta_{\text{gpa}}$ is (0.40, 1.14) on the log-odds scale. What is the 95% CI for the odds ratio associated with a 1-point increase in GPA?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt10').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt10">
+        Exponentiate both endpoints: $(e^{0.40}, e^{1.14}) \approx (1.49, 3.13)$.<br><br>
+        We are 95% confident that a 1-point increase in GPA multiplies the odds of admission by a factor between approximately 1.49 and 3.13, holding GRE constant. Since the interval doesn't contain 1, GPA is a significant predictor.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(10)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Logistic Regression</span>
+</div>
+
+<!-- Step 11 -->
+<div class="step" id="s11">
+  <div class="step-header" onclick="toggleStep(11)">
+    <span class="step-num">11</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check11"></span>
+  </div>
+  <div class="step-body" id="body11">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>A researcher wants to predict whether a customer will churn (yes/no) based on their monthly bill. They fit a linear regression model $\hat{y} = 1.2 - 0.005 \cdot \text{bill}$. For a customer with a &#36;300 monthly bill, the model predicts $\hat{y} = 1.2 - 0.005(300) = -0.3$. What is wrong with this approach, and what should they use instead?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        The predicted value $\hat{y} = -0.3$ is <strong>outside the valid range of [0, 1]</strong> for a probability. Linear regression is not appropriate for binary outcomes because it can produce predictions below 0 or above 1. They should use <strong>logistic regression</strong>, which models the log-odds as a linear function of the predictors, ensuring predicted probabilities always fall between 0 and 1. In R: <code>glm(churn ~ bill, data = df, family = "binomial")</code>.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>A logistic regression predicting loan default from credit score gives $\hat{\beta}_1 = -0.03$. Interpret this coefficient in two ways: (a) on the log-odds scale, and (b) on the odds ratio scale.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        (a) <strong>Log-odds:</strong> A 1-point increase in credit score is associated with a decrease of 0.03 in the log-odds of loan default.<br><br>
+        (b) <strong>Odds ratio:</strong> $e^{-0.03} \approx 0.97$. A 1-point increase in credit score is associated with multiplying the odds of default by approximately 0.97, i.e., roughly a 3% decrease in the odds of default.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>Given the model $\log\left(\frac{\hat{p}}{1-\hat{p}}\right) = -3.5 + 0.02 \cdot \text{score} + 1.2 \cdot \text{interview}$, write an expression for the predicted probability that a candidate with score = 150 and interview = 1 gets hired.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        Step 1: Log-odds = $-3.5 + 0.02(150) + 1.2(1) = -3.5 + 3.0 + 1.2 = 0.7$<br><br>
+        Step 2: Odds = $e^{0.7}$<br><br>
+        Step 3: $\hat{p} = \frac{e^{0.7}}{1 + e^{0.7}}$<br><br>
+        (Approximation: $e^{0.7} \approx 2.01$, so $\hat{p} \approx 2.01 / 3.01 \approx 0.67$)
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>Write one line of R code to fit a logistic regression predicting <code>survived</code> from <code>age</code> and <code>fare</code> using a data frame called <code>titanic</code>. Then write one line of R code to obtain 95% confidence intervals for the odds ratios.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <code>model &lt;- glm(survived ~ age + fare, data = titanic, family = "binomial")</code><br><br>
+        <code>exp(confint(model))</code><br><br>
+        Remember: <code>glm</code> not <code>lm</code>, <code>family = "binomial"</code> is required, and <code>exp(confint(...))</code> converts from log-odds CI to odds ratio CI.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(11)">Module 15 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 15 &rarr; Go to Module 16</button>
+
+</div>
+
+<script>
+const TOTAL=11;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod15_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod15_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[15]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-16.html'}
+loadState();
+</script>
+</body>
+</html>

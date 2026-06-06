@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 — Hypothesis Testing & the t-Test</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+
+  /* Top nav */
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}
+  .topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}
+  .topnav .next-btn:hover{background:#1a5276}
+
+  /* Progress */
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+
+  /* Section headers */
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}
+  .part-badge.b{background:#6c3483;color:#d2b4de}
+  .part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+
+  /* Steps — the core teaching unit */
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}
+  .step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}
+  .step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+
+  /* Content styles */
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}
+  .r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .callout strong{color:inherit}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+
+  /* Practice */
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}
+  .fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}
+  .reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}
+  .answer-reveal.shown{display:block}
+
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}
+  .done-btn:hover{background:#5dff77}
+
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">← Course Home</a>
+  <span class="sep">/</span>
+  <span class="current">Module 1</span>
+  <a href="#" class="next-btn" id="nextBtn">Module 2 →</a>
+</div>
+
+<div class="mod-progress">
+  <span>Module 1 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A: LEARN ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Hypothesis Testing & the t-Test</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">What is hypothesis testing? (The courtroom analogy)</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>Hypothesis testing works like a criminal trial:</p>
+    <div class="compare">
+      <div class="compare-side">
+        <h4>Criminal Trial</h4>
+        <p>Defendant is <strong>presumed innocent</strong></p>
+        <p>Prosecution presents evidence</p>
+        <p>Jury asks: "Is the evidence strong enough to convict?"</p>
+        <p>Verdict: <strong>guilty</strong> or <strong>not guilty</strong> (never "innocent")</p>
+      </div>
+      <div class="compare-side">
+        <h4>Hypothesis Test</h4>
+        <p>$H_0$ is <strong>presumed true</strong></p>
+        <p>Data is the evidence</p>
+        <p>We ask: "Is the data surprising enough to reject $H_0$?"</p>
+        <p>Decision: <strong>reject $H_0$</strong> or <strong>fail to reject $H_0$</strong> (never "accept $H_0$")</p>
+      </div>
+    </div>
+    <div class="callout warning">
+      <strong>Never say "accept $H_0$."</strong> Just like a jury says "not guilty" (not "innocent"), we say "fail to reject" — we didn't find enough evidence, but that doesn't mean $H_0$ is true.
+    </div>
+    <p>Click the circle on the right when this clicks. ↗</p>
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(1)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">$H_0$, $H_A$, and the p-value — what they actually mean</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <div class="callout insight">
+      <strong>$H_0$ (null hypothesis):</strong> The boring claim. "Nothing interesting is happening." Always has an $=$ sign.<br>
+      <strong>$H_A$ (alternative):</strong> The interesting claim. "Something IS going on." Has $\neq$, $>$, or $<$.
+    </div>
+
+    <p><strong>Example:</strong> UCSD claims students sleep 6 hours on average.</p>
+    <div class="eq-box">$$H_0: \mu = 6 \qquad H_A: \mu \neq 6$$</div>
+
+    <p>Now, what IS a p-value? Let's build it from scratch:</p>
+
+    <p>You collect data: sleep hours = {3, 7, 1, 2, 2}. Sample mean $\bar{x} = 3.0$. That's pretty far from 6. But is it far <em>enough</em>?</p>
+
+    <p>The p-value answers: <strong>"If the true mean really were 6, how often would we see data this extreme just by random chance?"</strong></p>
+
+    <ul>
+      <li>Small p-value (e.g., 0.01) → "This data would be really rare if $H_0$ were true" → reject $H_0$</li>
+      <li>Large p-value (e.g., 0.40) → "This data isn't unusual under $H_0$" → fail to reject</li>
+    </ul>
+
+    <div class="callout memorize">
+      <strong>The sentence to memorize:</strong><br>
+      "The p-value is the probability of observing a test statistic as extreme or more extreme than the one observed, <strong>assuming $H_0$ is true</strong>."
+    </div>
+
+    <p>That last part — "assuming $H_0$ is true" — is what makes all the wrong interpretations wrong. The p-value is conditional on $H_0$. It does NOT tell you the probability that $H_0$ is true or false.</p>
+
+    <div class="callout warning">
+      <strong>Three things the p-value is NOT:</strong><br>
+      ✗ The probability that $H_0$ is true<br>
+      ✗ The probability that $H_A$ is true<br>
+      ✗ The probability of making a Type I error
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(2)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">The t-test: formula, R code, and when it works</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>The one-sample t-test checks whether a population mean equals some value $\mu_0$.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e;">The test statistic</h4>
+    <div class="eq-box">$$t_s = \frac{\bar{x} - \mu_0}{s / \sqrt{n}}$$</div>
+    <p>In words: how many standard errors is our sample mean from the hypothesized mean?</p>
+    <ul>
+      <li>$\bar{x}$ = sample mean</li>
+      <li>$\mu_0$ = the null hypothesis value</li>
+      <li>$s$ = sample standard deviation</li>
+      <li>$n$ = sample size</li>
+    </ul>
+    <p>Big $|t_s|$ → sample mean is far from $\mu_0$ → small p-value → reject.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e;">R code — three ways</h4>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">t_test.R</span></div>
+      <pre><code class="language-r"># Method 1: Built-in function (use this on exams)
+t.test(sleep, mu = 6)
+
+# Extract just the p-value
+t.test(sleep, mu = 6)$p.value
+
+# Method 2: Manual calculation
+t_s <- (mean(sleep) - 6) / (sd(sleep) / sqrt(length(sleep)))
+
+# Method 3: One-sided test
+t.test(sleep, mu = 6, alternative = "less")     # HA: mu < 6
+t.test(sleep, mu = 6, alternative = "greater")  # HA: mu > 6</code></pre>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Memorize:</strong> <code>t.test(data, mu = null_value)$p.value</code><br>
+      The <code>$p.value</code> accessor is on every quiz. Not <code>$p</code>, not <code>$pvalue</code>. Exactly <code>$p.value</code>.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e;">Two conditions for the t-test to be valid</h4>
+    <ol>
+      <li><strong>Random sample</strong> — observations are independent and representative of the population</li>
+      <li><strong>Data come from a normal distribution</strong> (or $n$ is large enough for CLT) — so the test statistic follows a $t$-distribution under $H_0$</li>
+    </ol>
+
+    <p>If these are violated (especially with skewed data and small $n$), the t-test can break. That's Module 2.</p>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(3)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Making the decision: reject or fail to reject</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>The rule is simple:</p>
+    <div class="eq-box" style="font-size:0.95rem;">
+      $$\text{p-value} < \alpha \implies \text{reject } H_0 \qquad \text{p-value} \geq \alpha \implies \text{fail to reject } H_0$$
+    </div>
+    <p>$\alpha$ is the significance level — usually 0.05, but <strong>read the question</strong>. Quiz 1 used $\alpha = 0.10$ for one question. If you use 0.05 when they said 0.10, you lose points.</p>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e;">One-sided from two-sided</h4>
+    <p>If you have a two-sided p-value and want one-sided:</p>
+    <ul>
+      <li>If $\bar{x}$ is in the <strong>direction of $H_A$</strong>: one-sided $p = \text{two-sided } p / 2$</li>
+      <li>If $\bar{x}$ is in the <strong>opposite direction</strong>: one-sided $p = 1 - \text{two-sided } p / 2$</li>
+    </ul>
+    <p><strong>Example from Quiz 1:</strong> Two-sided $p = 0.14$, $\bar{x} < \mu_0$, $H_A: \mu < \mu_0$. Same direction → one-sided $p = 0.14/2 = 0.07$. At $\alpha = 0.10$: $0.07 < 0.10$ → reject.</p>
+
+    <div class="callout warning">
+      <strong>Confidence interval method:</strong> If the 95% CI contains $\mu_0$ → fail to reject at $\alpha = 0.05$. If it doesn't contain $\mu_0$ → reject. Same conclusion as the p-value, always.
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(4)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- ========== PART B: ON THE EXAM ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: How This Gets Tested</span>
+</div>
+
+<!-- Exam Q1: p-value interpretation -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Exam Question Type: "Interpret the p-value"</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <div class="callout insight">
+      <strong>📋 Real question (Quiz 1, Q1c):</strong><br>
+      p-value = 0.14. A colleague says: "There is a 14% probability the true average is &#36;4.00." Is this correct?
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Wrong answer</h4>
+        <p>"Yes, it means there's a 14% chance the mean is &#36;4."</p>
+        <p style="color:#e94560;font-size:0.78rem;">Confuses "probability of data given H0" with "probability of H0 given data." These are completely different things.</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ Full-marks answer</h4>
+        <p>"No. The p-value is the probability of observing a test statistic as extreme or more extreme than the one observed, <strong>assuming $H_0$ is true</strong>. It is NOT the probability that the true mean is &#36;4."</p>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Wording keys the grader looks for:</strong><br>
+      ✓ "assuming $H_0$ is true" — the conditional<br>
+      ✓ "as extreme or more extreme" — tail probability<br>
+      ✓ "test statistic" — not "the mean" or "the data"<br>
+      ✓ Explicitly say what it's NOT if the question gives a wrong interpretation
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>$p = 0.03$ for $H_0: \mu = 50$. Write the correct interpretation in one sentence.</p>
+      <textarea class="fr-input" rows="2" placeholder="If H0 is true..."></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('a5').classList.add('shown');this.style.display='none'">Check Wording</button>
+      <div class="answer-reveal" id="a5">
+        "If $H_0$ is true (i.e., if the true mean is 50), there is a 3% probability of observing a test statistic as extreme or more extreme than the one observed."
+        <br><br>
+        <strong>Check your answer for:</strong> Did you say "assuming/if $H_0$ is true"? Did you say "as extreme or more extreme"? If yes, full marks.
+      </div>
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(5)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Exam Q2: t-test conditions -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Question Type: "State the conditions for the t-test"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <div class="callout insight">
+      <strong>📋 Real question (Quiz 1, Q1e):</strong><br>
+      State the two conditions for the t-test to produce valid inference.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Loses points</h4>
+        <p>"Data should be normal and sample should be big enough."</p>
+        <p style="color:#e94560;font-size:0.78rem;">Misses "random/independent sample" entirely. And "big enough" is vague — the condition is normality OR large n for CLT.</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ Full marks</h4>
+        <p>1. <strong>Random sample</strong> — observations are independent and representative of the population.<br>
+        2. <strong>Data from a normal distribution</strong> (or $n$ large enough for CLT) — so the test statistic follows a $t$-distribution under $H_0$.</p>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Don't confuse the condition sets:</strong><br>
+      t-test: 2 conditions (random sample + normality)<br>
+      Linear regression: 4 conditions (LINE)<br>
+      Logistic regression: 3 conditions (binary + independence + linearity on log-odds)<br>
+      These are DIFFERENT. Module 10 covers LINE, Module 15 covers logistic conditions.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>You run a t-test on $n = 5$ observations from a right-skewed distribution. Which condition is violated? What happens to the Type I Error rate?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('a6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="a6">
+        The <strong>normality condition</strong> is violated (right-skewed, $n$ too small for CLT). The actual Type I Error rate is <strong>inflated above $\alpha$</strong> — the test rejects more often than it should. With $n = 5$ and Gamma data, lecture simulations showed ~10-11% when it should be 5%.
+      </div>
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(6)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Exam Q3: Write the R code -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Question Type: "Write the R code for..."</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <div class="callout insight">
+      <strong>📋 Real question (Practice Quiz 1, Q1b):</strong><br>
+      TSA data. Airport claims average wait = 20 min. Write R code to get the p-value.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>✗ Loses points</h4>
+        <p><code>t.test(tsa$wait_min, 20)</code></p>
+        <p style="color:#e94560;font-size:0.78rem;">Missing <code>mu =</code>. And doesn't extract the p-value.</p>
+      </div>
+      <div class="compare-side right">
+        <h4>✓ Full marks</h4>
+        <p><code>t.test(tsa$wait_min, mu = 20)$p.value</code></p>
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>R syntax cheat sheet for hypothesis testing:</strong><br>
+      <code>t.test(x, mu = val)</code> — run the test<br>
+      <code>t.test(x, mu = val)$p.value</code> — extract p-value<br>
+      <code>t.test(x, mu = val)$conf.int</code> — extract CI<br>
+      <code>t.test(x, mu = val, alternative = "greater")</code> — one-sided<br><br>
+      <strong>Must name the <code>mu</code> argument.</strong> <code>t.test(x, 6)</code> does NOT work — it thinks 6 is a second dataset.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">✏️ Your Turn</div>
+      <p>Data: <code>delivery$tip_amount</code>. Test whether average tip differs from &#36;4. Get the p-value. Then test whether it's less than &#36;4 (one-sided).</p>
+      <textarea class="fr-input" rows="3" placeholder="# Two-sided:&#10;# One-sided:"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('a7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="a7">
+        <div class="r-editor">
+          <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">answer.R</span></div>
+          <pre><code class="language-r"># Two-sided
+t.test(delivery$tip_amount, mu = 4)$p.value
+
+# One-sided (less than)
+t.test(delivery$tip_amount, mu = 4, alternative = "less")$p.value</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(7)">Got it ✓</button>
+  </div>
+</div>
+
+<!-- ========== PART C: QUIZ ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quick Quiz — Can You Apply This?</span>
+</div>
+
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">Q1</span>
+    <span class="step-title">Quiz: 4 questions, exam format</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Question 1 of 4</div>
+      <p>A researcher gets $p = 0.08$ for $H_0: \mu = 100$. Colleague says: "There's a 92% chance the true mean is not 100." Is this correct? If not, give the right interpretation.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('q1a').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="q1a">
+        <strong>No.</strong> The p-value is not $1 - P(H_0)$. Correct: "If $H_0$ is true, there is an 8% probability of observing a test statistic as extreme or more extreme than the one observed."
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Question 2 of 4</div>
+      <p>Two-sided $p = 0.08$. The sample mean is above $\mu_0$. You want $H_A: \mu > \mu_0$.<br>(a) One-sided p-value?<br>(b) Decision at $\alpha = 0.05$?<br>(c) Decision at $\alpha = 0.10$?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('q2a').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="q2a">
+        (a) $0.08 / 2 = 0.04$ (same direction as $H_A$, so divide by 2)<br>
+        (b) $0.04 < 0.05$ → <strong>reject $H_0$</strong><br>
+        (c) $0.04 < 0.10$ → <strong>reject $H_0$</strong>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Question 3 of 4</div>
+      <p>Write the R code: test whether the mean of <code>scores</code> differs from 75. Extract the p-value. Also get the 95% CI.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('q3a').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="q3a">
+        <code>t.test(scores, mu = 75)$p.value</code><br>
+        <code>t.test(scores, mu = 75)$conf.int</code>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Question 4 of 4</div>
+      <p>95% CI for the mean is $[72.3, 78.1]$. Does this interval suggest we reject $H_0: \mu = 75$ at $\alpha = 0.05$? What about $H_0: \mu = 70$?</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('q4a').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="q4a">
+        $\mu = 75$: 75 is INSIDE [72.3, 78.1] → <strong>fail to reject</strong>.<br>
+        $\mu = 70$: 70 is OUTSIDE [72.3, 78.1] → <strong>reject $H_0$</strong>.
+      </div>
+    </div>
+
+    <button style="margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer" onclick="markDone(8)">Module 1 Complete ✓</button>
+  </div>
+</div>
+
+<!-- Done button -->
+<button class="done-btn" onclick="completeModule()">Complete Module 1 → Go to Module 2</button>
+
+</div>
+
+<script>
+const TOTAL_STEPS = 8;
+let doneSteps = new Set();
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('mod1_done');
+    if (s) doneSteps = new Set(JSON.parse(s));
+  } catch(e) {}
+  updateProgress();
+  doneSteps.forEach(i => {
+    const c = document.getElementById('check' + i);
+    if (c) { c.classList.add('done'); c.textContent = '✓'; }
+  });
+  // Auto-open first incomplete step
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    if (!doneSteps.has(i)) { toggleStep(i); break; }
+  }
+}
+
+function saveState() {
+  localStorage.setItem('mod1_done', JSON.stringify([...doneSteps]));
+  // Also update course homepage
+  const pct = Math.round(doneSteps.size / TOTAL_STEPS * 100);
+  try {
+    const course = JSON.parse(localStorage.getItem('dsc152_course') || '{}');
+    course[1] = pct;
+    localStorage.setItem('dsc152_course', JSON.stringify(course));
+  } catch(e) {}
+}
+
+function updateProgress() {
+  const pct = Math.round(doneSteps.size / TOTAL_STEPS * 100);
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progPct').textContent = pct + '%';
+}
+
+function toggleStep(i) {
+  const body = document.getElementById('body' + i);
+  const isOpen = body.classList.contains('open');
+  // Close all
+  for (let j = 1; j <= TOTAL_STEPS; j++) {
+    document.getElementById('body' + j).classList.remove('open');
+  }
+  if (!isOpen) {
+    body.classList.add('open');
+    document.getElementById('s' + i).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  Prism.highlightAll();
+}
+
+function markDone(i) {
+  doneSteps.add(i);
+  const c = document.getElementById('check' + i);
+  c.classList.add('done');
+  c.textContent = '✓';
+  saveState();
+  updateProgress();
+  // Auto-open next step
+  if (i < TOTAL_STEPS) {
+    setTimeout(() => toggleStep(i + 1), 300);
+  }
+}
+
+function completeModule() {
+  for (let i = 1; i <= TOTAL_STEPS; i++) markDone(i);
+  alert('Module 1 complete! Tell Claude: "build module 2"');
+}
+
+loadState();
+</script>
+</body>
+</html>

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 — Power Analysis</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  .factor-card{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.6rem 0.8rem;margin:0.3rem 0;display:flex;align-items:center;gap:0.6rem}
+  .factor-arrow{font-size:1.2rem;min-width:30px;text-align:center}
+  .factor-text{font-size:0.82rem}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-03.html">Module 3</a><span class="sep">/</span>
+  <span class="current">Module 4</span>
+  <a href="module-05.html" class="next-btn">Module 5 &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 4 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Power Analysis</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">What is statistical power?</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>Think of a metal detector at the beach. Power is <strong>how good the detector is at finding buried metal</strong>. A weak detector misses coins. A strong detector finds them almost every time.</p>
+
+    <p>In statistics:</p>
+    <div class="eq-box">
+      $$\text{Power} = P(\text{reject } H_0 \mid H_0 \text{ is false})$$
+    </div>
+
+    <p>In words: power is <strong>the probability of correctly rejecting $H_0$ when $H_A$ is true</strong>.</p>
+
+    <div class="callout insight">
+      <strong>Power connects to Type II Error:</strong><br>
+      Type II Error = failing to reject $H_0$ when it's false = $\beta$<br>
+      Power = $1 - \beta$<br><br>
+      High power = low chance of missing a real effect. <strong>80% is the standard minimum</strong> (Lec 4).
+    </div>
+
+    <p>What would power = 1.0 mean?</p>
+    <div class="callout memorize">
+      <strong>From Practice Quiz 1 Q2b:</strong> "The test would need to reject $H_0$ in every possible sample drawn under $H_A$, i.e. the test statistic always falls in the rejection region."
+    </div>
+
+    <p>Power depends on a <em>specific alternative</em>. You can't compute power without specifying <strong>what the true parameter value actually is</strong>. For example: "power when $\mu = 50$" or "power when $\delta = 30$."</p>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">The 4 factors that control power</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>Four knobs you can turn. Memorize the direction of each:</p>
+
+    <div class="factor-card" style="border-left:3px solid #28c840">
+      <span class="factor-arrow" style="color:#28c840">&uarr;</span>
+      <div class="factor-text"><strong>Sample size $n$ &uarr;</strong> &rarr; Power &uarr;<br><span style="color:#888">More data = more information = easier to detect a real effect</span></div>
+    </div>
+
+    <div class="factor-card" style="border-left:3px solid #28c840">
+      <span class="factor-arrow" style="color:#28c840">&uarr;</span>
+      <div class="factor-text"><strong>Effect size $\delta$ &uarr;</strong> &rarr; Power &uarr;<br><span style="color:#888">Bigger true difference = easier to detect (finding a boulder vs a pebble)</span></div>
+    </div>
+
+    <div class="factor-card" style="border-left:3px solid #e94560">
+      <span class="factor-arrow" style="color:#e94560">&darr;</span>
+      <div class="factor-text"><strong>Standard deviation $\sigma$ &darr;</strong> &rarr; Power &uarr;<br><span style="color:#888">Less noise = signal stands out more</span></div>
+    </div>
+
+    <div class="factor-card" style="border-left:3px solid #28c840">
+      <span class="factor-arrow" style="color:#28c840">&uarr;</span>
+      <div class="factor-text"><strong>Significance level $\alpha$ &uarr;</strong> &rarr; Power &uarr;<br><span style="color:#888">Wider rejection region = easier to reject. But also more Type I Errors!</span></div>
+    </div>
+
+    <div class="callout warning">
+      <strong>TRAP on Quiz 1 Q4d:</strong> Students often get $\sigma$ and $\alpha$ backwards.<br>
+      <strong>Increase $\sigma$</strong> = MORE noise = HARDER to detect = <strong>LESS power</strong> (not more!)<br>
+      <strong>Decrease $\alpha$</strong> from 0.05 to 0.01 = STRICTER threshold = HARDER to reject = <strong>LESS power</strong>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Memorize this:</strong> <code>n&uarr; &delta;&uarr; &sigma;&darr; &alpha;&uarr;</code> all increase power.<br>
+      Think: <strong>"N</strong>eed <strong>D</strong>etectable <strong>S</strong>ignal, <strong>A</strong>ccept risk" (N&uarr; D&uarr; S&darr; A&uarr;)
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">power.t.test() &mdash; the theory-based approach</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>When data is <strong>normally distributed</strong>, R can compute exact power using the non-central $t$-distribution. No simulation needed.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">power_t_test.R</span></div>
+      <pre><code class="language-r">power.t.test(n = 10,          # sample size
+             delta = 30,       # true mean - null value (effect size)
+             sd = 10,          # population standard deviation
+             sig.level = 0.05, # alpha
+             type = "one.sample",
+             alternative = "two.sided")
+## power = 0.9999</code></pre>
+    </div>
+
+    <p>Every argument matters. Let's walk through what each one means:</p>
+
+    <table class="ref-table">
+      <tr><th>Argument</th><th>What it is</th><th>Watch out</th></tr>
+      <tr><td><code>n</code></td><td>Sample size</td><td>This is $n$, NOT degrees of freedom</td></tr>
+      <tr><td><code>delta</code></td><td>$\mu_{\text{true}} - \mu_0$ (the shift)</td><td>Always positive &mdash; it's the <em>magnitude</em> of the difference</td></tr>
+      <tr><td><code>sd</code></td><td>Population $\sigma$</td><td>NOT the standard error $\sigma/\sqrt{n}$</td></tr>
+      <tr><td><code>sig.level</code></td><td>$\alpha$</td><td>Default is 0.05, but quiz might use 0.10</td></tr>
+      <tr><td><code>type</code></td><td><code>"one.sample"</code></td><td>Must specify &mdash; default is <code>"two.sample"</code></td></tr>
+      <tr><td><code>alternative</code></td><td><code>"two.sided"</code> or <code>"one.sided"</code></td><td>Must match the $H_A$ direction</td></tr>
+    </table>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Worked Example: Practice Quiz 1 Q2c (TSA wait times)</h4>
+    <p>Context: $H_0: \mu = 20$, true $\mu = 50$, so $\delta = 30$. $\sigma = 10$, $n = 10$.</p>
+
+    <div class="worked">
+power.t.test(n = 10, delta = 30, sd = 10,
+             sig.level = 0.05,
+             type = "one.sample",
+             alternative = "two.sided")
+## power = 0.9999
+    </div>
+
+    <div class="callout success">
+      <strong>Answer key interpretation (PQ1 Q2c):</strong> "If the true mean wait time is 50 minutes (30 minutes above the null value of 20), then with a sample size of 10 passengers, we would almost certainly detect this difference and correctly reject $H_0$."
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">One-sided example: Quiz 1 Q4b (delivery tips)</h4>
+    <p>Context: $H_0: \mu = 4$, $H_A: \mu > 4$, true $\mu = 6$, so $\delta = 2$. $\sigma = 3$, $n = 30$.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">quiz1_q4b.R</span></div>
+      <pre><code class="language-r">power.t.test(n = 30, delta = 2, sd = 3,
+             sig.level = 0.05,
+             type = "one.sample",
+             alternative = "one.sided")</code></pre>
+    </div>
+
+    <div class="callout insight">
+      Notice <code>alternative = "one.sided"</code> because the quiz specifies $H_A: \mu > 4$. Getting this wrong changes the power value.
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Simulation-based power &mdash; when and how</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>Simulation gives you power for <strong>any distribution</strong>, not just Normal. The idea is dead simple:</p>
+
+    <div class="callout insight">
+      <strong>The recipe:</strong><br>
+      1. Generate data from the <em>true</em> distribution (where $H_A$ is true)<br>
+      2. Run the t-test on that data<br>
+      3. Check if the p-value is below $\alpha$<br>
+      4. Repeat 10,000 times<br>
+      5. Power = proportion of times you rejected
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">The sim_power function (Practice Quiz 1 Q6a)</h4>
+    <p>This exact code structure appears on exams. Every blank has been tested:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">sim_power.R</span></div>
+      <pre><code class="language-r">sim_power <- function(n, delta, sd, alpha = 0.05, reps = 10000){
+    count <- 0
+    for(i in 1:reps){
+        samp <- rnorm(n = n,
+                      mean = 20 + delta,  # true mean = null + shift
+                      sd   = sd)
+        pval <- t.test(samp, mu = 20)$p.value
+        if(pval < alpha){
+            count <- count + 1
+        }
+    }
+    return(count / reps)
+}</code></pre>
+    </div>
+
+    <p>Let's break down <strong>each piece</strong> that gets tested as blanks:</p>
+
+    <table class="ref-table">
+      <tr><th>Blank</th><th>Answer</th><th>Why</th></tr>
+      <tr><td><code>rnorm(n = ___)</code></td><td><code>n</code></td><td>Sample size is the function parameter</td></tr>
+      <tr><td><code>mean = ___</code></td><td><code>20 + delta</code></td><td>True mean = null value + effect size (we simulate under $H_A$!)</td></tr>
+      <tr><td><code>sd = ___</code></td><td><code>sd</code></td><td>Standard deviation parameter</td></tr>
+      <tr><td><code>if(___ < ___)</code></td><td><code>pval < alpha</code></td><td>Count rejections: p-value below threshold</td></tr>
+      <tr><td><code>return(___)</code></td><td><code>count / reps</code></td><td>Power = fraction of rejections</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Key difference from Type I Error simulation:</strong><br>
+      Type I Error sim: generate data where $H_0$ is TRUE (<code>mean = 20</code>)<br>
+      Power sim: generate data where $H_A$ is TRUE (<code>mean = 20 + delta</code>)<br><br>
+      Same loop structure, different <code>mean</code>. That's it.
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">Interpreting sim_power output (PQ1 Q6b)</h4>
+    <p>If <code>sim_power(n=5, delta=2, sd=1)</code> returns ~0.91:</p>
+    <div class="callout success">
+      <strong>Answer key (PQ1 Q6b):</strong> "If the true average wait time is 22 minutes (2 minutes above the null value of 20), and the standard deviation is 1 minute, then with a sample size of 5 passengers we would correctly reject $H_0$ about 91% of the time."
+    </div>
+
+    <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem;color:#ffbd2e">One-sided version (Quiz 1 Q4a)</h4>
+    <p>When $H_A$ is one-sided, the t.test call needs <code>alternative</code>:</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">quiz1_q4a_power_sim.R</span></div>
+      <pre><code class="language-r">count <- 0
+for(i in 1:10000){
+    samp <- rnorm(n = 30, mean = 6, sd = 3)
+    pval <- t.test(samp, mu = 4,
+                   alternative = "greater")$p.value
+    if(pval < 0.05){
+        count <- count + 1
+    }
+}
+count / 10000</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">When power.t.test() CANNOT be used</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>This is a <strong>guaranteed exam question</strong>. Quiz 1 Q4c tested it directly.</p>
+
+    <p>Scenario: data follows a right-skewed Gamma distribution, not Normal. Can you use <code>power.t.test()</code>?</p>
+
+    <div class="callout memorize">
+      <strong>Answer key (Quiz 1 Q4c):</strong> "No, <code>power.t.test</code> assumes the data follow a normal distribution. There is in fact no closed-form solution to the distribution of the t-Test test statistic if the data follow a gamma distribution, so there is no theory-based equivalent when the data are gamma distributed."
+    </div>
+
+    <p>So what do you do instead? <strong>Simulate.</strong></p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">power_gamma.R</span></div>
+      <pre><code class="language-r"># Power when data is Gamma (Quiz 1 Q4c context)
+count <- 0
+for(i in 1:10000){
+    samp <- rgamma(n = 30, shape = 1.2, scale = (6 / 1.2))
+    pval <- t.test(samp, mu = 4,
+                   alternative = "greater")$p.value
+    if(pval < 0.05){
+        count <- count + 1
+    }
+}
+count / 10000</code></pre>
+    </div>
+
+    <p>Notice: the only thing that changed is <code>rnorm(...)</code> became <code>rgamma(...)</code>. The rest of the simulation is identical. That's the beauty of simulation &mdash; swap the distribution, keep everything else.</p>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">power.t.test()</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Data must be Normal</li>
+          <li>Exact answer (no randomness)</li>
+          <li>One line of code</li>
+          <li>Uses non-central $t$-distribution</li>
+        </ul>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Simulation</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Works for ANY distribution</li>
+          <li>Approximate (varies by run)</li>
+          <li>Requires a loop</li>
+          <li>Must know how to generate data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout insight">
+      <strong>When to use which:</strong><br>
+      &bull; Normal data + t-test &rarr; <code>power.t.test()</code> works, simulation also works<br>
+      &bull; Non-normal data (Gamma, skewed, etc.) &rarr; simulation ONLY<br>
+      &bull; If the exam says "theory-based equivalent" &mdash; that means <code>power.t.test()</code>
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Power Questions</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "What is power?" + interpret a power value</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Real exam question (Practice Quiz 1 Q2a):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Suppose the true average wait time at SAN is actually $\mu = 50$ minutes (not 20), and that wait times follow a normal distribution with $\sigma = 10$. What is the name of the quantity that measures the probability of correctly rejecting $H_0$ in this scenario?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "The chance of getting the right answer"<br>
+        "Type I Error probability"<br>
+        "The p-value"
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        <strong>"Statistical power"</strong>
+      </div>
+    </div>
+
+    <p><strong>Real exam question (Practice Quiz 1 Q2c):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>A colleague runs <code>power.t.test(n=10, delta=30, sd=10, sig.level=0.05, type="one.sample", alternative="two.sided")</code> and gets power = 0.9999. Briefly explain what this means in the context of SAN wait times.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "There is a 99.99% chance that H0 is false."<br><br>
+        <span style="color:#e94560">Doesn't connect to the specific scenario. Doesn't mention the true mean or sample size.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "If the true mean wait time is 50 minutes (30 minutes above the null value of 20), then with a sample size of 10 passengers, we would almost certainly detect this difference and correctly reject $H_0$."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Template for interpreting power:</strong><br>
+      "If the true [parameter] is [value] ([delta] [units] above/below the null value of [null]), then with a sample size of [n], we would correctly reject $H_0$ about [power &times; 100]% of the time."
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p><code>sim_power(n=5, delta=2, sd=1)</code> returns ~0.91 in the TSA wait time context ($H_0: \mu = 20$). Interpret this value.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+        <strong>Full-marks answer (PQ1 Q6b):</strong> "If the true average wait time is 22 minutes (2 minutes above the null value of 20), and the standard deviation is 1 minute, then with a sample size of 5 passengers we would correctly reject $H_0$ about 91% of the time."
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: "Fill in the simulation code"</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p>This is the highest-value exam question type for power. Appeared on both Practice Quiz 1 Q6a AND Quiz 1 Q4a.</p>
+
+    <p><strong>Real exam question (Practice Quiz 1 Q6a):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Complete the function so that it returns a simulated estimate of power when data are normally distributed with mean $\mu_0 + \delta$ and standard deviation <code>sd</code>, using sample size <code>n</code> and significance level <code>alpha</code>. The null hypothesis value is $\mu_0 = 20$.</p>
+      <div class="r-editor">
+        <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">fill_in_blanks.R</span></div>
+        <pre><code class="language-r">sim_power <- function(n, delta, sd, alpha = 0.05, reps = 10000){
+    count <- 0
+    for(i in 1:reps){
+        samp <- rnorm(n = __(a)__,
+                      mean = __(b)__,
+                      sd   = __(c)__)
+        pval <- t.test(samp, mu = 20)$p.value
+        if(__(d)__){
+            count <- count + 1
+        }
+    }
+    return(__(e)__)
+}</code></pre>
+      </div>
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Blank</th><th>Answer</th><th>Common mistake</th></tr>
+      <tr><td>(a)</td><td><code>n</code></td><td>Writing <code>reps</code> or a number</td></tr>
+      <tr><td>(b)</td><td><code>20 + delta</code></td><td>Writing just <code>20</code> (that's Type I Error sim!) or just <code>delta</code></td></tr>
+      <tr><td>(c)</td><td><code>sd</code></td><td>Writing <code>sd/sqrt(n)</code> (rnorm wants $\sigma$, not SE)</td></tr>
+      <tr><td>(d)</td><td><code>pval &lt; alpha</code></td><td>Writing <code>pval &gt; alpha</code> or <code>pval &lt; 0.05</code> (use the parameter!)</td></tr>
+      <tr><td>(e)</td><td><code>count / reps</code></td><td>Writing <code>count / 10000</code> (should use parameter)</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>The #1 mistake:</strong> blank (b). Writing <code>mean = 20</code> turns this into a Type I Error simulation. For power, you simulate under $H_A$, so the mean is $\mu_0 + \delta = 20 + \text{delta}$.
+    </div>
+
+    <p><strong>Real exam question (Quiz 1 Q4a):</strong> One-sided version</p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Estimate power of one-sample t-test for detecting whether average tip amount is greater than &#36;4.00. True mean is &#36;6.00, $n = 30$, $\sigma = 3$. Fill in the blank:</p>
+      <div class="r-editor">
+        <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">quiz1_blank.R</span></div>
+        <pre><code class="language-r">count <- 0
+for(i in 1:10000){
+    samp <- rnorm(n = 30, mean = 6, sd = 3)
+    pval <- ___(a)___
+    if(pval < 0.05){
+        count <- count + 1
+    }
+}
+count / 10000</code></pre>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        <code>t.test(samp, mu = 4)$p.value</code><br>
+        <span style="color:#e94560">Missing <code>alternative = "greater"</code> &mdash; the test is one-sided!</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        <code>t.test(samp, mu = 4, alternative = "greater")$p.value</code>
+      </div>
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Write a simulation to estimate power of a two-sided t-test for $H_0: \mu = 10$ when the true mean is 13, $\sigma = 5$, $n = 20$, $\alpha = 0.05$. Write the full loop.</p>
+      <textarea class="fr-input" rows="6"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+<pre style="background:#0d0d0d;padding:0.5rem;border-radius:4px;font-size:0.78rem;overflow-x:auto"><code>count <- 0
+for(i in 1:10000){
+    samp <- rnorm(n = 20, mean = 13, sd = 5)
+    pval <- t.test(samp, mu = 10)$p.value
+    if(pval < 0.05){
+        count <- count + 1
+    }
+}
+count / 10000</code></pre>
+        Key checks: <code>mean = 13</code> (not 10!), <code>mu = 10</code> in t.test, two-sided by default.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: "Which factors increase power?" + "Can power.t.test be used?"</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p><strong>Real exam question (Quiz 1 Q4d):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Which of the following changes, applied individually, would <strong>increase</strong> the statistical power of the test? <strong>Select all that apply.</strong></p>
+      <p style="padding-left:1rem">
+        &#9724; Increase the sample size $n$<br>
+        &#9724; Increase the effect size $\delta$<br>
+        &#9723; Increase the population standard deviation $\sigma$<br>
+        &#9723; Decrease the significance level $\alpha$ from 0.05 to 0.01<br>
+        &#9723; None of the above
+      </p>
+    </div>
+
+    <p><strong>Why the wrong answers are wrong:</strong></p>
+    <ul>
+      <li><strong>Increase $\sigma$</strong>: More noise makes it HARDER to see the signal. Power DECREASES.</li>
+      <li><strong>Decrease $\alpha$</strong>: Stricter threshold (0.01 vs 0.05) makes it HARDER to reject. The rejection region shrinks. Power DECREASES.</li>
+    </ul>
+
+    <p><strong>Real exam question (Quiz 1 Q4c):</strong></p>
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Now consider simulation with <code>rgamma(n = 30, shape = 1.2, scale = (6 / 1.2))</code>. Can a theory-based equivalent of the power estimated by this simulation be calculated? If so, write R code. If not, explain why.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "No, because the sample size is too small."<br><br>
+        <span style="color:#e94560">Sample size isn't the issue &mdash; the distribution is.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "No, <code>power.t.test</code> assumes the data follow a normal distribution. There is in fact no closed-form solution to the distribution of the t-Test test statistic if the data follow a gamma distribution, so there is no theory-based equivalent when the data are gamma distributed."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Wording keys for this answer type:</strong><br>
+      1. Say "<code>power.t.test</code> assumes <strong>normal distribution</strong>"<br>
+      2. Say "no closed-form solution" or "no theory-based equivalent"<br>
+      3. Name the actual distribution (Gamma, skewed, etc.)
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A researcher simulates power using <code>rexp(n = 50, rate = 0.5)</code> and t.test. They ask: "Can I get the same answer from <code>power.t.test()</code>?" What do you tell them?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        No. <code>power.t.test()</code> assumes the data follow a normal distribution. The exponential distribution is right-skewed, so there is no closed-form theory-based equivalent. Simulation is the only way to estimate power for exponentially distributed data.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Power Analysis</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>Define statistical power in one sentence using proper terminology. Then: if power = 0.74 for a test with $n = 25$, $\delta = 3$, $\sigma = 8$, and $\alpha = 0.05$, interpret what 0.74 means in plain English.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        <strong>Definition:</strong> Statistical power is the probability of correctly rejecting $H_0$ when $H_0$ is actually false (i.e., when $H_A$ is true).<br><br>
+        <strong>Interpretation:</strong> If the true mean is 3 units away from the null value and $\sigma = 8$, then with $n = 25$ at $\alpha = 0.05$, we would correctly reject $H_0$ about 74% of the time. There's a 26% chance we'd miss the effect (Type II Error).
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>Write the <code>power.t.test()</code> call for: one-sample t-test, $H_0: \mu = 100$, $H_A: \mu \neq 100$, true $\mu = 108$, $\sigma = 15$, $n = 40$, $\alpha = 0.01$.</p>
+      <textarea class="fr-input" rows="2"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+<pre style="background:#0d0d0d;padding:0.5rem;border-radius:4px;font-size:0.78rem"><code>power.t.test(n = 40, delta = 8, sd = 15,
+             sig.level = 0.01,
+             type = "one.sample",
+             alternative = "two.sided")</code></pre>
+        Key: <code>delta = 108 - 100 = 8</code>, <code>sig.level = 0.01</code> (not 0.05!), <code>"two.sided"</code> because $H_A: \mu \neq 100$.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>Write a simulation to estimate power when data comes from a <strong>right-skewed Gamma distribution</strong> with mean 15 ($\text{shape} = 3$, $\text{scale} = 5$), testing $H_0: \mu = 12$ vs $H_A: \mu > 12$, $n = 20$, $\alpha = 0.05$. Then explain why <code>power.t.test()</code> cannot be used here.</p>
+      <textarea class="fr-input" rows="7"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+<pre style="background:#0d0d0d;padding:0.5rem;border-radius:4px;font-size:0.78rem;overflow-x:auto"><code>count <- 0
+for(i in 1:10000){
+    samp <- rgamma(n = 20, shape = 3, scale = 5)
+    pval <- t.test(samp, mu = 12,
+                   alternative = "greater")$p.value
+    if(pval < 0.05){
+        count <- count + 1
+    }
+}
+count / 10000</code></pre>
+        <strong>Why not power.t.test():</strong> <code>power.t.test</code> assumes the data follow a normal distribution. There is no closed-form solution to the distribution of the t-test statistic when data are gamma distributed, so simulation is the only option.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>For each change below, state whether power increases, decreases, or stays the same. Explain briefly.</p>
+      <p style="padding-left:0.5rem">(a) $n$: 30 &rarr; 100<br>(b) $\sigma$: 5 &rarr; 15<br>(c) $\alpha$: 0.05 &rarr; 0.01<br>(d) $\delta$: 2 &rarr; 10</p>
+      <textarea class="fr-input" rows="4"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        (a) <strong>Increases</strong> &mdash; more data, more information to detect the effect<br>
+        (b) <strong>Decreases</strong> &mdash; more noise obscures the signal; harder to detect a real shift<br>
+        (c) <strong>Decreases</strong> &mdash; stricter threshold shrinks the rejection region; harder to reject<br>
+        (d) <strong>Increases</strong> &mdash; larger true difference is easier to detect (boulder vs pebble)
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 4 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 4 &rarr; Go to Module 5</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod4_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod4_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[4]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-05.html'}
+loadState();
+</script>
+</body>
+</html>

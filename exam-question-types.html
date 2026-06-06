@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSC 152 — Every Question Type on the Final</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0f0f1a;color:#e0e0e0;line-height:1.6;padding:0}
+
+  .top-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:1.2rem 2rem;text-align:center;border-bottom:2px solid #0f3460;position:sticky;top:0;z-index:100}
+  .top-bar h1{font-size:1.3rem;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,#e94560,#ffbd2e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .top-bar .sub{font-size:0.78rem;color:#888;margin-top:0.2rem}
+
+  .progress-strip{display:flex;background:#1a1a2e;padding:0.6rem 1rem;gap:4px;justify-content:center;border-bottom:1px solid #2a2a4a;flex-wrap:wrap}
+  .prog-dot{width:28px;height:6px;border-radius:3px;background:#2a2a4a;transition:background 0.3s;cursor:pointer;position:relative}
+  .prog-dot.done{background:#28c840}
+  .prog-dot.active{background:#ffbd2e}
+  .prog-dot:hover::after{content:attr(data-label);position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:2px 6px;border-radius:3px;font-size:0.6rem;white-space:nowrap;z-index:10}
+
+  .container{max-width:820px;margin:0 auto;padding:1.5rem 1rem}
+
+  /* Question type blocks */
+  .qt{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;margin-bottom:1.5rem;overflow:hidden}
+  .qt.unlocked{border-color:#0f3460}
+  .qt-header{padding:1rem 1.3rem;cursor:pointer;display:flex;align-items:center;gap:0.8rem;transition:background 0.2s}
+  .qt-header:hover{background:#16213e}
+  .qt-num{background:#0f3460;color:#fff;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;padding:4px 8px;border-radius:4px;min-width:24px;text-align:center}
+  .qt-num.done-num{background:#28c840;color:#000}
+  .qt-title{font-weight:700;font-size:0.9rem;flex:1}
+  .qt-freq{font-size:0.65rem;color:#888;font-family:'JetBrains Mono',monospace}
+  .qt-arrow{color:#666;transition:transform 0.2s;font-size:0.8rem}
+  .qt-arrow.open{transform:rotate(90deg)}
+
+  .qt-body{display:none;padding:0 1.3rem 1.3rem}
+  .qt-body.open{display:block}
+
+  /* Steps within each question type */
+  .step{margin-top:1rem;padding:1rem;border-radius:6px}
+  .step-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;margin-bottom:0.5rem}
+
+  .step.real-q{background:#16213e;border:1px solid #0f3460}
+  .step.real-q .step-label{color:#4a9eff}
+
+  .step.wrong-ans{background:#2d1a1a;border:1px solid #5c2a2a}
+  .step.wrong-ans .step-label{color:#e94560}
+
+  .step.right-ans{background:#1a2d1a;border:1px solid #2a5c2a}
+  .step.right-ans .step-label{color:#28c840}
+
+  .step.why{background:#2d2a1a;border:1px solid #5c4a2a}
+  .step.why .step-label{color:#ffbd2e}
+
+  .step.your-turn{background:#1a1a2e;border:2px dashed #0f3460}
+  .step.your-turn .step-label{color:#4a9eff}
+
+  p{font-size:0.88rem;margin-bottom:0.4rem}
+  .sm{font-size:0.82rem;color:#aaa}
+
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.5rem 0.8rem;margin:0.4rem 0;text-align:center;overflow-x:auto}
+
+  .output-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:0.75rem;margin:0.5rem 0;background:#0f0f1a}
+  .output-table th,.output-table td{padding:4px 8px;text-align:right;border-bottom:1px solid #2a2a4a}
+  .output-table th{font-weight:700;border-bottom:2px solid #444;color:#888}
+  .output-table td:first-child,.output-table th:first-child{text-align:left}
+
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.4rem 0;border:1px solid #3a3a3a}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:8px;height:8px;border-radius:50%}
+  .r-editor-bar .dot.red{background:#ff5f57}.r-editor-bar .dot.yellow{background:#ffbd2e}.r-editor-bar .dot.green{background:#28c840}
+  .r-editor-bar .title{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.65rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+
+  .wording-box{background:rgba(40,200,64,0.08);border-left:3px solid #28c840;padding:0.5rem 0.8rem;margin:0.4rem 0;font-size:0.85rem}
+  .wording-box em{color:#28c840;font-style:normal;font-weight:700}
+
+  .trap-box{background:rgba(233,69,96,0.08);border-left:3px solid #e94560;padding:0.5rem 0.8rem;margin:0.4rem 0;font-size:0.85rem}
+
+  .fr-input{width:100%;min-height:60px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0f0f1a;color:#e0e0e0}
+  .fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.4rem 1.1rem;border-radius:4px;cursor:pointer;font-size:0.78rem;font-weight:700;margin-top:0.3rem}
+  .reveal-btn:hover{background:#1a5276}
+
+  .check-btn{background:#28c840;color:#000;border:none;padding:0.5rem 1.5rem;border-radius:4px;cursor:pointer;font-size:0.82rem;font-weight:800;margin-top:0.5rem;text-transform:uppercase;letter-spacing:1px}
+  .check-btn:hover{background:#5dff77}
+
+  .hidden{display:none}
+  .shown{display:block!important}
+
+  /* Coverage tracker */
+  .coverage{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;padding:1.2rem;margin-bottom:1.5rem}
+  .coverage h3{font-size:0.85rem;color:#ffbd2e;margin-bottom:0.6rem}
+  .cov-row{display:flex;align-items:center;gap:0.5rem;margin:3px 0;font-size:0.75rem}
+  .cov-label{width:200px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cov-bar{flex:1;height:5px;background:#0f0f1a;border-radius:3px;overflow:hidden}
+  .cov-fill{height:100%;border-radius:3px;transition:width 0.5s}
+  .cov-fill.g{background:#28c840}.cov-fill.y{background:#ffbd2e}.cov-fill.r{background:#e94560}.cov-fill.z{background:#2a2a4a}
+  .cov-pct{width:30px;text-align:right;font-family:'JetBrains Mono',monospace;color:#666;font-size:0.7rem}
+
+  @media(max-width:650px){body{padding:0}.container{padding:1rem 0.5rem}.qt-header{padding:0.8rem}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>THE 12 QUESTION TYPES ON YOUR FINAL</h1>
+  <div class="sub">Real exam questions &rarr; full-marks answers &rarr; your turn &rarr; check wording</div>
+</div>
+
+<div class="progress-strip" id="progStrip"></div>
+
+<div class="container">
+
+<div class="coverage" id="coveragePanel">
+  <h3>EXAM COVERAGE TRACKER</h3>
+  <div id="coverageBars"></div>
+</div>
+
+<div id="qtContainer"></div>
+
+</div>
+
+<script>
+const QTS = [
+  {
+    id: 1, title: 'Interpret a Regression Coefficient', freq: 'Every quiz',
+    real: {
+      source: 'Practice Quiz 3, Q1b',
+      prompt: 'Model: <code>stipend_hat = b0 + b1*gre + b2*CS + b3*DataSci + b4*(gre:CS) + b5*(gre:DataSci)</code><br>Reference category: Statistics.<br>Output shows b4 (gre:fieldCS) = 0.09.<br><br><strong>Interpret b4 = 0.09.</strong>',
+    },
+    wrong: '"For every 1-point increase in GRE, stipend increases by 0.09 for CS students."',
+    wrongWhy: 'This says 0.09 IS the slope for CS. It\'s not — it\'s the DIFFERENCE in slopes. The actual CS slope is b1 + b4 = 0.46 + 0.09 = 0.55.',
+    right: '"For CS applicants, each additional point on the GRE is associated with a predicted stipend that is <strong>$90 higher compared to the corresponding increase for Statistics applicants</strong>, holding all else constant."',
+    rightWhy: 'Three things that make this full-marks:<br>1. <em>Compared to reference category</em> (Statistics) — interaction coefs are always relative<br>2. <em>"associated with"</em> not "causes" — observational data<br>3. <em>"holding all else constant"</em> — multiple regression qualifier',
+    yourTurn: 'Same model. Interpret b5 = -0.03 (gre:fieldDataSci).',
+    yourAnswer: '"For Data Science applicants, each additional point on the GRE is associated with a predicted stipend that is $30 lower compared to the corresponding increase for Statistics applicants, holding all else constant."',
+    wording: [
+      {pattern: 'compared to [reference]', why: 'Interaction coefficients are DIFFERENCES from the reference group'},
+      {pattern: 'associated with', why: 'Never say "causes" with observational data'},
+      {pattern: 'holding all else constant', why: 'Required for any multiple regression coefficient'},
+      {pattern: 'on average / predicted', why: 'We\'re talking about estimates, not certainties'},
+    ]
+  },
+  {
+    id: 2, title: 'Write a Subgroup Equation', freq: 'Quiz 2, Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q1a',
+      prompt: 'Model: <code>stipend_hat = -8.20 + 0.46*gre + 12.80*CS + 6.30*DataSci + 0.09*(gre*CS) + (-0.03)*(gre*DataSci)</code><br><br><strong>Write the simplified equation for CS applicants.</strong>',
+    },
+    wrong: '"stipend_hat = -8.20 + 0.46*gre + 12.80*1 + 0.09*(gre*1)"<br><br>Not simplified, and missing the step showing how terms combine.',
+    wrongWhy: 'Partial credit at best. They want you to plug in, THEN combine like terms into a clean equation.',
+    right: 'Plug in CS = 1, DataSci = 0:<br><div class="eq-box" style="text-align:left;font-size:0.82rem;">stipend_hat = (-8.20 + 12.80) + (0.46 + 0.09) × gre<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>4.60 + 0.55 × gre</strong></div>',
+    rightWhy: 'Show both steps: the substitution AND the simplified form. The intercept is (b0 + b2) and the slope is (b1 + b4).',
+    yourTurn: 'Same model. Write the simplified equation for <strong>Data Science</strong> applicants.',
+    yourAnswer: 'Plug in CS = 0, DataSci = 1:<br><div class="eq-box" style="text-align:left;font-size:0.82rem;">stipend_hat = (-8.20 + 6.30) + (0.46 + (-0.03)) × gre<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>-1.90 + 0.43 × gre</strong></div>',
+    wording: [
+      {pattern: 'Show substitution step', why: 'Plug in dummy values FIRST, then simplify'},
+      {pattern: 'Combine intercepts: (b0 + b_group)', why: 'New intercept = original + group dummy coefficient'},
+      {pattern: 'Combine slopes: (b1 + b_interaction)', why: 'New slope = original + interaction coefficient'},
+    ]
+  },
+  {
+    id: 3, title: 'Set Up a Partial F-Test', freq: 'Quiz 2, Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q1c-d',
+      prompt: 'Test whether the effect of GRE on stipend is the same across all three fields.<br><br><strong>(c) State H0. (d) Can you conclude from the individual p-values alone?</strong>',
+    },
+    wrong: '"H0: b4 = 0 and H0: b5 = 0" (separate hypotheses)<br>"Yes, both p-values > 0.05 so no interaction."',
+    wrongWhy: 'Two separate tests ≠ one joint test. The partial F-test evaluates BOTH coefficients simultaneously. Individual p-values can all be > 0.05 while the F-test still rejects (or vice versa).',
+    right: '<strong>H0:</strong> $\\beta_4 = \\beta_5 = 0$ (both interaction terms are zero simultaneously)<br><br><strong>R code:</strong><div class="r-editor"><div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">partial_f.R</span></div><pre><code class="language-r">null_mod <- lm(stipend ~ gre + field, data = grad)\nfull_mod <- lm(stipend ~ gre * field, data = grad)\nanova(null_mod, full_mod)</code></pre></div><strong>Can we conclude from individual p-values?</strong> No. The partial F-test evaluates both coefficients jointly; individual p-values are not sufficient.',
+    rightWhy: 'The null model has NO interaction (parallel lines). The full model HAS interaction (different slopes). anova() compares them.',
+    yourTurn: 'You have a model with <code>salary ~ experience * department</code> (3 departments). Write H0 for testing whether the experience-salary relationship differs across departments, and the R code.',
+    yourAnswer: '<strong>H0:</strong> All interaction coefficients = 0 (parallel lines across departments).<div class="r-editor"><div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">your_answer.R</span></div><pre><code class="language-r">null_mod <- lm(salary ~ experience + department, data = df)\nfull_mod <- lm(salary ~ experience * department, data = df)\nanova(null_mod, full_mod)</code></pre></div>',
+    wording: [
+      {pattern: 'All interaction betas = 0 simultaneously', why: 'Joint hypothesis, not separate tests'},
+      {pattern: 'null_mod has no interaction, full_mod has interaction', why: 'anova compares nested models'},
+      {pattern: 'Individual p-values are not sufficient', why: 'This exact phrase appears in every answer key'},
+    ]
+  },
+  {
+    id: 4, title: 'Double-Log Derivation', freq: 'Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q2a',
+      prompt: 'Model: $\\log(\\hat{y}) = b_0 + b_1 \\log(x)$ with $b_1 = 2.84$.<br><br><strong>Derive the interpretation of $b_1$.</strong>',
+    },
+    wrong: '"A 1-unit increase in log(x) is associated with a b1 increase in log(y)."<br><br>Technically true but not what they want — they want the derivation on the ORIGINAL scale.',
+    wrongWhy: 'The exam says "derive" — they want the algebra, not just a statement. And the answer should be in terms of x and y, not log(x) and log(y).',
+    right: '<div class="eq-box" style="text-align:left;font-size:0.82rem;">At $x$: &nbsp; $\\log(\\hat{y}) = b_0 + b_1 \\log(x)$<br>At $cx$: $\\log(\\hat{y}^*) = b_0 + b_1 \\log(cx) = b_0 + b_1 \\log(c) + b_1 \\log(x)$<br><br>Subtract:<br>$\\log(\\hat{y}^*/\\hat{y}) = b_1 \\log(c)$<br>$\\hat{y}^*/\\hat{y} = c^{b_1}$</div><strong>Interpretation:</strong> A $c$-fold increase in $x$ is associated with a predicted $y$ that is $c^{b_1}$ times as large.<br><br><strong>For 1% increase</strong> ($c = 1.01$, $\\ln(1.01) \\approx 0.01$):<br>A 1% increase in GRE → approximately 2.84% increase in stipend.',
+    rightWhy: 'Three things for full marks:<br>1. Show the subtraction step explicitly<br>2. State the general interpretation with $c$<br>3. Give the 1% special case',
+    yourTurn: 'Model: $\\log(\\hat{y}) = 3.2 + 1.5 \\log(x)$. Derive interpretation of 1.5. What happens with a 1% increase in x?',
+    yourAnswer: 'Same derivation → $\\hat{y}^*/\\hat{y} = c^{1.5}$.<br>A $c$-fold increase in $x$ → predicted $y$ is $c^{1.5}$ times as large.<br>1% increase ($c=1.01$): approximately 1.5% increase in $y$.',
+    wording: [
+      {pattern: 'c-fold increase → y is c^(b1) times as large', why: 'This is the standard double-log interpretation'},
+      {pattern: '1% increase → approximately b1% change', why: 'The special case using ln(1.01) ≈ 0.01'},
+      {pattern: 'Show subtraction step', why: '"Derive" means show the algebra, not just state the result'},
+    ]
+  },
+  {
+    id: 5, title: 'Logistic Regression: Interpret on Odds Scale', freq: 'Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q4b-c',
+      prompt: 'Model: $\\log(\\hat{p}/(1-\\hat{p})) = -14.82 + 0.08 \\cdot \\text{gre} + 0.77 \\cdot \\text{gpa}$<br><br><strong>(b) Interpret 0.08 on the odds ratio scale.</strong><br><strong>(c) 95% CI for $\\beta_{\\text{gre}}$ on log-odds scale: (0.06, 0.10). Convert to odds ratio CI.</strong>',
+    },
+    wrong: '"Each GRE point increases admission probability by 8%."<br><br>WRONG scale — 0.08 is on the LOG-ODDS scale, not the probability scale.',
+    wrongWhy: 'Logistic regression coefficients are on the log-odds scale. You must exponentiate to get odds ratios. And odds ≠ probability.',
+    right: '<strong>(b)</strong> $e^{0.08} \\approx 1.08$. Each additional GRE point <em>multiplies the odds</em> of admission by approximately 1.08, holding GPA constant. (Roughly an 8% increase in odds.)<br><br><strong>(c)</strong> Exponentiate both endpoints: $(e^{0.06}, e^{0.10}) \\approx (1.06, 1.10)$.<br>We are 95% confident that a 1-point increase in GRE multiplies the odds of admission by a factor between 1.06 and 1.10.',
+    rightWhy: '1. Exponentiate the coefficient → odds ratio<br>2. Say "multiplies the odds" not "increases probability"<br>3. For CI: exponentiate BOTH endpoints (don\'t exponentiate point estimate then add/subtract)',
+    yourTurn: 'Coefficient on GPA is 0.77. 95% CI on log-odds scale: (0.40, 1.14). Interpret on odds scale with CI.',
+    yourAnswer: '$e^{0.77} \\approx 2.16$. Each additional GPA point multiplies the odds of admission by approximately 2.16, holding GRE constant.<br>CI: $(e^{0.40}, e^{1.14}) \\approx (1.49, 3.13)$.',
+    wording: [
+      {pattern: 'multiplies the odds by exp(b)', why: 'Odds RATIO — multiplicative, not additive'},
+      {pattern: 'holding [other vars] constant', why: 'Multiple regression qualifier'},
+      {pattern: 'exponentiate BOTH endpoints', why: 'Do NOT exponentiate point estimate and add/subtract SE'},
+    ]
+  },
+  {
+    id: 6, title: 'Compute Predicted Probability (Logistic)', freq: 'Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q4e',
+      prompt: 'Model: $\\log(\\hat{p}/(1-\\hat{p})) = -14.82 + 0.08(\\text{gre}) + 0.77(\\text{gpa})$<br><br><strong>Predicted probability for GRE=160, GPA=3.5.</strong>',
+    },
+    wrong: 'Plugging in and stopping at the log-odds: "-14.82 + 0.08(160) + 0.77(3.5) = 0.675"',
+    wrongWhy: '0.675 is the LOG-ODDS, not the probability. You need one more step to convert.',
+    right: '<div class="eq-box" style="text-align:left;font-size:0.82rem;">Step 1: log-odds = -14.82 + 0.08(160) + 0.77(3.5)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= -14.82 + 12.80 + 2.695 = 0.675<br><br>Step 2: $\\hat{p} = \\frac{e^{0.675}}{1 + e^{0.675}}$ &nbsp; or equivalently &nbsp; $\\hat{p} = \\frac{1}{1 + e^{-0.675}}$</div>',
+    rightWhy: 'Must show BOTH steps. The formula $\\hat{p} = e^{\\text{lo}} / (1 + e^{\\text{lo}})$ or $1/(1+e^{-\\text{lo}})$ — know either one.',
+    yourTurn: 'Same model. GRE = 150, GPA = 3.0. Show both steps.',
+    yourAnswer: 'log-odds = -14.82 + 0.08(150) + 0.77(3.0) = -14.82 + 12.0 + 2.31 = -0.51<br>$\\hat{p} = e^{-0.51}/(1 + e^{-0.51})$ or $1/(1+e^{0.51})$',
+    wording: [
+      {pattern: 'Step 1: compute log-odds', why: 'Plug into the fitted equation'},
+      {pattern: 'Step 2: convert to probability', why: 'p = exp(lo) / (1 + exp(lo))'},
+      {pattern: 'Show the formula, not just the number', why: 'No calculator allowed — leave as expression with e'},
+    ]
+  },
+  {
+    id: 7, title: 'State Conditions for Inference', freq: 'Quiz 1, Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q4d + Quiz 1, Q1e',
+      prompt: '<strong>Logistic regression:</strong> List 3 conditions for valid inference.<br><strong>t-test:</strong> List 2 conditions for validity.',
+    },
+    wrong: '"LINE conditions" for logistic regression.',
+    wrongWhy: 'LINE is for LINEAR regression only. Logistic has its own 3 conditions. Mixing them up = zero credit.',
+    right: '<strong>Logistic regression (3 conditions):</strong><br>1. Binary outcome (response is 0/1)<br>2. Independence of observations<br>3. Linearity on the log-odds scale (check deviance residual plot)<br><br><strong>t-test (2 conditions):</strong><br>1. Random sample (independent observations)<br>2. Data from normal distribution (or large n for CLT)<br><br><strong>Linear regression (LINE):</strong><br>L = Linearity, I = Independence, N = Normality of residuals, E = Equal variance',
+    rightWhy: 'Three different sets of conditions for three different models. The exam WILL ask you to name them — don\'t mix them up.',
+    yourTurn: 'Which conditions does logistic regression NOT have that linear regression does? (2 answers)',
+    yourAnswer: 'Normality and Equal variance. Logistic regression has NO normality condition and NO equal variance condition.',
+    wording: [
+      {pattern: 'Binary outcome, Independence, Linearity on log-odds', why: 'The exact 3 for logistic — memorize these'},
+      {pattern: 'Random sample + Normal (or large n)', why: 'The exact 2 for t-test'},
+      {pattern: 'LINE', why: 'Only for linear regression — never for logistic or time series'},
+    ]
+  },
+  {
+    id: 8, title: 'P-value Interpretation (Wording Trap)', freq: 'Quiz 1',
+    real: {
+      source: 'Quiz 1, Q1c',
+      prompt: 'p-value = 0.14. Which interpretation is correct?<br>"There is a 14% probability that the true mean is $4.00."',
+    },
+    wrong: 'Picking the wrong one — any statement that says "probability that H0/HA is true" or "probability of Type I Error."',
+    wrongWhy: 'The p-value is a property of the DATA, not of the hypothesis. It tells you how surprising your data is IF H0 were true — not how likely H0 is to be true.',
+    right: '"If $H_0$ is true, there is a 14% probability of observing a test statistic at least as extreme as the one observed."',
+    rightWhy: 'The key phrase is <strong>"assuming $H_0$ is true"</strong> — the p-value is conditional on $H_0$. It is NOT:<br>• $P(H_0$ is true)<br>• $P(H_A$ is true)<br>• $P$(Type I Error)<br>• The probability you\'re wrong',
+    yourTurn: 'p = 0.03 for testing $H_0: \\mu = 50$. Write the interpretation in one sentence.',
+    yourAnswer: '"If H0 is true (i.e., if the true mean is 50), there is a 3% probability of observing a test statistic as extreme or more extreme than the one observed."',
+    wording: [
+      {pattern: 'If H0 is true / assuming H0 is true', why: 'The conditional — without this, the interpretation is wrong'},
+      {pattern: 'as extreme or more extreme', why: 'P-value is a tail probability, not a point probability'},
+      {pattern: 'test statistic', why: 'We\'re talking about the test stat, not the parameter'},
+    ]
+  },
+  {
+    id: 9, title: 'Fill-in-Blank Simulation Code', freq: 'Quiz 1, Quiz 3',
+    real: {
+      source: 'Quiz 1, Q1g + Practice Quiz 1, Q6',
+      prompt: 'Fill in blanks for a Type I Error simulation with Gamma data, true mean = 4, α = 0.10:',
+      code: 'count <- 0\nfor (i in 1:10000) {\n  samp <- rgamma(n = ___(a)___, shape = 2, scale = ___(b)___)\n  p.val <- t.test(samp, mu = ___(c)___)$___(d)___\n  if (p.val < ___(e)___) {\n    count <- count + 1\n  }\n}\nTypeI <- ___(f)___',
+    },
+    wrong: 'Common mistakes: using delta instead of the null mean for mu, writing $p instead of $p.value, using 0.05 when the question says 0.10.',
+    wrongWhy: 'Read the question carefully — alpha might not be 0.05. And <code>$p.value</code> is the exact accessor (not $p, not $pvalue).',
+    right: '(a) n (sample size from context)<br>(b) 4/2 = 2 (so that mean = shape × scale = 2 × 2 = 4)<br>(c) 4 (null value — and since this is Type I Error sim, it equals the true mean)<br>(d) p.value<br>(e) 0.10 (the alpha stated in the problem, NOT always 0.05)<br>(f) count / 10000',
+    rightWhy: 'For Type I Error: generate data where H0 IS true (mean = null value). For Power: generate where HA is true (mean ≠ null value). Same loop, different mean.',
+    yourTurn: 'Now write a POWER simulation: true mean = 6, null = 4, n = 30, normal data, α = 0.05. What changes?',
+    yourAnswer: 'Only the mean changes: <code>rnorm(n = 30, mean = 6, sd = ...)</code> but still test against <code>mu = 4</code>. Everything else is identical.',
+    wording: [
+      {pattern: 'Type I Error: mean = null value', why: 'H0 is true in this simulation'},
+      {pattern: 'Power: mean = true value ≠ null', why: 'HA is true in this simulation'},
+      {pattern: '$p.value (not $p)', why: 'Exact R accessor — one of the most common blanks'},
+    ]
+  },
+  {
+    id: 10, title: 'Statistical vs Practical Significance', freq: 'Quiz 1',
+    real: {
+      source: 'Practice Quiz 1, Q7',
+      prompt: '$n = 50000$, $\\bar{x} = 20.3$, $p < 0.0001$, 95% CI = [20.17, 20.43]. Null is $\\mu = 20$.<br><br><strong>Is this practically meaningful?</strong>',
+    },
+    wrong: '"Yes, because p < 0.05."',
+    wrongWhy: 'Confusing statistical significance with practical significance. The p-value says a difference EXISTS — not that it MATTERS.',
+    right: 'Statistically significant (reject $H_0$, $p < 0.05$), but <strong>not practically meaningful</strong>. The difference is only 0.3 minutes (18 seconds). The CI [20.17, 20.43] shows the true mean is very close to 20. With very large $n$, even tiny, meaningless differences become statistically significant.',
+    rightWhy: 'Name the concept explicitly: "the distinction between statistical significance and practical (effect-size) significance." Also mention the CI — it shows the MAGNITUDE of the effect.',
+    yourTurn: 'Poker player: 10,000 hands, mean profit $0.10/hand, p = 0.22. At 300 hands/hr = $30/hr. Is this the opposite scenario? Explain.',
+    yourAnswer: 'Yes — this is the flip side. The effect is practically meaningful ($30/hr is real income) but NOT statistically significant (p = 0.22). High variance in poker makes it hard to detect the signal. Failing to reject ≠ H0 is true — she may just need more data.',
+    wording: [
+      {pattern: 'statistically significant but not practically meaningful', why: 'Name BOTH sides of the distinction'},
+      {pattern: 'with very large n, even tiny differences become significant', why: 'The core insight — memorize this sentence'},
+      {pattern: 'failing to reject ≠ H0 is true', why: 'The related trap — absence of evidence ≠ evidence of absence'},
+    ]
+  },
+  {
+    id: 11, title: 'ACF/PACF → Identify Model Order', freq: 'Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q5c',
+      prompt: 'ACF: gradual decay (tails off). PACF: significant at lags 1 and 2, then cuts off.<br><br><strong>What model is appropriate? Why?</strong>',
+    },
+    wrong: '"AR(1) because the PACF has significant spikes."',
+    wrongWhy: 'Count the spikes — lags 1 AND 2, not just lag 1. That\'s AR(2), not AR(1).',
+    right: '<strong>AR(2)</strong>. The PACF cuts off after lag 2 (significant at lags 1 and 2, then drops to zero), which identifies the AR order. The ACF tailing off (gradual decay) is consistent with an AR process.',
+    rightWhy: 'Pattern: PACF tells you AR order (cuts off after lag p). ACF tells you MA order (cuts off after lag q). They\'re mirrors.',
+    yourTurn: 'ACF: significant at lag 1 only, then cuts off. PACF: gradual decay. What model?',
+    yourAnswer: 'MA(1). ACF cuts off after lag 1 → MA order = 1. PACF tailing off confirms MA (not AR).',
+    wording: [
+      {pattern: 'PACF cuts off after lag p → AR(p)', why: 'PACF identifies AR order'},
+      {pattern: 'ACF cuts off after lag q → MA(q)', why: 'ACF identifies MA order'},
+      {pattern: 'tailing off confirms [the other type]', why: 'The other plot should gradually decay'},
+    ]
+  },
+  {
+    id: 12, title: 'Centering/Scaling Interpretation', freq: 'Quiz 3',
+    real: {
+      source: 'Practice Quiz 3, Q3a',
+      prompt: '<code>gre_s = (gre - mean(gre)) / (2*sd(gre))</code>, <code>gpa_c = gpa - mean(gpa)</code><br>Model: <code>stipend = g0 + g1*gre_s + g2*gpa_c + g3*(gre_s*gpa_c)</code><br><br><strong>Interpret g0 (intercept).</strong>',
+    },
+    wrong: '"g0 is the predicted stipend when gre_s = 0 and gpa_c = 0."',
+    wrongWhy: 'Technically correct but misses the point. gre_s = 0 means gre = mean(gre). gpa_c = 0 means gpa = mean(gpa). The exam wants you to say it in terms of the ORIGINAL variables.',
+    right: '"$\\gamma_0$ is the predicted stipend for an applicant with <strong>average GRE score</strong> and <strong>average GPA</strong>."',
+    rightWhy: 'Because both variables are centered, zero = the mean. Always translate back to original-variable language.',
+    yourTurn: 'Same model. What does g1 represent? (Hint: what does a 1-unit increase in gre_s mean in original GRE points?)',
+    yourAnswer: 'A 1-unit increase in gre_s = 2×sd(gre) increase in original GRE. So g1 is the predicted change in stipend for a 2-SD increase in GRE, among applicants with average GPA.',
+    wording: [
+      {pattern: 'applicant with average [X] and average [Z]', why: 'Centering makes 0 = mean — always translate'},
+      {pattern: '2×sd increase (if scaled by 2*sd)', why: '1 unit of scaled variable = 2 SDs of original'},
+      {pattern: 'among applicants whose [other var] = mean', why: 'In interaction models, interpretation depends on where the other variable is held'},
+    ]
+  },
+];
+
+// Render
+function renderAll() {
+  let progHtml = '';
+  let qtHtml = '';
+  const covData = {};
+
+  QTS.forEach((qt, idx) => {
+    const done = localStorage.getItem('qt_done_' + qt.id) === '1';
+    progHtml += `<div class="prog-dot ${done ? 'done' : ''}" data-label="Q${qt.id}: ${qt.title}" onclick="toggleQT(${idx})"></div>`;
+
+    qtHtml += `<div class="qt ${done ? 'unlocked' : ''}" id="qt${qt.id}">`;
+    qtHtml += `<div class="qt-header" onclick="toggleQT(${idx})">`;
+    qtHtml += `<span class="qt-num ${done ? 'done-num' : ''}">${qt.id}</span>`;
+    qtHtml += `<span class="qt-title">${qt.title}</span>`;
+    qtHtml += `<span class="qt-freq">${qt.freq}</span>`;
+    qtHtml += `<span class="qt-arrow" id="arrow${qt.id}">▸</span>`;
+    qtHtml += `</div>`;
+    qtHtml += `<div class="qt-body" id="body${qt.id}">`;
+
+    // Step 1: Real exam question
+    qtHtml += `<div class="step real-q"><div class="step-label">📋 Real Exam Question</div>`;
+    qtHtml += `<p class="sm">${qt.real.source}</p>`;
+    qtHtml += `<p>${qt.real.prompt}</p>`;
+    if (qt.real.code) qtHtml += `<div class="r-editor"><div class="r-editor-bar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="title">exam_code.R</span></div><pre><code class="language-r">${qt.real.code}</code></pre></div>`;
+    qtHtml += `</div>`;
+
+    // Step 2: Wrong answer
+    qtHtml += `<div class="step wrong-ans"><div class="step-label">✗ Common Wrong Answer</div>`;
+    qtHtml += `<p>${qt.wrong}</p>`;
+    qtHtml += `<p class="sm" style="margin-top:0.3rem">${qt.wrongWhy}</p>`;
+    qtHtml += `</div>`;
+
+    // Step 3: Right answer
+    qtHtml += `<div class="step right-ans"><div class="step-label">✓ Full-Marks Answer</div>`;
+    qtHtml += `<p>${qt.right}</p>`;
+    qtHtml += `<p class="sm" style="margin-top:0.3rem">${qt.rightWhy}</p>`;
+    qtHtml += `</div>`;
+
+    // Step 4: Why this wording
+    qtHtml += `<div class="step why"><div class="step-label">🔑 Wording That Gets Full Marks</div>`;
+    qt.wording.forEach(w => {
+      qtHtml += `<div class="wording-box"><em>${w.pattern}</em> — ${w.why}</div>`;
+    });
+    qtHtml += `</div>`;
+
+    // Step 5: Your turn
+    qtHtml += `<div class="step your-turn"><div class="step-label">✏️ Your Turn</div>`;
+    qtHtml += `<p>${qt.yourTurn}</p>`;
+    qtHtml += `<textarea class="fr-input" rows="3" placeholder="Write your answer here..."></textarea>`;
+    qtHtml += `<button class="reveal-btn" onclick="document.getElementById('ans${qt.id}').classList.add('shown');this.style.display='none'">Show Full-Marks Answer</button>`;
+    qtHtml += `<div class="hidden" id="ans${qt.id}" style="margin-top:0.5rem;padding:0.8rem;background:rgba(40,200,64,0.08);border:1px solid #2a5c2a;border-radius:4px;font-size:0.85rem;">${qt.yourAnswer}</div>`;
+    qtHtml += `<button class="check-btn" onclick="markDone(${qt.id})" style="margin-top:0.5rem">I Got This ✓</button>`;
+    qtHtml += `</div>`;
+
+    qtHtml += `</div></div>`;
+
+    covData[qt.id] = { title: qt.title, done };
+  });
+
+  document.getElementById('progStrip').innerHTML = progHtml;
+  document.getElementById('qtContainer').innerHTML = qtHtml;
+
+  // Coverage bars
+  let covHtml = '';
+  Object.values(covData).forEach(c => {
+    const pct = c.done ? 100 : 0;
+    const cls = pct >= 80 ? 'g' : pct > 0 ? 'y' : 'z';
+    covHtml += `<div class="cov-row"><span class="cov-label">${c.title}</span><div class="cov-bar"><div class="cov-fill ${cls}" style="width:${pct}%"></div></div><span class="cov-pct">${pct}%</span></div>`;
+  });
+  document.getElementById('coverageBars').innerHTML = covHtml;
+
+  Prism.highlightAll();
+}
+
+function toggleQT(idx) {
+  const qt = QTS[idx];
+  const body = document.getElementById('body' + qt.id);
+  const arrow = document.getElementById('arrow' + qt.id);
+  if (body.classList.contains('open')) {
+    body.classList.remove('open');
+    arrow.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+function markDone(id) {
+  localStorage.setItem('qt_done_' + id, '1');
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>

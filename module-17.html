@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 17 — Time Series Regression & Power</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .sep{color:#333}.topnav .current{color:#ffbd2e;font-weight:700}
+  .topnav .next-btn{margin-left:auto;background:#0f3460;color:#fff;padding:0.35rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;text-decoration:none}.topnav .next-btn:hover{background:#1a5276}
+  .mod-progress{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;color:#888}
+  .mod-progress .bar-track{flex:1;height:4px;background:#1a1a3e;border-radius:2px;overflow:hidden}
+  .mod-progress .bar-fill{height:100%;background:#ffbd2e;border-radius:2px;transition:width 0.5s;width:0%}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  .part-header{display:flex;align-items:center;gap:0.6rem;margin:2.5rem 0 1rem;padding-bottom:0.4rem;border-bottom:1px solid #1a1a3e}
+  .part-badge{font-size:0.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px}
+  .part-badge.a{background:#0f3460;color:#a8d8ff}.part-badge.b{background:#6c3483;color:#d2b4de}.part-badge.c{background:#28c840;color:#000}
+  .part-title{font-size:1rem;font-weight:700}
+  .step{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+  .step-header{padding:0.8rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:0.6rem}.step-header:hover{background:#161630}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;min-width:20px}
+  .step-title{font-size:0.88rem;font-weight:600;flex:1}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:0.6rem;transition:all 0.2s}
+  .step-check.done{background:#28c840;border-color:#28c840;color:#000}
+  .step-body{display:none;padding:0 1.2rem 1.2rem;font-size:0.88rem}.step-body.open{display:block}
+  .step-body p{margin-bottom:0.5rem}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.insight{background:rgba(15,52,96,0.3);border-left:3px solid #4a9eff}
+  .callout.warning{background:rgba(233,69,96,0.1);border-left:3px solid #e94560}
+  .callout.success{background:rgba(40,200,64,0.08);border-left:3px solid #28c840}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin:0.5rem 0}
+  .compare-side{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.7rem;font-size:0.82rem}
+  .compare-side h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem;padding-bottom:0.2rem;border-bottom:1px solid #1a1a3e}
+  .compare-side.wrong{border-color:#5c2a2a}.compare-side.wrong h4{color:#e94560}
+  .compare-side.right{border-color:#2a5c2a}.compare-side.right h4{color:#28c840}
+  .practice{background:#0f0f1a;border:2px solid #0f3460;border-radius:8px;padding:1.2rem;margin:0.8rem 0}
+  .practice-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:#4a9eff;margin-bottom:0.5rem}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .reveal-btn{background:#0f3460;color:#fff;border:none;padding:0.35rem 1rem;border-radius:4px;cursor:pointer;font-size:0.75rem;font-weight:700;margin-top:0.3rem}.reveal-btn:hover{background:#1a5276}
+  .answer-reveal{display:none;margin-top:0.5rem;padding:0.7rem;background:rgba(40,200,64,0.06);border:1px solid #2a5c2a;border-radius:4px;font-size:0.83rem}.answer-reveal.shown{display:block}
+  .done-btn{display:block;width:100%;padding:0.8rem;background:#28c840;color:#000;border:none;border-radius:6px;font-size:0.9rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:1.5rem}.done-btn:hover{background:#5dff77}
+  .got-btn{margin-top:0.5rem;padding:0.3rem 0.8rem;background:#28c840;color:#000;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer}
+  .ref-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0}
+  .ref-table th,.ref-table td{padding:5px 8px;text-align:left;border-bottom:1px solid #1a1a3e}
+  .ref-table th{color:#888;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px}
+  .ref-table code{background:#1a1a3e;color:#f8f8f2;padding:1px 4px;border-radius:3px;font-size:0.75rem}
+  .worked{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.8rem 1rem;margin:0.5rem 0;font-size:0.85rem;font-family:'JetBrains Mono',monospace;line-height:1.8}
+  @media(max-width:600px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a><span class="sep">/</span>
+  <a href="module-16.html">Module 16</a><span class="sep">/</span>
+  <span class="current">Module 17</span>
+  <a href="course.html" class="next-btn">Course &rarr;</a>
+</div>
+<div class="mod-progress">
+  <span>Module 17 Progress</span>
+  <div class="bar-track"><div class="bar-fill" id="progBar"></div></div>
+  <span id="progPct">0%</span>
+</div>
+
+<div class="container">
+
+<!-- ========== PART A ========== -->
+<div class="part-header">
+  <span class="part-badge a">Part A</span>
+  <span class="part-title">Learn: Time Series Regression & Power (Lec 19)</span>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="s1">
+  <div class="step-header" onclick="toggleStep(1)">
+    <span class="step-num">01</span>
+    <span class="step-title">Why lm() fails for time series data</span>
+    <span class="step-check" id="check1"></span>
+  </div>
+  <div class="step-body" id="body1">
+    <p>When your data has time dependency, using <code>lm()</code> gives you <strong>wrong p-values</strong>. Here's why:</p>
+
+    <div class="callout warning">
+      <strong>The core problem:</strong> <code>lm()</code> assumes the <strong>Independence</strong> condition in LINE. When residuals are autocorrelated (each residual is correlated with the previous one), the standard errors that <code>lm()</code> computes are <strong>too small</strong>. Smaller standard errors &rarr; bigger t-statistics &rarr; smaller p-values &rarr; you reject $H_0$ more often than you should.
+    </div>
+
+    <p>This means <code>lm()</code> on time series data has <strong>inflated Type I Error</strong>. You think you're testing at $\alpha = 0.05$ but you're actually rejecting way more than 5% of the time when $H_0$ is true.</p>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>lm() on time series</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Ignores autocorrelation in residuals</li>
+          <li>Standard errors are too small</li>
+          <li>P-values are too small (unreliable)</li>
+          <li>Type I Error is inflated</li>
+          <li>Rejects $H_0$ too often</li>
+        </ul>
+      </div>
+      <div class="compare-side right">
+        <h4>Arima() on time series</h4>
+        <ul style="font-size:0.8rem;padding-left:1rem">
+          <li>Models the autocorrelation explicitly</li>
+          <li>Standard errors are correct</li>
+          <li>P-values are reliable</li>
+          <li>Type I Error is at the correct $\alpha$ level</li>
+          <li>Rejects $H_0$ at the right rate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout insight">
+      <strong>From Lec 19:</strong> The lecture showed this with the NBA example &mdash; fitting <code>lm(pts ~ opp_def, data = nba_df)</code> failed to properly account for the MA(1) structure in the data, while <code>Arima()</code> with the correct order got it right.
+    </div>
+
+    <button class="got-btn" onclick="markDone(1)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="s2">
+  <div class="step-header" onclick="toggleStep(2)">
+    <span class="step-num">02</span>
+    <span class="step-title">Arima regression with xreg &mdash; adding predictors to time series models</span>
+    <span class="step-check" id="check2"></span>
+  </div>
+  <div class="step-body" id="body2">
+    <p>Regular <code>Arima(y, order = c(p, 0, q))</code> just models the time series structure. To do <strong>regression</strong> (test whether a predictor $X$ affects $Y$), add the <code>xreg</code> argument:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">arima_regression.R</span></div>
+      <pre><code class="language-r">library(forecast)
+
+# Time series regression with AR(1) and one predictor
+model <- Arima(y, order = c(1, 0, 0), xreg = x)
+
+# With multiple predictors: pass a matrix
+X <- cbind(x1, x2, x3)
+model <- Arima(y, order = c(1, 0, 0), xreg = X)
+
+# NBA example from lecture (MA(1) with one predictor):
+model2 <- Arima(
+  y = nba_df$pts,
+  order = c(0, 0, 1),
+  xreg = nba_df$opp_def
+)</code></pre>
+    </div>
+
+    <table class="ref-table">
+      <tr><th>Argument</th><th>What it does</th><th>Example</th></tr>
+      <tr><td><code>y</code></td><td>The outcome (time series)</td><td><code>nba_df$pts</code></td></tr>
+      <tr><td><code>order</code></td><td><code>c(p, d, q)</code> &mdash; AR, differencing, MA</td><td><code>c(1, 0, 0)</code> for AR(1)</td></tr>
+      <tr><td><code>xreg</code></td><td>Predictor variable(s) &mdash; vector or matrix</td><td><code>nba_df$opp_def</code></td></tr>
+    </table>
+
+    <div class="callout memorize">
+      <strong>The model being fit:</strong><br>
+      $$Y_t = \beta_0 + \beta_1 x_t + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \eta_t$$
+      This is a regression with a predictor $x_t$ <strong>plus</strong> AR terms to handle the time dependency. The <code>xreg</code> argument provides $x_t$, and the <code>order</code> argument specifies the AR/MA structure.
+    </div>
+
+    <div class="callout warning">
+      <strong>Watch out with multiple predictors:</strong> If you have categorical variables (like Home/Away), you need to convert them to numeric (0/1) before passing to <code>xreg</code>. The <code>Arima</code> function doesn't handle factors like <code>lm()</code> does.
+    </div>
+
+    <button class="got-btn" onclick="markDone(2)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="s3">
+  <div class="step-header" onclick="toggleStep(3)">
+    <span class="step-num">03</span>
+    <span class="step-title">coeftest() &mdash; getting p-values from Arima models</span>
+    <span class="step-check" id="check3"></span>
+  </div>
+  <div class="step-body" id="body3">
+    <p>Unlike <code>lm()</code> where you use <code>summary(model)</code> to see coefficients and p-values, for <code>Arima</code> models you need <code>coeftest()</code> from the <code>lmtest</code> package.</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">coeftest_example.R</span></div>
+      <pre><code class="language-r">library(forecast)
+library(lmtest)
+
+# Fit an Arima regression
+model <- Arima(y, order = c(2, 0, 0), xreg = time)
+
+# Get the coefficient table with p-values
+coeftest(model)</code></pre>
+    </div>
+
+    <p>The output looks like this:</p>
+    <div class="worked">
+             Estimate Std. Error z value Pr(>|z|)
+ar1        0.6423     0.0975    6.59   4.3e-11 ***
+ar2        0.2387     0.0989    2.41   0.016   *
+intercept  1.8914     0.8762    2.16   0.031   *
+time       0.0312     0.0089    3.51   0.00045 ***
+    </div>
+
+    <div class="callout insight">
+      <strong>Reading the output:</strong> The rows labeled <code>ar1</code>, <code>ar2</code> are the AR coefficients ($\phi_1$, $\phi_2$). The row labeled with your predictor name (e.g., <code>time</code>) is the regression coefficient ($\beta_1$). The <code>Pr(>|z|)</code> column gives the p-value &mdash; this is the one you use to decide significance.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">lm() workflow</h4>
+        <p style="font-size:0.8rem"><code>model &lt;- lm(y ~ x, data)</code><br><code>summary(model)</code></p>
+      </div>
+      <div class="compare-side" style="border-color:#2a2a5c">
+        <h4 style="color:#4a9eff">Arima() workflow</h4>
+        <p style="font-size:0.8rem"><code>model &lt;- Arima(y, order=c(p,0,q), xreg=x)</code><br><code>coeftest(model)</code></p>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(3)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="s4">
+  <div class="step-header" onclick="toggleStep(4)">
+    <span class="step-num">04</span>
+    <span class="step-title">Power comparison: lm vs Arima &mdash; the simulation</span>
+    <span class="step-check" id="check4"></span>
+  </div>
+  <div class="step-body" id="body4">
+    <p>Lec 19 ran a simulation to compare what happens when you use <code>lm()</code> vs <code>Arima()</code> on AR(2) data. The results are important and potentially tricky on the exam.</p>
+
+    <div class="callout memorize">
+      <strong>The key result:</strong><br>
+      &bull; <code>lm()</code> has a <strong>higher rejection rate</strong> than <code>Arima()</code><br>
+      &bull; But this is <strong>NOT a good thing</strong> &mdash; it's <strong>inflated Type I Error</strong><br>
+      &bull; <code>lm()</code> rejects $H_0$ too often because its p-values are unreliable (too small)<br>
+      &bull; <code>Arima()</code> has the <strong>correct</strong> Type I Error rate<br>
+      &bull; So <code>lm()</code> only <em>appears</em> more "powerful" &mdash; it's actually just making more false rejections
+    </div>
+
+    <div class="callout warning">
+      <strong>Exam trap:</strong> A question might say "lm() rejected $H_0$ more often in the simulation &mdash; does this mean lm() is more powerful?" The answer is <strong>NO</strong>. Higher rejection rate when $H_0$ is true is inflated Type I Error, not power. Power is the rejection rate when $H_A$ is true, but only meaningful if the Type I Error rate is correct. Since <code>lm()</code> has wrong Type I Error, its "power" comparison is meaningless.
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Misleading conclusion</h4>
+        "lm() is more powerful because it rejects more often"<br><br>
+        <span style="color:#e94560">Wrong &mdash; confuses inflated Type I Error with genuine power</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Correct conclusion</h4>
+        "lm() rejects more often because it ignores autocorrelation, producing unreliable (too small) p-values. This is inflated Type I Error, not higher power. Arima() is the appropriate model."
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(4)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step" id="s5">
+  <div class="step-header" onclick="toggleStep(5)">
+    <span class="step-num">05</span>
+    <span class="step-title">Simulation code pattern &mdash; generating AR data and comparing models</span>
+    <span class="step-check" id="check5"></span>
+  </div>
+  <div class="step-body" id="body5">
+    <p>The lecture showed a simulation pattern you should recognize. Here's the structure:</p>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">simulation_pattern.R</span></div>
+      <pre><code class="language-r">library(forecast)
+library(lmtest)
+
+# Function to generate AR(2) data with a covariate
+gen_AR2_reg <- function(n, phi1, phi2) {
+  x <- runif(n, 0, 10)
+  eps <- rnorm(n + 2, 0, 3)
+  y <- rep(0, n + 2)
+  y[1] <- eps[1]
+  y[2] <- phi1 * y[1] + eps[2]
+  for (i in 3:(n + 2)) {
+    y[i] <- 0 + 2 * x[i - 2] + phi1 * y[i - 1] +
+            phi2 * y[i - 2] + eps[i]
+  }
+  y <- y[3:(n + 2)]  # discard burn-in
+  data.frame(y = y, x = x, time = 1:n)
+}
+
+# Simulation: 1000 reps
+reps <- 1000
+lm_reject <- 0
+arima_reject <- 0
+
+for (i in 1:reps) {
+  df <- gen_AR2_reg(100, 0.65, 0.25)
+
+  # lm approach (ignoring time dependency)
+  m1 <- summary(lm(y ~ x, data = df))
+  if (m1$coefficients[2, 4] < 0.05) lm_reject <- lm_reject + 1
+
+  # Arima approach (accounting for AR(2))
+  m2 <- Arima(df$y, order = c(2, 0, 0), xreg = df$x)
+  ct <- coeftest(m2)
+  if (ct["df$x", 4] < 0.05) arima_reject <- arima_reject + 1
+}
+
+lm_reject / reps     # inflated rejection rate
+arima_reject / reps   # correct rejection rate</code></pre>
+    </div>
+
+    <div class="callout insight">
+      <strong>Key elements to recognize:</strong><br>
+      &bull; <code>arima.sim(model = list(ar = phi), n = n)</code> is a shortcut for generating AR data without a covariate<br>
+      &bull; The manual loop approach (shown above) is needed when you have a covariate $x$<br>
+      &bull; "Burn-in" values: the first 1-2 observations are discarded because the AR process needs previous values to get started<br>
+      &bull; Compare rejection rates at $\alpha = 0.05$ across many repetitions
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">arima_sim_shortcut.R</span></div>
+      <pre><code class="language-r"># Quick way to generate AR(1) data (no covariate)
+y <- arima.sim(model = list(ar = 0.8), n = 100)
+
+# AR(2) data
+y <- arima.sim(model = list(ar = c(0.65, 0.25)), n = 100)</code></pre>
+    </div>
+
+    <button class="got-btn" onclick="markDone(5)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART B ========== -->
+<div class="part-header">
+  <span class="part-badge b">Part B</span>
+  <span class="part-title">On the Exam: Time Series Regression Questions</span>
+</div>
+
+<!-- Step 6 -->
+<div class="step" id="s6">
+  <div class="step-header" onclick="toggleStep(6)">
+    <span class="step-num">06</span>
+    <span class="step-title">Exam Q Type: "Why is lm() inappropriate for this data?"</span>
+    <span class="step-check" id="check6"></span>
+  </div>
+  <div class="step-body" id="body6">
+    <p><strong>Typical exam setup:</strong> You're told the data is collected over time, or you see autocorrelated residuals, and asked why <code>lm()</code> is inappropriate.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>A researcher uses <code>lm(pts ~ opp_def, data = nba_df)</code> to model a basketball player's scoring over a season. The residual plot over time shows clear autocorrelation. Why is this analysis inappropriate?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "Because the data is time series data."<br><br>
+        <span style="color:#e94560">Too vague. Need to name the specific condition violated and the consequence.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "The residuals show autocorrelation, which violates the <strong>Independence</strong> condition in LINE. When residuals are autocorrelated, the standard errors from <code>lm()</code> are too small, making the p-values <strong>unreliable</strong> (too small). This means the test may reject $H_0$ more often than it should, inflating the Type I Error rate."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Template for "why is lm() wrong?" answers:</strong><br>
+      1. Name the violation: "residuals show <strong>autocorrelation</strong>, violating <strong>Independence</strong> in LINE"<br>
+      2. State the consequence: "p-values from <code>lm()</code> are <strong>unreliable</strong>"<br>
+      3. State the fix: "Use <code>Arima()</code> to properly account for the time dependency"
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>Daily stock returns are modeled with <code>lm(returns ~ market_index)</code>. A colleague points out that the ACF of the residuals shows significant spikes at lags 1 and 2. What's the problem and what should be done instead?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt6').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt6">
+        The significant ACF spikes at lags 1 and 2 indicate that the residuals are autocorrelated, violating the Independence assumption in LINE. The p-values from <code>lm()</code> are unreliable. Instead, use <code>Arima(returns, order = c(2, 0, 0), xreg = market_index)</code> to account for the AR(2) structure in the residuals, then use <code>coeftest(model)</code> for reliable p-values.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(6)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 7 -->
+<div class="step" id="s7">
+  <div class="step-header" onclick="toggleStep(7)">
+    <span class="step-num">07</span>
+    <span class="step-title">Exam Q Type: "Which model has higher power? Is this a good thing?"</span>
+    <span class="step-check" id="check7"></span>
+  </div>
+  <div class="step-body" id="body7">
+    <p><strong>Typical exam setup:</strong> A simulation compares rejection rates of <code>lm()</code> and <code>Arima()</code> on AR data.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>A simulation generates 1000 datasets from an AR(2) process under $H_0$ (no true effect of $X$). <code>lm()</code> rejects $H_0$ 23% of the time, while <code>Arima()</code> rejects 5% of the time at $\alpha = 0.05$. Which model has higher power? Is this a good thing?</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-side wrong">
+        <h4>Loses points</h4>
+        "lm() has higher power because it rejects more often. This is good because we want to detect effects."<br><br>
+        <span style="color:#e94560">Completely wrong. Confuses Type I Error with power.</span>
+      </div>
+      <div class="compare-side right">
+        <h4>Full marks</h4>
+        "This simulation is under $H_0$, so the rejection rate is the <strong>Type I Error rate</strong>, not power. <code>lm()</code> rejects 23% of the time at $\alpha = 0.05$ &mdash; this is <strong>massively inflated Type I Error</strong>, meaning <code>lm()</code> makes false positive conclusions 23% of the time instead of the intended 5%. <code>Arima()</code> correctly rejects at ~5%, showing proper Type I Error control. The <code>lm()</code> result is <strong>not</strong> a good thing &mdash; it means almost 1 in 4 conclusions would be wrong."
+      </div>
+    </div>
+
+    <div class="callout memorize">
+      <strong>Critical distinction:</strong><br>
+      &bull; <strong>Power</strong> = rejection rate when $H_A$ is true (a good thing to maximize)<br>
+      &bull; <strong>Type I Error</strong> = rejection rate when $H_0$ is true (should be $\leq \alpha$)<br><br>
+      If the simulation generates data under $H_0$ (no true effect), then a higher rejection rate is inflated Type I Error, NOT higher power. The <code>lm()</code> model only <em>appears</em> more powerful because its p-values are broken.
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>A student says: "I ran both <code>lm()</code> and <code>Arima()</code> on the same time series regression, and <code>lm()</code> gave me a smaller p-value. So <code>lm()</code> is the better model." What would you tell this student?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt7').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt7">
+        A smaller p-value from <code>lm()</code> does not make it the better model. Because <code>lm()</code> ignores the autocorrelation in the residuals, its standard errors are too small, which makes p-values artificially small. The <code>Arima()</code> model properly accounts for the time dependency, so its (larger) p-value is actually the <strong>reliable</strong> one. Using <code>lm()</code> here would inflate your Type I Error rate, meaning you'd make false positive conclusions more often than intended.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(7)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- Step 8 -->
+<div class="step" id="s8">
+  <div class="step-header" onclick="toggleStep(8)">
+    <span class="step-num">08</span>
+    <span class="step-title">Exam Q Type: Write Arima + coeftest code</span>
+    <span class="step-check" id="check8"></span>
+  </div>
+  <div class="step-body" id="body8">
+    <p><strong>Typical exam setup:</strong> You're given a dataset and told the time series structure, then asked to write the appropriate R code.</p>
+
+    <div class="practice" style="border-color:#6c3483;background:#12121e">
+      <p>Data is in <code>player_df</code> with columns <code>pts</code> (points scored) and <code>opp_def</code> (opponent defensive rating). You want to test whether <code>opp_def</code> is associated with <code>pts</code>, accounting for an AR(1) structure. Write the R code.</p>
+    </div>
+
+    <div class="callout success">
+      <strong>Answer:</strong>
+    </div>
+
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">answer.R</span></div>
+      <pre><code class="language-r">library(forecast)
+library(lmtest)
+
+model <- Arima(player_df$pts,
+               order = c(1, 0, 0),
+               xreg = player_df$opp_def)
+coeftest(model)</code></pre>
+    </div>
+
+    <div class="callout warning">
+      <strong>Common mistakes:</strong><br>
+      &bull; Forgetting <code>xreg</code> &mdash; without it you're just fitting an AR model with no predictor<br>
+      &bull; Using <code>summary(model)</code> instead of <code>coeftest(model)</code><br>
+      &bull; Writing <code>arima()</code> (lowercase) instead of <code>Arima()</code> (capital A)<br>
+      &bull; Wrong order: AR(1) is <code>c(1, 0, 0)</code>, not <code>c(0, 0, 1)</code> (that would be MA(1))
+    </div>
+
+    <div class="practice">
+      <div class="practice-label">Your Turn</div>
+      <p>You have <code>temp_df</code> with columns <code>electricity</code> (daily usage) and <code>high_temp</code> (daily high temperature). The PACF of the residuals suggests AR(2). Write the complete R code to test whether temperature is associated with electricity usage.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('yt8').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="yt8">
+        <code>library(forecast)</code><br>
+        <code>library(lmtest)</code><br><br>
+        <code>model &lt;- Arima(temp_df&#36;electricity, order = c(2, 0, 0), xreg = temp_df&#36;high_temp)</code><br>
+        <code>coeftest(model)</code>
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(8)">Got it &#10003;</button>
+  </div>
+</div>
+
+<!-- ========== PART C ========== -->
+<div class="part-header">
+  <span class="part-badge c">Part C</span>
+  <span class="part-title">Quiz: Time Series Regression & Power</span>
+</div>
+
+<!-- Step 9 -->
+<div class="step" id="s9">
+  <div class="step-header" onclick="toggleStep(9)">
+    <span class="step-num">09</span>
+    <span class="step-title">4-Question Quiz</span>
+    <span class="step-check" id="check9"></span>
+  </div>
+  <div class="step-body" id="body9">
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q1</div>
+      <p>A researcher fits <code>lm(sales ~ ad_spend, data = quarterly_df)</code> where the data is collected quarterly over 10 years. The ACF of the residuals shows significant autocorrelation at lags 1 through 4. Why is this analysis problematic? Name the specific LINE condition violated and the consequence for inference.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz1').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz1">
+        The autocorrelated residuals violate the <strong>Independence</strong> condition in LINE. When this condition is violated, the standard errors from <code>lm()</code> are too small, which makes the p-values unreliable (too small). This inflates the Type I Error rate &mdash; the researcher may conclude <code>ad_spend</code> is significantly associated with <code>sales</code> when in reality it is not. The researcher should use <code>Arima()</code> with the appropriate order to properly account for the time dependency.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q2</div>
+      <p>Data is in <code>weather_df</code> with columns <code>temp</code> (daily temperature) and <code>ice_cream_sales</code>. You suspect an AR(1) structure. Write the R code to test whether temperature is associated with ice cream sales, accounting for the time series structure. Include all necessary library calls.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz2').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz2">
+        <code>library(forecast)</code><br>
+        <code>library(lmtest)</code><br><br>
+        <code>model &lt;- Arima(weather_df&#36;ice_cream_sales, order = c(1, 0, 0), xreg = weather_df&#36;temp)</code><br>
+        <code>coeftest(model)</code>
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q3</div>
+      <p>In a simulation under $H_0$ (no true effect), <code>lm()</code> rejects 18% of the time and <code>Arima()</code> rejects 4.8% of the time at $\alpha = 0.05$. A student concludes: "lm() has higher statistical power." Is this correct? Explain.</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz3').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz3">
+        <strong>Incorrect.</strong> Since the simulation is under $H_0$ (no true effect exists), the rejection rate measures <strong>Type I Error</strong>, not power. Power is the rejection rate when $H_A$ is true. The <code>lm()</code> rejection rate of 18% at $\alpha = 0.05$ represents severely <strong>inflated Type I Error</strong> &mdash; it makes false positive conclusions 18% of the time instead of the intended 5%. The <code>Arima()</code> rate of 4.8% is close to the nominal $\alpha = 0.05$, indicating <strong>correct</strong> Type I Error control. The higher rejection rate from <code>lm()</code> is not genuine power &mdash; it's a consequence of unreliable p-values caused by ignoring autocorrelation.
+      </div>
+    </div>
+
+    <div class="practice" style="border-color:#6c3483;">
+      <div class="practice-label" style="color:#d2b4de">Q4</div>
+      <p>What does <code>coeftest(model)</code> do, and why do we use it instead of <code>summary(model)</code> for Arima models?</p>
+      <textarea class="fr-input" rows="3"></textarea>
+      <button class="reveal-btn" onclick="document.getElementById('qz4').classList.add('shown');this.style.display='none'">Check</button>
+      <div class="answer-reveal" id="qz4">
+        <code>coeftest(model)</code> (from the <code>lmtest</code> package) produces a coefficient table showing the estimated coefficients, standard errors, z-values, and <strong>p-values</strong> for each parameter in the Arima model. We use it instead of <code>summary(model)</code> because <code>summary()</code> on an Arima object does not provide p-values for the coefficients. <code>coeftest()</code> gives us the significance tests we need to determine whether predictors (in <code>xreg</code>) are statistically significant.
+      </div>
+    </div>
+
+    <button class="got-btn" onclick="markDone(9)">Module 17 Complete &#10003;</button>
+  </div>
+</div>
+
+<button class="done-btn" onclick="completeModule()">Complete Module 17 &rarr; Back to Course</button>
+
+</div>
+
+<script>
+const TOTAL=9;let doneSteps=new Set();
+function loadState(){try{const s=localStorage.getItem('mod17_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
+function saveState(){localStorage.setItem('mod17_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[17]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
+function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
+function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
+function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='course.html'}
+loadState();
+</script>
+</body>
+</html>

@@ -182,9 +182,11 @@ function render() {
         // Insert unit pct into header (done via DOM after)
         const cpBuilt = {cp1:'quiz1-checkpoint.html',cp2:'quiz2-checkpoint.html',cp3:'quiz3-checkpoint.html'};
         const cpLink = cpBuilt[m.id];
-        html += `<div class="checkpoint" ${cpLink?'onclick="window.location.href=\''+cpLink+'\'" style="cursor:pointer"':''}>
-          <span class="cp-icon">⚡</span>
-          <div><div class="cp-title">${m.title}</div><div class="cp-desc">${m.desc}</div></div>
+        const cpDone = localStorage.getItem('cp_'+m.id)==='done';
+        html += `<div class="checkpoint" ${cpLink?'onclick="window.location.href=\''+cpLink+'\'"':''} style="cursor:pointer;${cpDone?'border-color:#28c840;':''}">
+          <span class="cp-icon">${cpDone?'✅':'⚡'}</span>
+          <div style="flex:1"><div class="cp-title">${m.title}</div><div class="cp-desc">${m.desc}</div></div>
+          <button onclick="event.stopPropagation();toggleCp('${m.id}')" style="background:${cpDone?'#333':'#28c840'};color:${cpDone?'#888':'#000'};border:none;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.65rem;font-weight:700;cursor:pointer;flex-shrink:0">${cpDone?'Undo':'Done'}</button>
         </div>`;
         html += `</div></div>`; // close module-list and unit
       }
@@ -249,6 +251,8 @@ function render() {
   document.getElementById('modDone').textContent = done + '/17';
   document.getElementById('totalXp').textContent = avgPct + '%';
   document.getElementById('totalXp').style.color = avgPct >= 85 ? '#28c840' : avgPct >= 50 ? '#ffbd2e' : '#e94560';
+  const cpDoneCount = ['cp1','cp2','cp3'].filter(c => localStorage.getItem('cp_'+c)==='done').length;
+  document.getElementById('quizDone').textContent = cpDoneCount + '/3';
 }
 
 let markMode = false;
@@ -275,6 +279,13 @@ function resetAll() {
   for (let i = 1; i <= 17; i++) localStorage.removeItem('mod' + i + '_done');
   localStorage.removeItem('lab9_done');
   MODULES.forEach(m => { if (!m.checkpoint) m.pct = 0; });
+  render();
+}
+
+function toggleCp(cpId) {
+  const key = 'cp_' + cpId;
+  if (localStorage.getItem(key) === 'done') localStorage.removeItem(key);
+  else localStorage.setItem(key, 'done');
   render();
 }
 

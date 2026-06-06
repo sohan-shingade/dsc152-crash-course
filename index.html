@@ -174,7 +174,7 @@ function render() {
       if (currentUnit > 0) {
         const unitPct = unitMods.length > 0 ? Math.round(unitMods.reduce((a,b) => a + b, 0) / unitMods.length) : 0;
         // Insert unit pct into header (done via DOM after)
-        const cpBuilt = {cp1:'quiz1-checkpoint.html',final:'final-simulator.html'};
+        const cpBuilt = {cp1:'quiz1-checkpoint.html',cp2:'quiz2-checkpoint.html',cp3:'quiz3-checkpoint.html'};
         const cpLink = cpBuilt[m.id];
         html += `<div class="checkpoint" ${cpLink?'onclick="window.location.href=\''+cpLink+'\'" style="cursor:pointer"':''}>
           <span class="cp-icon">⚡</span>
@@ -190,8 +190,16 @@ function render() {
           <div class="mod-info"><div class="mod-title">Lab 9 Review (APPEARS ON FINAL)</div><div class="mod-desc">Model selection vs inference, Lucas 2013, correct workflow, diagnostic checks, log traps</div></div>
         </div>`;
         html += `<div class="mod" onclick="window.location.href='final-simulator.html'" style="border-color:#28c840">
-          <div class="mod-num" style="background:#28c840;color:#000">FE</div>
-          <div class="mod-info"><div class="mod-title">Final Exam Simulator</div><div class="mod-desc">15 questions, 3-hour timer, all topics, auto-graded</div></div>
+          <div class="mod-num" style="background:#28c840;color:#000">F1</div>
+          <div class="mod-info"><div class="mod-title">Practice Final 1</div><div class="mod-desc">15 questions, 3-hour timer, all topics, auto-graded</div></div>
+        </div>`;
+        html += `<div class="mod" onclick="window.location.href='practice-final-2.html'" style="border-color:#28c840">
+          <div class="mod-num" style="background:#28c840;color:#000">F2</div>
+          <div class="mod-info"><div class="mod-title">Practice Final 2</div><div class="mod-desc">15 NEW questions, heavier regression emphasis</div></div>
+        </div>`;
+        html += `<div class="mod" onclick="window.location.href='practice-final-3.html'" style="border-color:#e94560">
+          <div class="mod-num" style="background:#e94560;color:#fff">F3</div>
+          <div class="mod-info"><div class="mod-title">Practice Final 3 (Lab 9 Focus)</div><div class="mod-desc">15 questions, 4 directly from Lab 9 casino study</div></div>
         </div>`;
         html += `</div></div>`;
       }

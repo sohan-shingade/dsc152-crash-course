@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 2 Checkpoint — DSC 152</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0a14;color:#e0e0e0;line-height:1.7}
+  .topnav{background:#12121e;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:1px solid #1a1a3e;position:sticky;top:0;z-index:100}
+  .topnav a{color:#888;text-decoration:none;font-size:0.78rem}.topnav a:hover{color:#fff}
+  .topnav .current{color:#e94560;font-weight:700}
+  .timer-bar{background:#0f0f1a;padding:0.5rem 1.5rem;border-bottom:1px solid #1a1a3e;display:flex;align-items:center;gap:0.6rem;font-size:0.75rem;color:#888}
+  .timer-bar .clock{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:800;color:#ffbd2e}
+  .timer-bar .q-count{margin-left:auto;font-family:'JetBrains Mono',monospace}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1rem 4rem}
+  h1{font-size:1.4rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
+  h1 span{color:#e94560}
+  .subtitle{text-align:center;color:#888;font-size:0.8rem;margin-bottom:2rem}
+  .q{background:#12121e;border:1px solid #1a1a3e;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem}
+  .q.correct{border-color:#28c840;background:rgba(40,200,64,0.03)}
+  .q.incorrect{border-color:#e94560;background:rgba(233,69,96,0.03)}
+  .q-head{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem}
+  .q-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:800;color:#ffbd2e;background:#1a1a3e;padding:2px 8px;border-radius:4px}
+  .q-tag{font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:#888;margin-left:auto}
+  .q-text{font-size:0.88rem;margin-bottom:0.6rem}
+  .q-text p{margin-bottom:0.4rem}
+  .opts{display:flex;flex-direction:column;gap:0.3rem}
+  .opt{display:flex;align-items:flex-start;gap:0.5rem;padding:0.4rem 0.6rem;border:1px solid #1a1a3e;border-radius:4px;cursor:pointer;font-size:0.83rem;transition:all 0.15s}
+  .opt:hover{background:#161630;border-color:#2a2a4a}
+  .opt.selected{border-color:#4a9eff;background:rgba(74,158,255,0.08)}
+  .opt.graded-correct{border-color:#28c840;background:rgba(40,200,64,0.1)}
+  .opt.graded-wrong{border-color:#e94560;background:rgba(233,69,96,0.08)}
+  .opt .radio{width:16px;height:16px;border:2px solid #444;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center}
+  .opt .radio.check{border-radius:3px}
+  .opt.selected .radio{border-color:#4a9eff}
+  .opt.selected .radio::after{content:'';width:8px;height:8px;background:#4a9eff;border-radius:50%;display:block}
+  .opt.selected .radio.check::after{border-radius:1px}
+  .fr-input{width:100%;min-height:55px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.5rem;border:1px solid #333;border-radius:4px;resize:vertical;background:#0a0a14;color:#e0e0e0}.fr-input:focus{outline:2px solid #4a9eff;border-color:#4a9eff}
+  .r-editor{border-radius:6px;overflow:hidden;margin:0.5rem 0;border:1px solid #333}
+  .r-editor-bar{background:#111;padding:4px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #333}
+  .r-editor-bar .dot{width:7px;height:7px;border-radius:50%}.r-editor-bar .dot.r{background:#ff5f57}.r-editor-bar .dot.y{background:#ffbd2e}.r-editor-bar .dot.g{background:#28c840}
+  .r-editor-bar .t{margin-left:6px;color:#666;font-family:'JetBrains Mono',monospace;font-size:0.62rem}
+  .r-editor pre{margin:0!important;border-radius:0!important;border:none!important}
+  .r-editor pre[class*="language-"]{background:#0d0d0d!important;padding:0.6rem 0.8rem!important;font-size:0.78rem!important;line-height:1.5!important}
+  .eq-box{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:4px;padding:0.6rem 1rem;margin:0.5rem 0;text-align:center;overflow-x:auto}
+  .submit-btn{display:block;width:100%;padding:0.9rem;background:#e94560;color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;margin-top:1.5rem}.submit-btn:hover{background:#ff6b81}
+  .submit-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .feedback{display:none;margin-top:0.5rem;padding:0.7rem;border-radius:6px;font-size:0.83rem}
+  .feedback.shown{display:block}
+  .feedback.right{background:rgba(40,200,64,0.08);border:1px solid #2a5c2a}
+  .feedback.wrong{background:rgba(233,69,96,0.08);border:1px solid #5c2a2a}
+  .results{display:none;background:#12121e;border:2px solid #ffbd2e;border-radius:12px;padding:1.5rem;margin-top:2rem;text-align:center}
+  .results.shown{display:block}
+  .results h2{font-size:1.5rem;font-weight:900;margin-bottom:0.5rem}
+  .results .score{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:900}
+  .results .score.good{color:#28c840}.results .score.ok{color:#ffbd2e}.results .score.bad{color:#e94560}
+  .skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem;text-align:left}
+  .skill-row{background:#0f0f1a;border:1px solid #1a1a3e;border-radius:6px;padding:0.5rem 0.7rem;font-size:0.78rem}
+  .skill-row .name{color:#888;font-size:0.65rem;text-transform:uppercase;letter-spacing:1px}
+  .skill-row .bar-track{height:4px;background:#1a1a3e;border-radius:2px;margin-top:3px;overflow:hidden}
+  .skill-row .bar-fill{height:100%;border-radius:2px;transition:width 0.8s}
+  .callout{border-radius:6px;padding:0.7rem 1rem;margin:0.6rem 0;font-size:0.85rem}
+  .callout.memorize{background:rgba(255,189,46,0.08);border-left:3px solid #ffbd2e}
+  @media(max-width:600px){.skill-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="course.html">&larr; Course</a>
+  <span class="current">Quiz 2 Checkpoint</span>
+</div>
+<div class="timer-bar">
+  <span>Time:</span><span class="clock" id="timer">50:00</span>
+  <span class="q-count"><span id="answered">0</span>/8 answered</span>
+</div>
+
+<div class="container">
+
+<h1><span>Quiz 2</span> Checkpoint</h1>
+<p class="subtitle">Modules 6&ndash;13 &bull; Lectures 6&ndash;14 &bull; 8 Questions &bull; 50 Minutes</p>
+
+<!-- Q1: A/B Testing / Causation (Module 6) -->
+<div class="q" id="q1" data-module="6" data-skill="Causation vs association">
+  <div class="q-head">
+    <span class="q-num">Q1</span>
+    <span class="q-tag">Module 6 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher randomly assigns 60 patients to drug A or placebo and measures blood pressure. They find a significant difference ($p = 0.02$). Can they conclude the drug <strong>causes</strong> lower blood pressure?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="0">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>Yes, because random assignment enables causal inference</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>No, because this is observational data</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>No, because $p = 0.02$ is not small enough</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>Yes, because the sample size is large enough</div>
+  </div>
+  <div class="feedback" id="fb1"></div>
+</div>
+
+<!-- Q2: Simple Linear Regression (Module 7) -->
+<div class="q" id="q2" data-module="7" data-skill="Slope interpretation">
+  <div class="q-head">
+    <span class="q-num">Q2</span>
+    <span class="q-tag">Module 7 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A regression output shows:</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">salary_model.R</span></div>
+      <pre><code class="language-r">lm(salary ~ years_exp, data = employees)</code></pre>
+    </div>
+    <p>The slope is 3200, the intercept is 35000, and the p-value for the slope is 0.001. <strong>This is observational data.</strong></p>
+    <p>Interpret the slope in context.</p>
+  </div>
+  <textarea class="fr-input" id="a2" rows="3" placeholder="Each additional year of experience..."></textarea>
+  <div class="feedback" id="fb2"></div>
+</div>
+
+<!-- Q3: Multiple Regression (Module 8) -->
+<div class="q" id="q3" data-module="8" data-skill="Holding constant">
+  <div class="q-head">
+    <span class="q-num">Q3</span>
+    <span class="q-tag">Module 8 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A model is:</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">gpa_model.R</span></div>
+      <pre><code class="language-r">lm(gpa ~ hours_study + hours_sleep, data = students)</code></pre>
+    </div>
+    <p>The coefficient for <code>hours_study</code> is 0.15. Interpret this coefficient.</p>
+  </div>
+  <textarea class="fr-input" id="a3" rows="3" placeholder="Holding hours of sleep constant..."></textarea>
+  <div class="feedback" id="fb3"></div>
+</div>
+
+<!-- Q4: Categorical Predictors (Module 9) -->
+<div class="q" id="q4" data-module="9" data-skill="Categorical predictors">
+  <div class="q-head">
+    <span class="q-num">Q4</span>
+    <span class="q-tag">Module 9 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A model includes a categorical predictor <code>region</code> with levels "East", "Midwest", "South", "West".</p>
+    <p>(a) What is the reference category?</p>
+    <p>(b) The coefficient for <code>regionWest</code> is 12.5. Interpret it.</p>
+  </div>
+  <textarea class="fr-input" id="a4" rows="4" placeholder="(a) The reference category is...&#10;(b) Compared to..."></textarea>
+  <div class="feedback" id="fb4"></div>
+</div>
+
+<!-- Q5: LINE Conditions (Module 10) -->
+<div class="q" id="q5" data-module="10" data-skill="LINE conditions">
+  <div class="q-head">
+    <span class="q-num">Q5</span>
+    <span class="q-tag">Module 10 &bull; Select all that apply</span>
+  </div>
+  <div class="q-text">
+    <p>Which of the following are conditions required for valid linear regression inference (LINE)?</p>
+  </div>
+  <div class="opts" data-type="multi" data-answer="0,1,2,3">
+    <div class="opt" onclick="toggleOpt(this,0)"><span class="radio check"></span>Linearity</div>
+    <div class="opt" onclick="toggleOpt(this,1)"><span class="radio check"></span>Independence</div>
+    <div class="opt" onclick="toggleOpt(this,2)"><span class="radio check"></span>Normality of residuals</div>
+    <div class="opt" onclick="toggleOpt(this,3)"><span class="radio check"></span>Equal variance (homoscedasticity)</div>
+  </div>
+  <div class="feedback" id="fb5"></div>
+</div>
+
+<!-- Q6: Interaction Terms (Module 11) -->
+<div class="q" id="q6" data-module="11" data-skill="Interaction terms">
+  <div class="q-head">
+    <span class="q-num">Q6</span>
+    <span class="q-tag">Module 11 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>An interaction model gives:</p>
+    <div class="eq-box">$\text{sal} = 50000 + 8000 \cdot \text{remote} + 3000 \cdot \text{experience} + 1500 \cdot \text{remote} \cdot \text{experience}$</div>
+    <p>where <code>remote</code> is 1 for remote workers and 0 for non-remote.</p>
+    <p>(a) Write the fitted equation for remote workers only.</p>
+    <p>(b) Interpret the interaction coefficient 1500.</p>
+  </div>
+  <textarea class="fr-input" id="a6" rows="4" placeholder="(a) Remote: sal = ...&#10;(b) The interaction coefficient means..."></textarea>
+  <div class="feedback" id="fb6"></div>
+</div>
+
+<!-- Q7: Model Selection Pitfalls (Module 12) -->
+<div class="q" id="q7" data-module="12" data-skill="Model selection pitfalls">
+  <div class="q-head">
+    <span class="q-num">Q7</span>
+    <span class="q-tag">Module 12 &bull; Select one</span>
+  </div>
+  <div class="q-text">
+    <p>A researcher tests 40 predictors at $\alpha = 0.05$ and finds 3 significant. They report those 3 as real findings. What is the primary concern?</p>
+  </div>
+  <div class="opts" data-type="single" data-answer="1">
+    <div class="opt" onclick="selectOpt(this,0)"><span class="radio"></span>The sample size is too small</div>
+    <div class="opt" onclick="selectOpt(this,1)"><span class="radio"></span>This is the model selection &rarr; inference problem; about 2 of those 3 could be false positives</div>
+    <div class="opt" onclick="selectOpt(this,2)"><span class="radio"></span>They should have used $\alpha = 0.01$</div>
+    <div class="opt" onclick="selectOpt(this,3)"><span class="radio"></span>3 out of 40 is too few to be meaningful</div>
+  </div>
+  <div class="feedback" id="fb7"></div>
+</div>
+
+<!-- Q8: Log Transformation (Module 13) -->
+<div class="q" id="q8" data-module="13" data-skill="Log transformation">
+  <div class="q-head">
+    <span class="q-num">Q8</span>
+    <span class="q-tag">Module 13 &bull; Free response</span>
+  </div>
+  <div class="q-text">
+    <p>A model is:</p>
+    <div class="r-editor">
+      <div class="r-editor-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">house_model.R</span></div>
+      <pre><code class="language-r">lm(log(price) ~ sqft, data = houses)</code></pre>
+    </div>
+    <p>The slope is 0.0004. Interpret the slope.</p>
+  </div>
+  <textarea class="fr-input" id="a8" rows="3" placeholder="Each additional square foot..."></textarea>
+  <div class="feedback" id="fb8"></div>
+</div>
+
+<button class="submit-btn" id="submitBtn" onclick="gradeQuiz()">Submit Quiz</button>
+<button class="submit-btn" id="copyBtn" style="background:#0f3460;margin-top:0.5rem;display:none" onclick="copyForClaude()">Copy All Answers for Claude Grading</button>
+
+<div class="results" id="results">
+  <h2>Quiz 2 Results</h2>
+  <div class="score" id="scoreVal"></div>
+  <p id="scoreSummary" style="color:#888;font-size:0.85rem;margin-top:0.3rem"></p>
+  <div class="skill-grid" id="skillGrid"></div>
+  <p style="color:#888;font-size:0.75rem;margin-top:1rem">Review incorrect answers above, then continue studying.</p>
+  <button class="submit-btn" style="background:#28c840;color:#000;margin-top:1rem" onclick="window.location.href='module-14.html'">Continue to Module 14 &rarr;</button>
+</div>
+
+</div>
+
+<script>
+let timerSec = 50*60;
+let timerInterval = setInterval(()=>{
+  timerSec--;
+  if(timerSec<=0){clearInterval(timerInterval);gradeQuiz();return}
+  const m=Math.floor(timerSec/60),s=timerSec%60;
+  document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  if(timerSec<300)document.getElementById('timer').style.color='#e94560';
+},1000);
+
+const selections={};
+function selectOpt(el,idx){
+  const opts=el.parentElement;
+  opts.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const qid=el.closest('.q').id;
+  selections[qid]=idx;
+  updateCount();
+}
+function toggleOpt(el,idx){
+  el.classList.toggle('selected');
+  const qid=el.closest('.q').id;
+  if(!selections[qid])selections[qid]=new Set();
+  if(el.classList.contains('selected'))selections[qid].add(idx);
+  else selections[qid].delete(idx);
+  updateCount();
+}
+function updateCount(){
+  const seen=new Set();
+  document.querySelectorAll('.q').forEach(q=>{
+    const id=q.id;
+    let answered=false;
+    if(selections[id]!==undefined){
+      if(selections[id] instanceof Set){if(selections[id].size>0)answered=true}
+      else answered=true;
+    }
+    const ta=q.querySelector('textarea');
+    if(ta&&ta.value.trim())answered=true;
+    if(answered)seen.add(id);
+  });
+  document.getElementById('answered').textContent=seen.size;
+}
+document.querySelectorAll('textarea').forEach(ta=>ta.addEventListener('input',updateCount));
+
+const ANSWERS = {
+  q1: {type:'single',correct:0,
+    explain:'Random assignment (randomized experiment) is the key to causal inference. Because patients were randomly assigned to drug A vs placebo, confounders are balanced between groups, so a significant difference can be attributed to the drug. This is NOT observational data — it is an experiment.'},
+  q2: {type:'free',
+    keywords:['associated','years','experience','3200','average','salary'],
+    answer:'Every additional year of experience is associated with an average difference of &#36;3,200 in salary.',
+    explain:'Must use "associated with" (not "causes") because this is observational data. The slope means that for each one-unit increase in years of experience, salary differs by &#36;3,200 on average.'},
+  q3: {type:'free',
+    keywords:['holding','constant','hour','study','0.15','gpa','sleep'],
+    answer:'Holding hours of sleep constant, each additional hour of studying is associated with a 0.15 increase in GPA, on average.',
+    explain:'In multiple regression, you must say "holding the other variable(s) constant" when interpreting a coefficient. This isolates the relationship between hours_study and GPA, controlling for hours_sleep.'},
+  q4: {type:'free',
+    keywords:['east','reference','alphabetically','west','12.5','compared','holding'],
+    answer:'(a) East (alphabetically first). (b) Compared to the East region, jobs in the West are associated with a 12.5 unit higher outcome, holding other predictors constant.',
+    explain:'R uses the alphabetically first level as the reference category by default. Coefficients for categorical predictors represent the difference from the reference category, holding other variables constant.'},
+  q5: {type:'multi',correct:new Set([0,1,2,3]),
+    explain:'All four are correct! LINE stands for: <strong>L</strong>inearity (the relationship is linear), <strong>I</strong>ndependence (observations are independent), <strong>N</strong>ormality (residuals are approximately normal), <strong>E</strong>qual variance (residuals have constant spread, i.e., homoscedasticity). All four conditions must hold for valid regression inference.'},
+  q6: {type:'free',
+    keywords:['58000','4500','experience','remote','slope','additional','larger'],
+    answer:'(a) Remote: sal = 58000 + 4500 * experience. (b) The interaction coefficient 1500 means the salary increase per year of experience is &#36;1,500 larger for remote workers than for non-remote workers.',
+    explain:'Plug in remote = 1: sal = 50000 + 8000(1) + 3000*exp + 1500(1)*exp = 58000 + 4500*exp. The interaction term means the slope of experience differs by 1500 between the two groups — remote workers gain &#36;1,500 more per year of experience than non-remote workers.'},
+  q7: {type:'single',correct:1,
+    explain:'Under H0, testing 40 predictors at α = 0.05 means you expect about 40 × 0.05 = 2 false positives by chance alone. Finding 3 significant results is barely above what you would expect from random noise. This is the classic model selection → inference problem: using the same data to both select and test predictors inflates false positive rates.'},
+  q8: {type:'free',
+    keywords:['percent','square','foot','0.04','price','increase','associated'],
+    answer:'Each additional square foot is associated with approximately a 0.04% increase in price (since e^0.0004 ≈ 1.0004, meaning a 0.04% multiplicative increase).',
+    explain:'When the response is log-transformed, the slope is interpreted on a multiplicative/percentage scale. A slope of 0.0004 means each additional sqft multiplies price by e^(0.0004) ≈ 1.0004, which is approximately a 0.04% increase. For small slopes, the coefficient × 100 ≈ the percent change.'}
+};
+
+function getAnswerText(qid){
+  const q=document.getElementById(qid);
+  const a=ANSWERS[qid];
+  if(a.type==='single'||a.type==='multi'){
+    const opts=q.querySelectorAll('.opt');
+    const selected=[];
+    opts.forEach((o,i)=>{if(o.classList.contains('selected'))selected.push(o.textContent.trim())});
+    return selected.length?selected.join('; '):'(no answer)';
+  } else {
+    const ta=q.querySelector('textarea');
+    return ta&&ta.value.trim()?ta.value.trim():'(no answer)';
+  }
+}
+
+function getQuestionText(qid){
+  const q=document.getElementById(qid);
+  const textEl=q.querySelector('.q-text');
+  let txt=textEl?textEl.innerText.trim():'';
+  const codeEl=q.querySelector('pre code');
+  if(codeEl)txt+='\n[Code shown]\n'+codeEl.textContent.trim();
+  return txt;
+}
+
+function copyForClaude(){
+  let out='QUIZ 2 CHECKPOINT — Grade my answers\n';
+  out+='==========================================\n\n';
+  const qids=['q1','q2','q3','q4','q5','q6','q7','q8'];
+  qids.forEach(qid=>{
+    const num=qid.slice(1);
+    const tag=document.getElementById(qid).querySelector('.q-tag').textContent;
+    out+='Q'+num+' ('+tag+'):\n';
+    out+=getQuestionText(qid)+'\n\n';
+    out+='MY ANSWER: '+getAnswerText(qid)+'\n\n';
+    out+='---\n\n';
+  });
+  navigator.clipboard.writeText(out).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='Copied! Paste to Claude.';
+    btn.style.background='#28c840';btn.style.color='#000';
+    setTimeout(()=>{btn.textContent='Copy All Answers for Claude Grading';btn.style.background='#0f3460';btn.style.color='#fff'},3000);
+  });
+}
+
+function gradeQuiz(){
+  clearInterval(timerInterval);
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('copyBtn').style.display='block';
+  let total=0,correct=0;
+  const skills={};
+  const qids=['q1','q2','q3','q4','q5','q6','q7','q8'];
+
+  qids.forEach(qid=>{
+    const q=document.getElementById(qid);
+    if(!q)return;
+    const a=ANSWERS[qid];
+    if(!a)return;
+    const fbId='fb'+qid.slice(1);
+    const fb=document.getElementById(fbId);
+    if(!fb)return;
+    const mod=q.dataset.module;
+    const skill=q.dataset.skill;
+    if(!skills[skill])skills[skill]={correct:0,total:0,mod:mod};
+    skills[skill].total++;
+    total++;
+
+    let isCorrect=false;
+
+    if(a.type==='single'){
+      const sel=selections[qid];
+      isCorrect=(sel===a.correct);
+      q.querySelectorAll('.opt').forEach((o,i)=>{
+        if(i===a.correct)o.classList.add('graded-correct');
+        else if(i===sel&&sel!==a.correct)o.classList.add('graded-wrong');
+      });
+    } else if(a.type==='multi'){
+      const sel=selections[qid]||new Set();
+      isCorrect=(sel.size===a.correct.size&&[...sel].every(v=>a.correct.has(v)));
+      q.querySelectorAll('.opt').forEach((o,i)=>{
+        if(a.correct.has(i))o.classList.add('graded-correct');
+        else if(sel.has(i))o.classList.add('graded-wrong');
+      });
+    } else if(a.type==='free'){
+      const ta=q.querySelector('textarea');
+      const text=(ta?ta.value:'').toLowerCase();
+      if(!text.trim()){
+        isCorrect=false;
+      } else {
+        let hits=0;
+        a.keywords.forEach(kw=>{if(text.includes(kw.toLowerCase()))hits++});
+        isCorrect=(hits>=Math.ceil(a.keywords.length*0.5));
+      }
+    }
+
+    if(isCorrect){correct++;skills[skill].correct++;q.classList.add('correct')}
+    else{q.classList.add('incorrect')}
+
+    const answerHtml=a.answer?a.answer.replace(/\n/g,'<br>'):'';
+    fb.innerHTML='<strong style="color:'+(isCorrect?'#28c840':'#e94560')+'">'+(isCorrect?'&#10003; Correct':'&#10007; Incorrect/Needs Review')+'</strong><br><br>'+
+      '<strong>Full-marks answer:</strong><br>'+answerHtml+'<br><br>'+
+      '<strong>Explanation:</strong> '+a.explain;
+    fb.className='feedback shown '+(isCorrect?'right':'wrong');
+  });
+
+  const pct=Math.round(correct/total*100);
+  const scoreEl=document.getElementById('scoreVal');
+  scoreEl.textContent=pct+'%';
+  scoreEl.className='score '+(pct>=80?'good':pct>=60?'ok':'bad');
+  document.getElementById('scoreSummary').textContent=correct+'/'+total+' correct — free response grading is approximate. Use "Copy for Claude" for precise grading.';
+
+  let gridHtml='';
+  Object.keys(skills).forEach(s=>{
+    const sk=skills[s];
+    const spct=Math.round(sk.correct/sk.total*100);
+    const color=spct>=80?'#28c840':spct>=50?'#ffbd2e':'#e94560';
+    gridHtml+=`<div class="skill-row">
+      <div class="name">M${sk.mod}: ${s}</div>
+      <div style="font-weight:700;color:${color}">${spct}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${spct}%;background:${color}"></div></div>
+    </div>`;
+  });
+  document.getElementById('skillGrid').innerHTML=gridHtml;
+  document.getElementById('results').classList.add('shown');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+
+  document.querySelectorAll('.opt').forEach(o=>o.style.pointerEvents='none');
+  document.querySelectorAll('textarea').forEach(t=>t.disabled=true);
+}
+Prism.highlightAll();
+</script>
+</body>
+</html>

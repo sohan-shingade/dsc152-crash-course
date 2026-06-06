@@ -81,6 +81,7 @@
   <span id="progPct">0%</span>
 </div>
 
+<div style="max-width:760px;margin:0.5rem auto;padding:0 1rem;display:flex;gap:0.5rem"><button onclick="expandAll()" id="expandBtn" style="background:#0f3460;color:#fff;border:none;padding:0.3rem 0.8rem;border-radius:4px;font-size:0.7rem;font-weight:700;cursor:pointer">Expand All</button><button onclick="collapseAll()" style="background:#1a1a3e;color:#888;border:1px solid #333;padding:0.3rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer">Collapse All</button></div>
 <div class="container">
 
 <!-- ========== PART A ========== -->
@@ -501,6 +502,8 @@ alpha = 0.01,  tests = 100
 
 <script>
 const TOTAL=9;let doneSteps=new Set();
+function expandAll(){for(let j=1;j<=TOTAL;j++)document.getElementById("body"+j).classList.add("open");Prism.highlightAll()}
+function collapseAll(){for(let j=1;j<=TOTAL;j++)document.getElementById("body"+j).classList.remove("open")}
 function loadState(){try{const s=localStorage.getItem('mod12_done');if(s)doneSteps=new Set(JSON.parse(s))}catch(e){}updateProgress();doneSteps.forEach(i=>{const c=document.getElementById('check'+i);if(c){c.classList.add('done');c.textContent='✓'}});for(let i=1;i<=TOTAL;i++){if(!doneSteps.has(i)){toggleStep(i);break}}}
 function saveState(){localStorage.setItem('mod12_done',JSON.stringify([...doneSteps]));const pct=Math.round(doneSteps.size/TOTAL*100);try{const c=JSON.parse(localStorage.getItem('dsc152_course')||'{}');c[12]=pct;localStorage.setItem('dsc152_course',JSON.stringify(c))}catch(e){}}
 function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}

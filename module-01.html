@@ -105,6 +105,7 @@
   <span id="progPct">0%</span>
 </div>
 
+<div style="max-width:760px;margin:0.5rem auto;padding:0 1rem;display:flex;gap:0.5rem"><button onclick="expandAll()" id="expandBtn" style="background:#0f3460;color:#fff;border:none;padding:0.3rem 0.8rem;border-radius:4px;font-size:0.7rem;font-weight:700;cursor:pointer">Expand All</button><button onclick="collapseAll()" style="background:#1a1a3e;color:#888;border:1px solid #333;padding:0.3rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer">Collapse All</button></div>
 <div class="container">
 
 <!-- ========== PART A: LEARN ========== -->
@@ -505,6 +506,8 @@ t.test(delivery$tip_amount, mu = 4, alternative = "less")$p.value</code></pre>
 const TOTAL_STEPS = 8;
 let doneSteps = new Set();
 
+function expandAll(){for(let j=1;j<=TOTAL;j++)document.getElementById("body"+j).classList.add("open");Prism.highlightAll()}
+function collapseAll(){for(let j=1;j<=TOTAL;j++)document.getElementById("body"+j).classList.remove("open")}
 function loadState() {
   try {
     const s = localStorage.getItem('mod1_done');

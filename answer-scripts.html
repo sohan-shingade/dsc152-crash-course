@@ -55,7 +55,7 @@
 <div class="container">
 
 <h1><span>Answer Scripts</span></h1>
-<p class="sub">14 question types from all 6 quizzes &bull; Exact full-marks wording &bull; Fill in the blanks for your context</p>
+<p class="sub">22 question types from all 6 quizzes &bull; Exact full-marks wording &bull; Fill in the blanks for your context</p>
 
 <!-- ===== SCRIPT 1 ===== -->
 <div class="script">
@@ -487,6 +487,257 @@
       <li><span class="tag q3">Q3</span> "This is an incorrect workflow because the p-value for practice_hours from the smaller model is influenced by model-selection step based on the same data."</li>
       <li><span class="tag q3">Q3</span> "The decision of whether to include practice_hours in the model should not be based on this workflow, but rather on whether there is scientific justification for it as a confounding variable."</li>
       <li><span class="tag q3">Q3</span> "As a sensitivity analysis, these residual plots would suggest that future studies should consider using model_logy for statistical inference. Scientific rationale should also guide model choice."</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== SCRIPT 15 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num log">15</span>
+    <span class="script-title">glm() code + 3 logistic regression conditions</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>Writing the code:</strong></p>
+    <div class="template">
+      <code>model &lt;- glm(<strong class="fill">[outcome]</strong> ~ <strong class="fill">[predictors]</strong>, data = <strong class="fill">[df]</strong>, family = binomial)</code><br>
+      <code>summary(model)</code>
+    </div>
+    <p class="warn">Must include <code>family = binomial</code>. Without it you get linear regression (lm), not logistic.</p>
+
+    <p><strong>CI for odds ratios:</strong></p>
+    <div class="template">
+      <code>exp(confint(model))</code> &mdash; exponentiates both endpoints of the log-odds CI.
+    </div>
+
+    <p><strong>3 conditions for valid logistic regression inference:</strong></p>
+    <div class="template">
+      1. <strong>Binary outcome</strong>: <strong class="fill">[outcome]</strong> takes only values 0 and 1. Satisfied by construction.<br>
+      2. <strong>Independence of observations</strong>: Each row is a different <strong class="fill">[subject]</strong>. Approximately satisfied if <strong class="fill">[subjects]</strong> are not clustered.<br>
+      3. <strong>Linearity on the log-odds scale</strong>: The log-odds of <strong class="fill">[outcome]</strong> should be approximately linear in <strong class="fill">[predictors]</strong>. Checked via a deviance residual plot.
+    </div>
+    <p class="warn">NOT "normally distributed residuals" — that's linear regression, not logistic!</p>
+
+    <ul class="examples">
+      <li><span class="tag q3">Q3</span> <code>glm(offer ~ coaching + portfolio_score, data = career_df, family = binomial)</code></li>
+      <li><span class="tag pq3">PQ3</span> "Binary outcome: admitted takes only 0 and 1. Independence: each row is a different applicant. Linearity on log-odds: checked via deviance residual plot."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 16 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">16</span>
+    <span class="script-title">Simulation code patterns (Type I Error + Power)</span>
+    <span class="script-freq">Appeared 5x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq1">PQ1</span><span class="tag q1">Q1</span></p>
+
+    <p><strong>Type I Error simulation (simulate under H0 TRUE):</strong></p>
+    <div class="template">
+      <code>count &lt;- 0</code><br>
+      <code>for(i in 1:10000){</code><br>
+      &emsp;<code>data &lt;- r<strong class="fill">[dist]</strong>(n = <strong class="fill">[n]</strong>, <strong class="fill">[params with mean = null value]</strong>)</code><br>
+      &emsp;<code>p.val &lt;- t.test(data, mu = <strong class="fill">[null value]</strong>)$p.value</code><br>
+      &emsp;<code>if(p.val &lt; <strong class="fill">[alpha]</strong>) count &lt;- count + 1</code><br>
+      <code>}</code><br>
+      <code>TypeI &lt;- count / 10000</code>
+    </div>
+    <p class="good">Key: <code>mean = [null value]</code> because H0 is TRUE. We're checking how often we falsely reject.</p>
+
+    <p><strong>Power simulation (simulate under HA TRUE):</strong></p>
+    <div class="template">
+      <code>count &lt;- 0</code><br>
+      <code>for(i in 1:10000){</code><br>
+      &emsp;<code>data &lt;- r<strong class="fill">[dist]</strong>(n = <strong class="fill">[n]</strong>, <strong class="fill">[params with mean = null + delta]</strong>)</code><br>
+      &emsp;<code>p.val &lt;- t.test(data, mu = <strong class="fill">[null value]</strong>)$p.value</code><br>
+      &emsp;<code>if(p.val &lt; <strong class="fill">[alpha]</strong>) count &lt;- count + 1</code><br>
+      <code>}</code><br>
+      <code>power &lt;- count / 10000</code>
+    </div>
+    <p class="warn">Key difference: <code>mean = [null + delta]</code> for power (HA is true), <code>mean = [null]</code> for Type I Error (H0 is true). Same loop structure otherwise.</p>
+
+    <p><strong>Power interpretation template:</strong></p>
+    <div class="template">
+      "If the true <strong class="fill">[parameter]</strong> is <strong class="fill">[value]</strong> (<strong class="fill">[delta]</strong> <strong class="fill">[units]</strong> above/below the null value of <strong class="fill">[null]</strong>), then with a sample size of <strong class="fill">[n]</strong>, we would correctly reject $H_0$ about <strong class="fill">[power &times; 100]</strong>% of the time."
+    </div>
+
+    <p><strong>When power.t.test() CANNOT be used:</strong></p>
+    <div class="template">
+      "No. <code>power.t.test</code> assumes the data follow a <strong>normal distribution</strong>. There is no closed-form solution to the distribution of the t-test statistic if the data follow a <strong class="fill">[Gamma / exponential / etc.]</strong> distribution, so there is no theory-based equivalent. Simulation is the only option."
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 17 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">17</span>
+    <span class="script-title">Statistical vs practical significance</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq1">PQ1</span><span class="tag q1">Q1</span></p>
+
+    <div class="template">
+      "This illustrates the distinction between <strong>statistical significance</strong> and <strong>practical (effect-size) significance</strong>. With a very large sample size, even a tiny true difference from the null value will produce a very small p-value, causing us to reject $H_0$. However, a <strong class="fill">[small difference]</strong> is negligible from <strong class="fill">[a practical/operational]</strong> standpoint &mdash; it provides no meaningful guidance for <strong class="fill">[decision-making context]</strong>. The p-value tells us <strong>whether</strong> a difference exists, but not whether it is <strong>large enough to matter</strong>."
+    </div>
+
+    <p><strong>Reverse scenario (fail to reject + large effect):</strong></p>
+    <div class="template">
+      "The result indicates that <strong>a larger sample size may be needed</strong> to determine whether there is a difference from <strong class="fill">[null value]</strong>."
+    </div>
+    <p class="warn">Failing to reject does NOT mean "no difference." With small n, the test may lack power.</p>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 18 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">18</span>
+    <span class="script-title">Residual plot code for LINE diagnostics</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span></p>
+
+    <p><strong>Residuals vs fitted (checks Linearity + Equal variance):</strong></p>
+    <div class="template">
+      <code><strong class="fill">[df]</strong>$resid &lt;- <strong class="fill">[model]</strong>$residuals</code><br>
+      <code><strong class="fill">[df]</strong>$fitted &lt;- <strong class="fill">[model]</strong>$fitted.values</code><br>
+      <code>ggplot(data = <strong class="fill">[df]</strong>, aes(x = fitted, y = resid)) + geom_point()</code>
+    </div>
+
+    <p><strong>Residuals vs predictor (checks Equal variance for specific predictor):</strong></p>
+    <div class="template">
+      <code>ggplot(data = <strong class="fill">[df]</strong>, aes(x = <strong class="fill">[predictor]</strong>, y = resid)) + geom_point()</code>
+    </div>
+
+    <p><strong>What to look for:</strong></p>
+    <div class="template">
+      &bull; <strong>Linearity:</strong> No curve/pattern in residuals vs fitted. Random scatter around 0.<br>
+      &bull; <strong>Equal variance:</strong> No fan/funnel shape. Constant spread across all fitted values.<br>
+      &bull; <strong>Normality:</strong> QQ plot follows diagonal. <code>qqnorm(model$residuals); qqline(model$residuals)</code><br>
+      &bull; <strong>Independence:</strong> No pattern in residuals vs time/order. Hard to check from plot alone &mdash; think about study design.
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 19 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">19</span>
+    <span class="script-title">One-sided from two-sided p-value</span>
+    <span class="script-freq">Appeared 2x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag q1">Q1</span></p>
+
+    <div class="template">
+      <strong>If sample mean is in the same direction as $H_A$:</strong><br>
+      one-sided p-value $=$ two-sided p-value $/\, 2$<br><br>
+      <strong>If sample mean is in the opposite direction as $H_A$:</strong><br>
+      one-sided p-value $= 1 -$ two-sided p-value $/\, 2$
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag q1">Q1</span> "Since the sample mean is below &#36;4.00 (in the same direction as $H_A: \mu &lt; 4$), the one-sided p-value is half of the two-sided: $0.14 / 2 = 0.07$. Since $0.07 &lt; 0.10$, the manager would reject $H_0$ at $\alpha = 0.10$."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 20 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num reg">20</span>
+    <span class="script-title">When individual p-value = partial F-test (and when it doesn't)</span>
+    <span class="script-freq">Appeared 3x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag q2">Q2</span><span class="tag pq2">PQ2</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>Individual p-value from summary() IS equivalent to partial F-test WHEN:</strong></p>
+    <div class="template">
+      The variable being tested has <strong>only 2 levels</strong> (1 dummy variable = 1 coefficient). In this case, the t-test p-value in summary(), the Global F p-value, and the partial F-test all give the same result.
+    </div>
+
+    <p><strong>Individual p-value is NOT enough WHEN:</strong></p>
+    <div class="template">
+      &bull; The categorical variable has <strong>3+ levels</strong> (multiple dummy coefficients)<br>
+      &bull; You're testing a <strong>main effect + interaction</strong> jointly<br>
+      &bull; In an interaction model, the individual p-value for <strong class="fill">[groupB]</strong> only tests the effect <strong>at <span class="fill">[X]</span> = 0</strong> (or at the reference level) &mdash; NOT the overall effect.
+    </div>
+
+    <p class="warn">In an interaction model: the p-value for coachingyes only tests coaching effect at practice_hours = 0. To test coaching's OVERALL effect, you need anova() with both the main effect and interaction removed.</p>
+
+    <ul class="examples">
+      <li><span class="tag q2">Q2</span> "Because intervention has only two levels, the partial F-test is testing the significance of a single coefficient. The same p-value would appear in: (1) the row for interventionprogram in the coefficients table, and (2) the Global F-statistic p-value."</li>
+      <li><span class="tag q3">Q3</span> "The individual t-test for coachingyes only checks the coaching effect at practice_hours = 0; it does not jointly test the coaching main effect and interaction."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 21 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num hyp">21</span>
+    <span class="script-title">Intercept interpretation</span>
+    <span class="script-freq">Appeared 4x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag pq2">PQ2</span><span class="tag q2">Q2</span><span class="tag pq3">PQ3</span><span class="tag q3">Q3</span></p>
+
+    <p><strong>Standard model:</strong></p>
+    <div class="template">
+      "The intercept is the predicted <strong class="fill">[outcome]</strong> when <strong>all predictors are 0</strong>. That is, for a <strong class="fill">[subject]</strong> with <strong class="fill">[predictor1]</strong> = 0 <strong class="fill">[and predictor2 = reference level]</strong>."
+    </div>
+
+    <p><strong>Centered model:</strong></p>
+    <div class="template">
+      "The intercept is the predicted <strong class="fill">[outcome]</strong> for a <strong class="fill">[subject]</strong> with <strong>average</strong> <strong class="fill">[predictor1]</strong> and <strong>average</strong> <strong class="fill">[predictor2]</strong>." (Because centered predictors = 0 at the mean.)
+    </div>
+
+    <p><strong>Interaction model with categorical:</strong></p>
+    <div class="template">
+      "The intercept is the predicted <strong class="fill">[outcome]</strong> for the <strong>reference group</strong> (<strong class="fill">[reference level]</strong>) when <strong class="fill">[numeric predictor]</strong> = 0."
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag pq2">PQ2</span> "The predicted starting salary for an in-person job in a low-rent city (hi_rent = FALSE) is &#36;74,000."</li>
+      <li><span class="tag q2">Q2</span> "The expected recovery time for a patient with 0% adherence rate." (May not be meaningful!)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SCRIPT 22 ===== -->
+<div class="script">
+  <div class="script-head" onclick="this.nextElementSibling.classList.toggle('open')">
+    <span class="script-num ts">22</span>
+    <span class="script-title">AR model — what $\phi_1$ close to 1 means</span>
+    <span class="script-freq">Appeared 1x</span>
+  </div>
+  <div class="script-body">
+    <p><span class="tag q3">Q3</span></p>
+
+    <div class="template">
+      "If $\phi_1$ is close to 1, the series is <strong>highly persistent</strong>: today's value is strongly related to yesterday's value, and shocks or unusually high/low values <strong>decay slowly</strong> over time."
+    </div>
+
+    <p><strong>AR(p) order from PACF:</strong></p>
+    <div class="template">
+      "The partial ACF plot shows spikes at the first <strong class="fill">[p]</strong> lags. Since the partial ACF factors out intermediate lags that are not directly causing any autocorrelation, the remaining <strong class="fill">[p]</strong> would indicate that these data might follow an <strong>AR(<span class="fill">[p]</span>)</strong> model."
+    </div>
+
+    <ul class="examples">
+      <li><span class="tag pq3">PQ3</span> "The partial ACF plot shows spikes at the first two lags. Since the partial ACF factors out intermediate lags, the remaining two would indicate that these data might follow an AR(2) model."</li>
+      <li><span class="tag q3">Q3</span> "If φ1 is close to 1, the series is highly persistent: today's value is strongly related to yesterday's value, and shocks or unusually high/low values decay slowly over time."</li>
     </ul>
   </div>
 </div>

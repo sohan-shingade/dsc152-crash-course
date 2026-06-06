@@ -107,6 +107,12 @@
   </div>
 </div>
 
+<div style="margin-bottom:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+  <button onclick="toggleMarkMode()" id="markBtn" style="background:#0f3460;color:#fff;border:none;padding:0.4rem 1rem;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer">Mark Modules as Known</button>
+  <span id="markHint" style="font-size:0.7rem;color:#888;display:none">Click modules to toggle 100%. Click button again to exit.</span>
+  <button onclick="resetAll()" style="background:#1a1a3e;color:#888;border:1px solid #333;padding:0.4rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer;margin-left:auto">Reset All Progress</button>
+</div>
+
 <div id="courseContent"></div>
 
 </div>
@@ -244,14 +250,44 @@ function render() {
   document.getElementById('totalXp').style.color = avgPct >= 85 ? '#28c840' : avgPct >= 50 ? '#ffbd2e' : '#e94560';
 }
 
-function openModule(id) {
-  const built = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
-  if (built.includes(id)) {
-    window.location.href = 'module-' + String(id).padStart(2,'0') + '.html';
+let markMode = false;
+function toggleMarkMode() {
+  markMode = !markMode;
+  const btn = document.getElementById('markBtn');
+  const hint = document.getElementById('markHint');
+  if (markMode) {
+    btn.textContent = 'Done Marking';
+    btn.style.background = '#28c840';
+    btn.style.color = '#000';
+    hint.style.display = 'inline';
   } else {
-    const m = MODULES.find(x => x.id === id);
-    if (m) alert(`Tell Claude: "build module ${id}"\n\nClaude will create the full lesson page.`);
+    btn.textContent = 'Mark Modules as Known';
+    btn.style.background = '#0f3460';
+    btn.style.color = '#fff';
+    hint.style.display = 'none';
   }
+}
+
+function resetAll() {
+  if (!confirm('Reset ALL module progress to 0%?')) return;
+  localStorage.removeItem('dsc152_course');
+  for (let i = 1; i <= 17; i++) localStorage.removeItem('mod' + i + '_done');
+  localStorage.removeItem('lab9_done');
+  MODULES.forEach(m => { if (!m.checkpoint) m.pct = 0; });
+  render();
+}
+
+function openModule(id) {
+  if (markMode) {
+    const m = MODULES.find(x => x.id === id);
+    if (m) {
+      m.pct = m.pct >= 85 ? 0 : 100;
+      savePct();
+      render();
+    }
+    return;
+  }
+  window.location.href = 'module-' + String(id).padStart(2, '0') + '.html';
 }
 
 render();

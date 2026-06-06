@@ -581,7 +581,7 @@ function saveState(){localStorage.setItem('mod2_done',JSON.stringify([...doneSte
 function updateProgress(){const pct=Math.round(doneSteps.size/TOTAL*100);document.getElementById('progBar').style.width=pct+'%';document.getElementById('progPct').textContent=pct+'%'}
 function toggleStep(i){const body=document.getElementById('body'+i);const isOpen=body.classList.contains('open');for(let j=1;j<=TOTAL;j++)document.getElementById('body'+j).classList.remove('open');if(!isOpen){body.classList.add('open');document.getElementById('s'+i).scrollIntoView({behavior:'smooth',block:'start'})}Prism.highlightAll()}
 function markDone(i){doneSteps.add(i);const c=document.getElementById('check'+i);c.classList.add('done');c.textContent='✓';saveState();updateProgress();if(i<TOTAL)setTimeout(()=>toggleStep(i+1),300)}
-function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);alert('Module 2 complete! Tell Claude: "build module 3"')}
+function completeModule(){for(let i=1;i<=TOTAL;i++)markDone(i);window.location.href='module-03.html'}
 
 // Skew visualization
 function drawSkewViz(){

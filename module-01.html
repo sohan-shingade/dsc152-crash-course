@@ -567,7 +567,7 @@ function markDone(i) {
 
 function completeModule() {
   for (let i = 1; i <= TOTAL_STEPS; i++) markDone(i);
-  alert('Module 1 complete! Tell Claude: "build module 2"');
+  window.location.href='module-02.html';
 }
 
 loadState();
